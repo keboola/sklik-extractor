@@ -1,4 +1,11 @@
 services:
-#    keboola_sklik_extractor.example:
-#        class: Keboola\SklikExtractorBundle\Example
-#        arguments: [@service_id, "plain_value", %parameter%]
+    ex_sklik.job_executor:
+        class: Keboola\SklikExtractorBundle\Job\Executor
+        arguments: ['@keboola_extractor.configuration', '@ex_sklik.extractor', '@logger', '@syrup.temp']
+    ex_sklik.extractor:
+        class: Keboola\SklikExtractorBundle\SklikExtractor
+        arguments: {  }
+    keboola_extractor.configuration:
+        class: Keboola\ExtractorBundle\Common\Configuration
+        arguments: ['%app_name%', '@syrup.encryptor', '@syrup.temp']
+parameters: null
