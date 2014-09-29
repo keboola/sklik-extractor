@@ -1,0 +1,54 @@
+{
+    "name": "keboola/sklik-extractor-bundle",
+    "type": "symfony-bundle",
+    "description": "Keboola Sklik extractor Bundle",
+    "keywords": ["keboola", "sklik", "extractor"],
+    "authors": [
+        {
+            "name": "Jakub Matejka",
+            "email": "jakub@keboola.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@bitbucket.org:keboola/extractor-bundle.git"
+        }
+    ],
+    "require": {
+        "keboola/extractor-bundle": "~0.10.0"
+    },
+    "require-dev": {
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+            "Keboola\\ExtractorBundle\\DeploymentHandler\\ScriptHandler::createESMapping"
+        ],
+        "post-update-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache"
+        ]
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-0": {
+            "Keboola\\SklikExtractorBundle": ""
+        }
+    },
+    "target-dir": "Keboola/SklikExtractorBundle",
+    "extra": {
+        "symfony-app-dir": "vendor/keboola/syrup/app",
+        "symfony-web-dir": "vendor/keboola/syrup/web",
+        "incenteev-parameters": {
+            "keep-outdated": true,
+            "file": "vendor/keboola/syrup/app/config/parameters.yml",
+            "dist-file": "parameters.yml"
+        },
+        "extractor-parameters": {
+            "elasticsearch-mapping-file": "Resources/elasticsearch/mapping.json"
+        }
+    }
+}

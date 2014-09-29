@@ -1,0 +1,3 @@
+keboola_sklik_extractor_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Default:index }
