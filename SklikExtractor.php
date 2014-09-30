@@ -2,45 +2,144 @@
 
 namespace Keboola\SklikExtractorBundle;
 
+use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
-use Syrup\ComponentBundle\Exception\SyrupComponentException as Exception;
-use GuzzleHttp\Client as Client;
-use Keboola\SklikExtractorBundle\SklikExtractorJob;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class SklikExtractor extends Extractor
 {
 	protected $name = "sklik";
+	protected $files;
+	protected $tables = array(
+		'accounts' => array(
+			'columns' => array('userId', 'username', 'access', 'relationName', 'relationStatus', 'relationType',
+				'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum')
+		),
+		'campaigns' => array(
+			'columns' => array('accountId', 'id', 'name', 'removed', 'status', 'dayBudget', 'exhaustedDayBudget',
+				'adSelection', 'createDate', 'totalBudget', 'exhaustedTotalBudget', 'totalClicks', 'exhaustedTotalClicks',
+				'premiseId')
+		),
+		'stats' => array(
+			'columns' => array('accountId', 'campaignId', 'date', 'target', 'conversions', 'transactions', 'money', 'value',
+				'avgPosition', 'impressions', 'clicks')
+		)
+	);
 
-	public function run($config) {
-/**
- *	REST Example:
- *		$client = new Client(
- * 			["base_url" => "https://api.example.com/v1/"]
- *		);
- */
+	protected function prepareFiles()
+	{
+		foreach ($this->tables as $k => $v) {
+			$f = new CsvFile($this->temp->createTmpFile());
+			$f->writeRow($v['columns']);
+			$this->files[$k] = $f;
+		}
+	}
 
-/**
- *	WSDL Example:
- *		$options = array(
- * // 			"trace" => 1, // DEBUG
- *			"connection_timeout" => 15,
- *			"compression" => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
- *			"location" => $config["soapEndpoint"]
- *		);
- *		$client = new Client($config["soapEndpoint"] . "?WSDL", $options);
- *
- *		$this->parser = new WsdlParser($client->__getTypes());
- */
+	protected function saveToFile($table, $data)
+	{
+		if (!isset($this->tables[$table])) {
+			throw new \Exception('Table ' . $table . ' not configured for the Extractor');
+		}
+		/** @var CsvFile $f */
+		$f = $this->files[$table];
 
-		foreach($config["data"] as $jobConfig) {
-			// $this->parser is, by default, only pre-created when using JsonExtractor
-			// Otherwise it must be created like Above example, OR withing the job itself
-			$job = new SklikExtractorJob($jobConfig, $client, $this->parser);
-			$job->run();
+		$dataToSave = array();
+		foreach ($this->tables[$table]['columns'] as $c) {
+			$dataToSave[$c] = isset($data[$c])? $data[$c] : null;
 		}
 
-		// ONLY available in the Json/Wsdl parsers -
-		// otherwise just pass an array of CsvFile OR Common/Table files to upload
-		$this->sapiUpload($this->parser->getCsvFiles());
+		$f->writeRow($dataToSave);
+	}
+
+	protected function uploadFiles()
+	{
+		$this->sapiUpload($this->files, 'in.c-ex-sklik');
+	}
+
+	public function run($config)
+	{
+		//@TODO PARAMETERS
+		$since='-1 day';$until='-1 day';
+		//@TODO PARAMETERS
+
+		if (!isset($config['attributes']['username'])) {
+			throw new UserException('Sklik username is not configured in configuration table');
+		}
+		if (!isset($config['attributes']['password'])) {
+			throw new UserException('Sklik password is not configured in configuration table');
+		}
+
+		$startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
+		$endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 23:59:59', strtotime($until)));
+		$interval = \DateInterval::createFromDateString('1 day');
+		$downloadPeriod = new \DatePeriod($startDate, $interval, $endDate);
+
+		$this->prepareFiles();
+
+		$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
+		$accounts = $sk->request('client.getAttributes');
+
+		// Add user itself to check for reports
+		array_unshift($accounts['foreignAccounts'], array(
+			'userId' => $accounts['user']['userId'],
+			'username' => $accounts['user']['username'],
+			'access' => null,
+			'relationName' => null,
+			'relationStatus' => null,
+			'relationType' => null,
+			'walletCredit' => $accounts['user']['walletCredit'],
+			'walletCreditWithVat' => $accounts['user']['walletCreditWithVat'],
+			'walletVerified' => $accounts['user']['walletVerified'],
+			'accountLimit' => $accounts['user']['accountLimit'],
+			'dayBudgetSum' => $accounts['user']['dayBudgetSum']
+		));
+
+		foreach ($accounts['foreignAccounts'] as $account) {
+			$this->saveToFile('accounts', $account);
+
+			$campaigns = $sk->request('listCampaigns', array($accounts['user']['userId']));
+			if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
+				$campaign['accountId'] = $accounts['user']['userId'];
+				$this->saveToFile('campaigns', $campaign);
+
+				foreach ($downloadPeriod as $date) {
+					/** @var \DateInterval $date */
+					$d = new \DateTime($date->format('c'));
+					$stats = $sk->request('campaign.stats', array($campaign['id'], $d, $d));
+
+					if (isset($stats['fulltext'])) {
+						$stats['fulltext']['accountId'] = $campaign['accountId'];
+						$stats['fulltext']['campaignId'] = $campaign['id'];
+						$stats['fulltext']['date'] = $date->format('Y-m-d');
+						$stats['fulltext']['target'] = 'fulltext';
+						$this->saveToFile('stats', $stats['fulltext']);
+					}
+					if (isset($stats['context'])) {
+						$stats['context']['accountId'] = $campaign['accountId'];
+						$stats['context']['campaignId'] = $campaign['id'];
+						$stats['context']['date'] = $date->format('Y-m-d');
+						$stats['context']['target'] = 'context';
+						$this->saveToFile('stats', $stats['context']);
+					}
+				}
+			}
+		}
+
+		$this->uploadFiles();
+
+		//$this->logEvent('Data for client ' . $client->name . ' downloaded');
+
+	}
+
+	private function logEvent($message)
+	{
+		$event = new Event();
+		$event
+			->setType(Event::TYPE_INFO)
+			->setMessage($message)
+			->setComponent($this->appName)
+			//->setConfigurationId()
+			->setRunId($this->storageApi->getRunId());
+		$this->storageApi->createEvent($event);
 	}
 }

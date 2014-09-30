@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d49bfcbfe428f7e2a4d33710bf6cdc08",
+    "hash": "d74d690df9acf34ace5a8f024c2c8701",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -1424,6 +1424,71 @@
             "time": "2013-07-19 00:03:27"
         },
         {
+            "name": "lstrojny/fxmlrpc",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lstrojny/fxmlrpc.git",
+                "reference": "eff79d2184c38a8cb7bc60aed1a7ee5aac404981"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lstrojny/fxmlrpc/zipball/eff79d2184c38a8cb7bc60aed1a7ee5aac404981",
+                "reference": "eff79d2184c38a8cb7bc60aed1a7ee5aac404981",
+                "shasum": ""
+            },
+            "require-dev": {
+                "ext-curl": "*",
+                "guzzle/guzzle": "*",
+                "internations/kodierungsregelwerksammlung": "dev-master",
+                "kriswallsmith/buzz": "*",
+                "lstrojny/hmmmath": "*",
+                "monolog/monolog": "*",
+                "php": ">=5.4.0",
+                "phpunit/phpunit": "~4",
+                "psr/log": "*",
+                "symfony/process": "~2",
+                "zendframework/zend-http": "~2",
+                "zendframework/zend-log": "~2",
+                "zendframework/zendframework1": "~1"
+            },
+            "suggest": {
+                "ext-http": "Use ext/http as HTTP client",
+                "guzzle/guzzle": "To integrate Guzzle as HTTP client",
+                "kriswallsmith/buzz": "To integrate Buzz as HTTP client",
+                "monolog/monolog": "To integrate monolog as logger",
+                "zendframework/zend-http": "To use ZF2 Zend\\Http\\Client as HTTP client",
+                "zendframework/zend-log": "To use ZF2 Zend\\Log\\Logger as a logger",
+                "zendframework/zendframework1": "To use ZF1 Zend_Http_Client as HTTP client"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "fXmlRpc": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lars Strojny",
+                    "email": "lstrojny@php.net",
+                    "homepage": "http://usrportage.de"
+                }
+            ],
+            "description": "Fast and tiny XML/RPC client with bridges for various HTTP clients",
+            "keywords": [
+                "api",
+                "performance",
+                "rpc",
+                "xml",
+                "xmlrpc"
+            ],
+            "time": "2014-09-03 11:44:13"
+        },
+        {
             "name": "monolog/monolog",
             "version": "1.10.0",
             "source": {
@@ -2287,7 +2352,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "lstrojny/fxmlrpc": 20
+    },
     "prefer-stable": false,
     "platform": [],
     "platform-dev": []

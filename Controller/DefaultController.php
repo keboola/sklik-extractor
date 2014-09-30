@@ -10,4 +10,5 @@ class DefaultController extends Controller
     {
         return $this->render('KeboolaSklikExtractorBundle:Default:index.html.twig', array('name' => $name));
     }
+
 }

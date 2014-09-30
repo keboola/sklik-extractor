@@ -16,7 +16,8 @@
         }
     ],
     "require": {
-        "keboola/extractor-bundle": "~0.10.0"
+        "keboola/extractor-bundle": "~0.10.0",
+        "lstrojny/fxmlrpc": "dev-master"
     },
     "require-dev": {
     },
