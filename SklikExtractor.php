@@ -4,10 +4,15 @@ namespace Keboola\SklikExtractorBundle;
 
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
+use Keboola\StorageApi\Client;
 use Syrup\ComponentBundle\Exception\UserException;
 
 class SklikExtractor extends Extractor
 {
+	/**
+	 * @var Client
+	 */
+	protected $storageApi;
 	protected $name = "sklik";
 	protected $files;
 	protected $tables = array(
@@ -28,6 +33,7 @@ class SklikExtractor extends Extractor
 
 	protected function prepareFiles()
 	{
+		$this->incrementalUpload = false;
 		foreach ($this->tables as $k => $v) {
 			$f = new CsvFile($this->temp->createTmpFile());
 			$f->writeRow($v['columns']);
@@ -53,7 +59,7 @@ class SklikExtractor extends Extractor
 
 	protected function uploadFiles()
 	{
-		$this->sapiUpload($this->files, 'in.c-ex-sklik');
+		$this->sapiUpload($this->files);
 	}
 
 	public function run($config)

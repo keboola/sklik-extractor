@@ -1,3 +1,63 @@
-keboola_sklik_extractor_homepage:
-    path:     /hello/{name}
-    defaults: { _controller: KeboolaSklikExtractorBundle:Default:index }
+#keboola_sklik_extractor:
+#  resource: "@KeboolaSklikExtractorBundle/Controller/ApiController.php"
+#  type: annotation
+
+keboola_sklik_extractor_configs_list:
+    pattern:  /configs
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:getConfigs }
+    requirements:
+        _method:  GET
+
+keboola_sklik_extractor_configs_add:
+    pattern:  /configs
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:post }
+    requirements:
+        _method:  POST
+
+keboola_sklik_extractor_configs_delete:
+    pattern:  /configs/{id}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:delete }
+    requirements:
+        _method:  DELETE
+
+keboola_sklik_extractor_configs_getconfig:
+    pattern:  /configs/{id}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:getConfig }
+    requirements:
+        _method:  GET
+
+keboola_sklik_extractor_configs_addrow:
+    pattern:  /configs/{id}/rows
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:addRow }
+    requirements:
+        _method:  POST
+
+keboola_sklik_extractor_configs_addrowid:
+    pattern:  /configs/{id}/rows/{rowId}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:addRow }
+    requirements:
+        _method:  POST
+
+keboola_sklik_extractor_configs_getrow:
+    pattern:  /configs/{id}/rows/{rowId}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:getRow }
+    requirements:
+        _method:  GET
+
+keboola_sklik_extractor_configs_deleterow:
+    pattern:  /configs/{id}/rows/{rowId}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:deleteRow }
+    requirements:
+        _method:  DELETE
+
+keboola_sklik_extractor_configs_updaterow:
+    pattern:  /configs/{id}/rows/{rowId}
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:addRow }
+    requirements:
+        _method:  PUT
+
+keboola_sklik_extractor_configs_addcreds:
+    pattern:  /configs/{id}/credentials
+    defaults: { _controller: KeboolaSklikExtractorBundle:Configs:addAttrs }
+    requirements:
+        _method:  POST
