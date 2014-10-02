@@ -67,7 +67,7 @@ class SklikExtractor extends Extractor
 		$params = $this->getSyrupJob()->getParams();
 		$since = isset($params['since'])? $params['since'] : '-1 day';
 		$until = isset($params['until'])? $params['until'] : '-1 day';
-		
+
 		if (!isset($config['attributes']['username'])) {
 			throw new UserException('Sklik username is not configured in configuration table');
 		}
@@ -102,8 +102,7 @@ class SklikExtractor extends Extractor
 
 		foreach ($accounts['foreignAccounts'] as $account) {
 			$this->saveToFile('accounts', $account);
-
-			$campaigns = $sk->request('listCampaigns', array($accounts['user']['userId']));
+			$campaigns = $sk->request('listCampaigns', array($account['userId']));
 			if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
 				$campaign['accountId'] = $accounts['user']['userId'];
 				$this->saveToFile('campaigns', $campaign);
