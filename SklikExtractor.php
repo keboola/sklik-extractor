@@ -64,10 +64,10 @@ class SklikExtractor extends Extractor
 
 	public function run($config)
 	{
-		//@TODO PARAMETERS
-		$since='-1 day';$until='-1 day';
-		//@TODO PARAMETERS
-
+		$params = $this->getSyrupJob()->getParams();
+		$since = isset($params['since'])? $params['since'] : '-1 day';
+		$until = isset($params['until'])? $params['until'] : '-1 day';
+		
 		if (!isset($config['attributes']['username'])) {
 			throw new UserException('Sklik username is not configured in configuration table');
 		}
