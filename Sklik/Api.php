@@ -5,10 +5,9 @@
 
 namespace Keboola\SklikExtractorBundle\Sklik;
 
-use fXmlRpc\Client;
-use fXmlRpc\Transport\Guzzle4Bridge;
-use GuzzleHttp\Subscriber\Retry\RetrySubscriber;
+use Zend\XmlRpc\Client;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
+use Zend\XmlRpc\Client\Exception\HttpException;
 
 class ApiException extends SyrupComponentException
 {
@@ -28,14 +27,8 @@ class Api
 		$this->username = $username;
 		$this->password = $password;
 
-		$httpClient = new \GuzzleHttp\Client();
-		$httpClient->getEmitter()->attach(new RetrySubscriber(array(
-			'filter' => RetrySubscriber::createChainFilter(array(
-					RetrySubscriber::createCurlFilter(),
-					RetrySubscriber::createStatusFilter([415, 500, 503])
-				))
-		)));
-		$this->client = new Client(self::API_URL, new Guzzle4Bridge($httpClient));
+		$this->client = new Client(self::API_URL);
+		$this->client->getHttpClient()->getAdapter()->setOptions(array('sslverifypeer' => false));
 		$this->login();
 	}
 
@@ -64,39 +57,56 @@ class Api
 
 	private function call($method, array $args=array())
 	{
-		$result = $this->client->call($method, $args);
-		if(isset($result['status'])) {
-			switch ($result['status']) {
-				case 200:
-					if (isset($result['session'])) {
-						// refresh session token
-						$this->session = $result['session'];
-					}
-					return $result;
-					break;
-				case 401: // Session expired or Authentication failed
-				case 502: // Bad gateway
-					$this->logout();
-					$this->login();
-					break;
-				case 404: // Not found
-					return false;
-					break;
-				case 415: // Too many requests
-					sleep(rand(10, 30));
-					return $this->call($method, $args);
-					break;
-				default:
-
+		$maxRepeatCount = 10;
+		$repeatCount = 0;
+		do {
+			$repeatCount++;
+			$exception = null;
+			try {
+				$result = $this->client->call($method, $args);
+				if (isset($result['session'])) {
+					// refresh session token
+					$this->session = $result['session'];
+				}
+				return $result;
+			} catch (HttpException $e) {
+				switch ($e->getCode()) {
+					case 401: // Session expired or Authentication failed
+					case 502: // Bad gateway
+						$this->logout();
+						$this->login();
+						break;
+					case 404: // Not found
+						return false;
+						break;
+					case 415: // Too many requests
+						sleep(rand(10, 30));
+						break;
+					default:
+						$exception = $e;
+				}
+			} catch (\Exception $e) {
+				$exception = $e;
 			}
-		}
 
-		$e = new ApiException(400, 'Sklik Api error');
-		$e->setData(array(
-			'method' => $method,
-			'args' => $args,
-			'result' => $result
-		));
-		throw $e;
+			if ($exception) {
+				$e = new ApiException(400, 'Sklik Api error', $exception);
+				$e->setData(array(
+					'method' => $method,
+					'args' => $args
+				));
+				throw $e;
+			}
+
+			if ($repeatCount >= $maxRepeatCount) {
+				$e = new ApiException(400, 'Sklik Api max repeats error', $exception);
+				$e->setData(array(
+					'method' => $method,
+					'args' => $args
+				));
+				throw $e;
+			}
+
+		} while (true);
 	}
 }

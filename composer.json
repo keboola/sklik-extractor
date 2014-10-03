@@ -13,11 +13,15 @@
         {
             "type": "vcs",
             "url": "git@bitbucket.org:keboola/extractor-bundle.git"
+        },
+        {
+            "type": "composer",
+            "url": "https://packages.zendframework.com/"
         }
     ],
     "require": {
         "keboola/extractor-bundle": "~0.10.0",
-        "lstrojny/fxmlrpc": "dev-master"
+        "zendframework/zend-xmlrpc": "2.*"
     },
     "require-dev": {
     },
