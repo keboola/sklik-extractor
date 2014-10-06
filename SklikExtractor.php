@@ -5,6 +5,7 @@ namespace Keboola\SklikExtractorBundle;
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
 use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
 
 class SklikExtractor extends Extractor
@@ -64,6 +65,7 @@ class SklikExtractor extends Extractor
 
 	public function run($config)
 	{
+		$timerAll = time();
 		$params = $this->getSyrupJob()->getParams();
 		$since = isset($params['since'])? $params['since'] : '-1 day';
 		$until = isset($params['until'])? $params['until'] : '-1 day';
@@ -101,10 +103,11 @@ class SklikExtractor extends Extractor
 		));
 
 		foreach ($accounts['foreignAccounts'] as $account) {
+			$timer = time();
 			$this->saveToFile('accounts', $account);
 			$campaigns = $sk->request('listCampaigns', array($account['userId']));
 			if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
-				$campaign['accountId'] = $accounts['user']['userId'];
+				$campaign['accountId'] = $account['userId'];
 				$this->saveToFile('campaigns', $campaign);
 
 				foreach ($downloadPeriod as $date) {
@@ -128,23 +131,25 @@ class SklikExtractor extends Extractor
 					}
 				}
 			}
+			$this->logEvent('Data for client ' . $account['userName'] . ' downloaded', time() - $timer);
 		}
 
 		$this->uploadFiles();
-
-		//$this->logEvent('Data for client ' . $client->name . ' downloaded');
-
+		$this->logEvent('Extraction complete', time() - $timerAll);
 	}
 
-	private function logEvent($message)
+	private function logEvent($message, $duration=null)
 	{
 		$event = new Event();
 		$event
 			->setType(Event::TYPE_INFO)
 			->setMessage($message)
-			->setComponent($this->appName)
+			->setComponent('ex-sklik')
 			//->setConfigurationId()
 			->setRunId($this->storageApi->getRunId());
+		if ($duration) {
+			$event->setDuration($duration);
+		}
 		$this->storageApi->createEvent($event);
 	}
 }
