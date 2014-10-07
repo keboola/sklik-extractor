@@ -131,7 +131,7 @@ class SklikExtractor extends Extractor
 					}
 				}
 			}
-			$this->logEvent('Data for client ' . $account['userName'] . ' downloaded', time() - $timer);
+			$this->logEvent('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
 		}
 
 		$this->uploadFiles();
