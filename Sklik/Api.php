@@ -5,6 +5,7 @@
 
 namespace Keboola\SklikExtractorBundle\Sklik;
 
+use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
 use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Zend\XmlRpc\Client\Exception\HttpException;
@@ -28,6 +29,9 @@ class Api
 		$this->password = $password;
 
 		$this->client = new Client(self::API_URL);
+		$this->client->getHttpClient()->setOptions(array(
+			'timeout' => 30
+		));
 		$this->client->getHttpClient()->getAdapter()->setOptions(array('sslverifypeer' => false));
 		$this->login();
 	}
@@ -64,11 +68,20 @@ class Api
 			$exception = null;
 			try {
 				$result = $this->client->call($method, $args);
-				if (isset($result['session'])) {
-					// refresh session token
-					$this->session = $result['session'];
+				if ($result['status'] == 401) {
+					if ($method == 'client.login') {
+						throw new UserException($result['statusMessage']);
+					} else {
+						$this->logout();
+						$this->login();
+					}
+				} else {
+					if (isset($result['session'])) {
+						// refresh session token
+						$this->session = $result['session'];
+					}
+					return $result;
 				}
-				return $result;
 			} catch (HttpException $e) {
 				switch ($e->getCode()) {
 					case 401: // Session expired or Authentication failed
@@ -90,7 +103,7 @@ class Api
 			}
 
 			if ($exception) {
-				$e = new ApiException(400, 'Sklik Api error', $exception);
+				$e = new ApiException(400, $exception->getMessage(), $exception);
 				$e->setData(array(
 					'method' => $method,
 					'args' => $args

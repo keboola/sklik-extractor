@@ -4,6 +4,7 @@ namespace Keboola\SklikExtractorBundle;
 
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
+use Keboola\SklikExtractorBundle\Sklik\ApiException;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
@@ -66,86 +67,94 @@ class SklikExtractor extends Extractor
 	public function run($config)
 	{
 		$timerAll = time();
-		$params = $this->getSyrupJob()->getParams();
-		$since = isset($params['since'])? $params['since'] : '-1 day';
-		$until = isset($params['until'])? $params['until'] : '-1 day';
+		try {
+			ini_set('memory_limit', '2048M');
+			$params = $this->getSyrupJob()->getParams();
+			$since = isset($params['since']) ? $params['since'] : '-1 day';
+			$until = isset($params['until']) ? $params['until'] : '-1 day';
 
-		if (!isset($config['attributes']['username'])) {
-			throw new UserException('Sklik username is not configured in configuration table');
-		}
-		if (!isset($config['attributes']['password'])) {
-			throw new UserException('Sklik password is not configured in configuration table');
-		}
+			if (!isset($config['attributes']['username'])) {
+				throw new UserException('Sklik username is not configured in configuration table');
+			}
+			if (!isset($config['attributes']['password'])) {
+				throw new UserException('Sklik password is not configured in configuration table');
+			}
 
-		$startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
-		$endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 23:59:59', strtotime($until)));
-		$interval = \DateInterval::createFromDateString('1 day');
-		$downloadPeriod = new \DatePeriod($startDate, $interval, $endDate);
+			$startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
+			$endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 23:59:59', strtotime($until)));
+			$interval = \DateInterval::createFromDateString('1 day');
+			$downloadPeriod = new \DatePeriod($startDate, $interval, $endDate);
 
-		$this->prepareFiles();
+			$this->prepareFiles();
 
-		$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
-		$accounts = $sk->request('client.getAttributes');
+			$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
+			$accounts = $sk->request('client.getAttributes');
 
-		// Add user itself to check for reports
-		array_unshift($accounts['foreignAccounts'], array(
-			'userId' => $accounts['user']['userId'],
-			'username' => $accounts['user']['username'],
-			'access' => null,
-			'relationName' => null,
-			'relationStatus' => null,
-			'relationType' => null,
-			'walletCredit' => $accounts['user']['walletCredit'],
-			'walletCreditWithVat' => $accounts['user']['walletCreditWithVat'],
-			'walletVerified' => $accounts['user']['walletVerified'],
-			'accountLimit' => $accounts['user']['accountLimit'],
-			'dayBudgetSum' => $accounts['user']['dayBudgetSum']
-		));
+			// Add user itself to check for reports
+			array_unshift($accounts['foreignAccounts'], array(
+				'userId' => $accounts['user']['userId'],
+				'username' => $accounts['user']['username'],
+				'access' => null,
+				'relationName' => null,
+				'relationStatus' => null,
+				'relationType' => null,
+				'walletCredit' => $accounts['user']['walletCredit'],
+				'walletCreditWithVat' => $accounts['user']['walletCreditWithVat'],
+				'walletVerified' => $accounts['user']['walletVerified'],
+				'accountLimit' => $accounts['user']['accountLimit'],
+				'dayBudgetSum' => $accounts['user']['dayBudgetSum']
+			));
 
-		foreach ($accounts['foreignAccounts'] as $account) {
-			$timer = time();
-			$this->saveToFile('accounts', $account);
-			$campaigns = $sk->request('listCampaigns', array($account['userId']));
-			if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
-				$campaign['accountId'] = $account['userId'];
-				$this->saveToFile('campaigns', $campaign);
+			foreach ($accounts['foreignAccounts'] as $account) {
+				$timer = time();
+				$this->saveToFile('accounts', $account);
+				$campaigns = $sk->request('listCampaigns', array($account['userId']));
+				if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
+					$campaign['accountId'] = $account['userId'];
+					$this->saveToFile('campaigns', $campaign);
 
-				foreach ($downloadPeriod as $date) {
-					/** @var \DateInterval $date */
-					$d = new \DateTime($date->format('c'));
-					$stats = $sk->request('campaign.stats', array($campaign['id'], $d, $d));
+					foreach ($downloadPeriod as $date) {
+						/** @var \DateInterval $date */
+						$d = new \DateTime($date->format('c'));
+						$stats = $sk->request('campaign.stats', array($campaign['id'], $d, $d));
 
-					if (isset($stats['fulltext'])) {
-						$stats['fulltext']['accountId'] = $campaign['accountId'];
-						$stats['fulltext']['campaignId'] = $campaign['id'];
-						$stats['fulltext']['date'] = $date->format('Y-m-d');
-						$stats['fulltext']['target'] = 'fulltext';
-						$this->saveToFile('stats', $stats['fulltext']);
-					}
-					if (isset($stats['context'])) {
-						$stats['context']['accountId'] = $campaign['accountId'];
-						$stats['context']['campaignId'] = $campaign['id'];
-						$stats['context']['date'] = $date->format('Y-m-d');
-						$stats['context']['target'] = 'context';
-						$this->saveToFile('stats', $stats['context']);
+						if (isset($stats['fulltext'])) {
+							$stats['fulltext']['accountId'] = $campaign['accountId'];
+							$stats['fulltext']['campaignId'] = $campaign['id'];
+							$stats['fulltext']['date'] = $date->format('Y-m-d');
+							$stats['fulltext']['target'] = 'fulltext';
+							$this->saveToFile('stats', $stats['fulltext']);
+						}
+						if (isset($stats['context'])) {
+							$stats['context']['accountId'] = $campaign['accountId'];
+							$stats['context']['campaignId'] = $campaign['id'];
+							$stats['context']['date'] = $date->format('Y-m-d');
+							$stats['context']['target'] = 'context';
+							$this->saveToFile('stats', $stats['context']);
+						}
 					}
 				}
+				$this->logEvent('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
 			}
-			$this->logEvent('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
-		}
 
-		$this->uploadFiles();
-		$this->logEvent('Extraction complete', time() - $timerAll);
+			$this->uploadFiles();
+			$this->logEvent('Extraction complete', time() - $timerAll, Event::TYPE_SUCCESS);
+		} catch (\Exception $e) {
+			$message = 'Extraction failed' . (($e instanceof ApiException)? ': ' . $e->getMessage() : null);
+			$this->logEvent($message, time() - $timerAll, Event::TYPE_ERROR);
+			throw $e;
+		}
 	}
 
-	private function logEvent($message, $duration=null)
+	private function logEvent($message, $duration=null, $type=Event::TYPE_INFO)
 	{
+		$params = $this->getSyrupJob()->getParams();
 		$event = new Event();
 		$event
-			->setType(Event::TYPE_INFO)
+			->setType($type)
 			->setMessage($message)
 			->setComponent('ex-sklik')
-			//->setConfigurationId()
+			->setConfigurationId(isset($params['config'])? $params['config'] : null)
 			->setRunId($this->storageApi->getRunId());
 		if ($duration) {
 			$event->setDuration($duration);
