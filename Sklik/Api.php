@@ -102,7 +102,7 @@ class Api
 			}
 
 			if ($exception) {
-				$e = new ApiException(400, $exception->getMessage(), $exception);
+				$e = new ApiException($exception->getMessage(), $exception);
 				$e->setData(array(
 					'method' => $method,
 					'args' => $args
@@ -111,7 +111,7 @@ class Api
 			}
 
 			if ($repeatCount >= $maxRepeatCount) {
-				$e = new ApiException(400, 'Sklik Api max repeats error', $exception);
+				$e = new ApiException('Sklik Api max repeats error', $exception);
 				$e->setData(array(
 					'method' => $method,
 					'args' => $args
