@@ -7,10 +7,9 @@ namespace Keboola\SklikExtractorBundle\Sklik;
 
 use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
-use Syrup\ComponentBundle\Exception\SyrupComponentException;
 use Zend\XmlRpc\Client\Exception\HttpException;
 
-class ApiException extends SyrupComponentException
+class ApiException extends UserException
 {
 
 }
@@ -70,7 +69,7 @@ class Api
 				$result = $this->client->call($method, $args);
 				if ($result['status'] == 401) {
 					if ($method == 'client.login') {
-						throw new UserException($result['statusMessage']);
+						throw new ApiException($result['statusMessage']);
 					} else {
 						$this->logout();
 						$this->login();

@@ -4,7 +4,6 @@ namespace Keboola\SklikExtractorBundle;
 
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
-use Keboola\SklikExtractorBundle\Sklik\ApiException;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
@@ -140,7 +139,7 @@ class SklikExtractor extends Extractor
 			$this->uploadFiles();
 			$this->logEvent('Extraction complete', time() - $timerAll, Event::TYPE_SUCCESS);
 		} catch (\Exception $e) {
-			$message = 'Extraction failed' . (($e instanceof ApiException)? ': ' . $e->getMessage() : null);
+			$message = 'Extraction failed' . (($e instanceof UserException)? ': ' . $e->getMessage() : null);
 			$this->logEvent($message, time() - $timerAll, Event::TYPE_ERROR);
 			throw $e;
 		}
@@ -155,7 +154,7 @@ class SklikExtractor extends Extractor
 			->setMessage($message)
 			->setComponent('ex-sklik')
 			->setConfigurationId(isset($params['config'])? $params['config'] : null)
-			->setRunId($this->storageApi->getRunId());
+			->setRunId($this->getSyrupJob()->getRunId());
 		if ($duration) {
 			$event->setDuration($duration);
 		}
