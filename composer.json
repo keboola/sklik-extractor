@@ -27,12 +27,10 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
             "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap"
         ],
         "post-update-cmd": [
-            "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
             "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache"

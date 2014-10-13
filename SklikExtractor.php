@@ -4,6 +4,7 @@ namespace Keboola\SklikExtractorBundle;
 
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
+use Keboola\SklikExtractorBundle\Sklik\EventLogger;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
@@ -14,6 +15,10 @@ class SklikExtractor extends Extractor
 	 * @var Client
 	 */
 	protected $storageApi;
+	/**
+	 * @var Sklik\EventLogger
+	 */
+	protected $eventLogger;
 	protected $name = "sklik";
 	protected $files;
 	protected $tables = array(
@@ -31,6 +36,11 @@ class SklikExtractor extends Extractor
 				'avgPosition', 'impressions', 'clicks')
 		)
 	);
+
+	public function __construct(EventLogger $eventLogger)
+	{
+		$this->eventLogger = $eventLogger;
+	}
 
 	protected function prepareFiles()
 	{
@@ -65,6 +75,13 @@ class SklikExtractor extends Extractor
 
 	public function run($config)
 	{
+		$params = $this->getSyrupJob()->getParams();
+		$this->eventLogger->setStorageApi($this->storageApi);
+		$this->eventLogger->setRunId($this->getSyrupJob()->getRunId());
+		if (isset($params['config'])) {
+			$this->eventLogger->setConfig($params['config']);
+		}
+
 		$timerAll = time();
 		try {
 			ini_set('memory_limit', '2048M');
@@ -86,7 +103,7 @@ class SklikExtractor extends Extractor
 
 			$this->prepareFiles();
 
-			$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
+			$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'], $this->eventLogger);
 			$accounts = $sk->request('client.getAttributes');
 
 			// Add user itself to check for reports
@@ -133,31 +150,15 @@ class SklikExtractor extends Extractor
 						}
 					}
 				}
-				$this->logEvent('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
+				$this->eventLogger->log('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
 			}
 
 			$this->uploadFiles();
-			$this->logEvent('Extraction complete', time() - $timerAll, Event::TYPE_SUCCESS);
+			$this->eventLogger->log('Extraction complete', time() - $timerAll, Event::TYPE_SUCCESS);
 		} catch (\Exception $e) {
 			$message = 'Extraction failed' . (($e instanceof UserException)? ': ' . $e->getMessage() : null);
-			$this->logEvent($message, time() - $timerAll, Event::TYPE_ERROR);
+			$this->eventLogger->log($message, time() - $timerAll, Event::TYPE_ERROR);
 			throw $e;
 		}
-	}
-
-	private function logEvent($message, $duration=null, $type=Event::TYPE_INFO)
-	{
-		$params = $this->getSyrupJob()->getParams();
-		$event = new Event();
-		$event
-			->setType($type)
-			->setMessage($message)
-			->setComponent('ex-sklik')
-			->setConfigurationId(isset($params['config'])? $params['config'] : null)
-			->setRunId($this->getSyrupJob()->getRunId());
-		if ($duration) {
-			$event->setDuration($duration);
-		}
-		$this->storageApi->createEvent($event);
 	}
 }

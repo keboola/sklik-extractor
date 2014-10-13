@@ -1,10 +1,13 @@
 services:
+    ex_sklik.event_logger:
+        class: Keboola\SklikExtractorBundle\Sklik\EventLogger
+        arguments: [ ]
     ex_sklik.job_executor:
         class: Keboola\SklikExtractorBundle\Job\Executor
         arguments: ['@keboola_extractor.configuration', '@ex_sklik.extractor', '@logger', '@syrup.temp']
     ex_sklik.extractor:
         class: Keboola\SklikExtractorBundle\SklikExtractor
-        arguments: {  }
+        arguments: [ '@ex_sklik.event_logger' ]
     keboola_extractor.configuration:
         class: Keboola\ExtractorBundle\Common\Configuration
         arguments: ['%app_name%', '@syrup.encryptor', '@syrup.temp']

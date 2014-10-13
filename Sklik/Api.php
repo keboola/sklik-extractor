@@ -21,17 +21,22 @@ class Api
 	private $password;
 	private $client;
 	private $session;
+	/**
+	 * @var EventLogger
+	 */
+	private $eventLogger;
 
-	public function __construct($username, $password)
+	public function __construct($username, $password, EventLogger $eventLogger)
 	{
 		$this->username = $username;
 		$this->password = $password;
+		$this->eventLogger = $eventLogger;
 
-		$this->client = new Client(self::API_URL);
-		$this->client->getHttpClient()->setOptions(array(
-			'timeout' => 30
+		$client = new \Zend\Http\Client(self::API_URL, array(
+			'adapter'   => 'Zend\Http\Client\Adapter\Curl',
+			'curloptions' => array(CURLOPT_SSL_VERIFYPEER => false),
 		));
-		$this->client->getHttpClient()->getAdapter()->setOptions(array('sslverifypeer' => false));
+		$this->client = new Client(self::API_URL, $client);
 		$this->login();
 	}
 
@@ -63,6 +68,7 @@ class Api
 		$maxRepeatCount = 10;
 		$repeatCount = 0;
 		do {
+			$start = time();
 			$repeatCount++;
 			$exception = null;
 			try {
@@ -79,6 +85,7 @@ class Api
 						// refresh session token
 						$this->session = $result['session'];
 					}
+					$this->eventLogger->log('API call ' . $method . ' finished', time()-$start, null, array('args' => $args));
 					return $result;
 				}
 			} catch (HttpException $e) {
@@ -89,6 +96,7 @@ class Api
 						$this->login();
 						break;
 					case 404: // Not found
+						$this->eventLogger->log('API call ' . $method . ' finished with code 404', time()-$start, null, array('args' => $args));
 						return false;
 						break;
 					case 415: // Too many requests
@@ -118,6 +126,8 @@ class Api
 				));
 				throw $e;
 			}
+
+			$this->eventLogger->log('API call ' . $method . ' will be repeated', time()-$start, null, array('args' => $args));
 
 		} while (true);
 	}
