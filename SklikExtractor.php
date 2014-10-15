@@ -3,6 +3,7 @@
 namespace Keboola\SklikExtractorBundle;
 
 use Keboola\Csv\CsvFile;
+use Keboola\ExtractorBundle\Common\Logger;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
 use Keboola\SklikExtractorBundle\Sklik\EventLogger;
 use Keboola\StorageApi\Client;
@@ -176,13 +177,17 @@ class SklikExtractor extends Extractor
 				'includeContext' => $context? true : false
 			)
 		));
-		foreach ($stats['report'] as $campaignReport) {
+		if (isset($stats['report'])) foreach ($stats['report'] as $campaignReport) {
 			foreach ($campaignReport['stats'] as $stats) {
 				$stats['accountId'] = $userId;
 				$stats['campaignId'] = $campaignReport['campaignId'];
 				$stats['target'] = $context? 'context' : 'fulltext';
 				$this->saveToFile('stats', $stats);
 			}
+		} else {
+			Logger::log(\Monolog\Logger::ALERT, 'Bad stats format', array(
+				'stats' => $stats
+			));
 		}
 	}
 }
