@@ -5,6 +5,7 @@
 
 namespace Keboola\SklikExtractorBundle\Sklik;
 
+use Keboola\ExtractorBundle\Common\Logger;
 use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
@@ -27,11 +28,10 @@ class Api
 	 */
 	private $eventLogger;
 
-	public function __construct($username, $password, EventLogger $eventLogger)
+	public function __construct($username, $password)
 	{
 		$this->username = $username;
 		$this->password = $password;
-		$this->eventLogger = $eventLogger;
 
 		$client = new \Zend\Http\Client(self::API_URL, array(
 			'adapter'   => 'Zend\Http\Client\Adapter\Curl',
@@ -87,10 +87,11 @@ class Api
 			$exception = null;
 			try {
 				$result = $this->client->call($method, $args);
-				$this->eventLogger->log('API call ' . $method . ' finished', time()-$start, null, array(
+				Logger::log(\Monolog\Logger::DEBUG, 'API call ' . $method . ' finished', array(
 					'params' => $args,
 					'status' => $result['status'],
-					'message' => isset($result['statusMessage'])? $result['statusMessage'] : null
+					'message' => isset($result['statusMessage'])? $result['statusMessage'] : null,
+					'duration' => time() - $start
 				));
 				if ($result['status'] == 401) {
 					if ($method == 'client.login') {
@@ -145,10 +146,11 @@ class Api
 				throw $e;
 			}
 
-			$this->eventLogger->log('API call ' . $method . ' will be repeated', time()-$start, Event::TYPE_WARN, array(
+			Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' will be repeated', array(
 				'params' => $args,
 				'code' => $exception? $exception->getCode() : null,
-				'exception' => $exception? $exception->getMessage() : null
+				'exception' => $exception? $exception->getMessage() : null,
+				'duration' => time() - $start
 			));
 
 		} while (true);

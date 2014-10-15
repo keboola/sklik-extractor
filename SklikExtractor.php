@@ -77,11 +77,15 @@ class SklikExtractor extends Extractor
 	public function run($config)
 	{
 		$params = $this->getSyrupJob()->getParams();
+
+		$jobId = $params['config'] . '|' . $this->getSyrupJob()->getId();
+		if (!$this->storageApi->getRunId()) {
+			$this->storageApi->setRunId($this->getSyrupJob()->getId());
+		}
+
 		$this->eventLogger->setStorageApi($this->storageApi);
 		$this->eventLogger->setRunId($this->getSyrupJob()->getRunId());
-		if (isset($params['config'])) {
-			$this->eventLogger->setConfig($params['config']);
-		}
+		$this->eventLogger->setConfig($jobId);
 
 		$timerAll = time();
 		try {
@@ -102,7 +106,7 @@ class SklikExtractor extends Extractor
 
 			$this->prepareFiles();
 
-			$api = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'], $this->eventLogger);
+			$api = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
 			$limit = $api->getListLimit();
 
 			$accounts = $api->request('client.get');
