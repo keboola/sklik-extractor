@@ -6,7 +6,6 @@
 namespace Keboola\SklikExtractorBundle\Sklik;
 
 use Keboola\ExtractorBundle\Common\Logger;
-use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
 use Zend\XmlRpc\Client\Exception\HttpException;
@@ -23,15 +22,16 @@ class Api
 	private $password;
 	private $client;
 	private $session;
-	/**
-	 * @var EventLogger
-	 */
-	private $eventLogger;
 
-	public function __construct($username, $password)
+	private $config, $jobId, $runId;
+
+	public function __construct($username, $password, $config, $jobId, $runId)
 	{
 		$this->username = $username;
 		$this->password = $password;
+		$this->config = $config;
+		$this->jobId = $jobId;
+		$this->runId = $runId;
 
 		$client = new \Zend\Http\Client(self::API_URL, array(
 			'adapter'   => 'Zend\Http\Client\Adapter\Curl',
@@ -115,7 +115,10 @@ class Api
 						$this->login();
 						break;
 					case 404: // Not found
-						$this->eventLogger->log('API call ' . $method . ' finished with code 404', time()-$start, null, array('args' => $args));
+						Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' finished with code 404', array(
+							'params' => $args,
+							'duration' => time() - $start
+						));
 						return false;
 						break;
 					case 415: // Too many requests

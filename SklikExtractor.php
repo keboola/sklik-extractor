@@ -106,7 +106,8 @@ class SklikExtractor extends Extractor
 
 			$this->prepareFiles();
 
-			$api = new Sklik\Api($config['attributes']['username'], $config['attributes']['password']);
+			$api = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'],
+				$params['config'], $this->getSyrupJob()->getId(), $this->storageApi->getRunId());
 			$limit = $api->getListLimit();
 
 			$accounts = $api->request('client.get');
