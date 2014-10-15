@@ -93,7 +93,13 @@ class Api
 					'message' => isset($result['statusMessage'])? $result['statusMessage'] : null,
 					'duration' => time() - $start
 				));
-				if ($result['status'] == 401) {
+				if ($result['status'] == 200) {
+					if (isset($result['session'])) {
+						// refresh session token
+						$this->session = $result['session'];
+					}
+					return $result;
+				} elseif ($result['status'] == 401) {
 					if ($method == 'client.login') {
 						throw new ApiException($result['statusMessage']);
 					} else {
@@ -101,11 +107,12 @@ class Api
 						$this->login();
 					}
 				} else {
-					if (isset($result['session'])) {
-						// refresh session token
-						$this->session = $result['session'];
-					}
-					return $result;
+					$e = new ApiException(sprintf('API Error %s: %s', $result['status'], $result['message']));
+					$e->setData(array(
+						'method' => $method,
+						'args' => $args
+					));
+					throw $e;
 				}
 			} catch (HttpException $e) {
 				switch ($e->getCode()) {
