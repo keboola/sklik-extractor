@@ -27,9 +27,8 @@ class SklikExtractor extends Extractor
 				'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum')
 		),
 		'campaigns' => array(
-			'columns' => array('accountId', 'id', 'name', 'removed', 'status', 'dayBudget', 'exhaustedDayBudget',
-				'adSelection', 'createDate', 'totalBudget', 'exhaustedTotalBudget', 'totalClicks', 'exhaustedTotalClicks',
-				'premiseId')
+			'columns' => array('accountId', 'id', 'name', 'deleted', 'status', 'dayBudget', 'exhaustedDayBudget',
+				'adSelection', 'createDate', 'totalBudget', 'exhaustedTotalBudget', 'totalClicks', 'exhaustedTotalClicks')
 		),
 		'stats' => array(
 			'columns' => array('accountId', 'campaignId', 'date', 'target', 'conversions', 'transactions', 'money', 'value',
@@ -104,8 +103,17 @@ class SklikExtractor extends Extractor
 			$this->prepareFiles();
 
 			$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'], $this->eventLogger);
-			$accounts = $sk->request('client.getAttributes');
 
+			$limit = 100;
+			$limits = $sk->request('api.limits');
+			foreach($limits['limits']['batchCallLimits'] as $l) {
+				if ($l['name'] == 'global.list') {
+					$limit = $l['limit'];
+					break;
+				}
+			}
+
+			$accounts = $sk->request('client.get');
 			// Add user itself to check for reports
 			array_unshift($accounts['foreignAccounts'], array(
 				'userId' => $accounts['user']['userId'],
@@ -124,29 +132,65 @@ class SklikExtractor extends Extractor
 			foreach ($accounts['foreignAccounts'] as $account) {
 				$timer = time();
 				$this->saveToFile('accounts', $account);
-				$campaigns = $sk->request('listCampaigns', array($account['userId']));
-				if (isset($campaigns['campaigns'])) foreach ($campaigns['campaigns'] as $campaign) {
-					$campaign['accountId'] = $account['userId'];
-					$this->saveToFile('campaigns', $campaign);
+				$campaigns = $sk->request('campaigns.list', array('user' => array('userId' => $account['userId'])));
 
-					foreach ($downloadPeriod as $date) {
-						/** @var \DateInterval $date */
-						$d = new \DateTime($date->format('c'));
-						$stats = $sk->request('campaign.stats', array($campaign['id'], $d, $d));
+				if (isset($campaigns['campaigns']) && count($campaigns['campaigns'])) {
+					$campaignIds = array();
+					foreach ($campaigns['campaigns'] as $campaign) {
+						$campaign['accountId'] = $account['userId'];
+						$this->saveToFile('campaigns', $campaign);
+						$campaignIds[] = $campaign['id'];
 
-						if (isset($stats['fulltext'])) {
-							$stats['fulltext']['accountId'] = $campaign['accountId'];
-							$stats['fulltext']['campaignId'] = $campaign['id'];
-							$stats['fulltext']['date'] = $date->format('Y-m-d');
-							$stats['fulltext']['target'] = 'fulltext';
-							$this->saveToFile('stats', $stats['fulltext']);
-						}
-						if (isset($stats['context'])) {
-							$stats['context']['accountId'] = $campaign['accountId'];
-							$stats['context']['campaignId'] = $campaign['id'];
-							$stats['context']['date'] = $date->format('Y-m-d');
-							$stats['context']['target'] = 'context';
-							$this->saveToFile('stats', $stats['context']);
+						foreach ($downloadPeriod as $date) {
+							/** @var \DateInterval $date */
+							$d = new \DateTime($date->format('c'));
+
+
+							// Fulltext stats
+							$stats = $sk->request('campaigns.stats', array(
+								'user' => array(
+									'userId' => $account['userId']
+								),
+								'campaignIds' => array($campaign['id']),
+								'params' => array(
+									'dateFrom' => $d,
+									'dateTo' => $d,
+									'granularity' => 'daily',
+									'includeFulltext' => true,
+									'includeContext' => false
+								)
+							));
+							foreach ($stats['report'] as $campaignReport) {
+								foreach ($campaignReport['stats'] as $stats) {
+									$stats['accountId'] = $account['userId'];
+									$stats['campaignId'] = $campaign['id'];
+									$stats['target'] = 'fulltext';
+									$this->saveToFile('stats', $stats);
+								}
+							}
+
+							// Context stats
+							$stats = $sk->request('campaigns.stats', array(
+								'user' => array(
+									'userId' => $account['userId']
+								),
+								'campaignIds' => array($campaign['id']),
+								'params' => array(
+									'dateFrom' => $d,
+									'dateTo' => $d,
+									'granularity' => 'daily',
+									'includeFulltext' => false,
+									'includeContext' => true
+								)
+							));
+							foreach ($stats['report'] as $campaignReport) {
+								foreach ($campaignReport['stats'] as $stats) {
+									$stats['accountId'] = $account['userId'];
+									$stats['campaignId'] = $campaign['id'];
+									$stats['target'] = 'context';
+									$this->saveToFile('stats', $stats);
+								}
+							}
 						}
 					}
 				}

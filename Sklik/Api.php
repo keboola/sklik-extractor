@@ -5,6 +5,7 @@
 
 namespace Keboola\SklikExtractorBundle\Sklik;
 
+use Keboola\StorageApi\Event;
 use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
 use Zend\XmlRpc\Client\Exception\HttpException;
@@ -16,7 +17,7 @@ class ApiException extends UserException
 
 class Api
 {
-	const API_URL = 'https://api.sklik.cz/RPC2';
+	const API_URL = 'https://api.sklik.cz/cipisek/RPC2';
 	private $username;
 	private $password;
 	private $client;
@@ -53,13 +54,13 @@ class Api
 	public function logout()
 	{
 		if ($this->session) {
-			$this->call('client.logout', array($this->session));
+			$this->call('client.logout', array('user' => array('session' => $this->session)));
 		}
 	}
 
 	public function request($method, array $args=array())
 	{
-		$args = array_merge(array($this->session), $args);
+		$args = array_merge_recursive(array('user' => array('session' => $this->session)), $args);
 		return $this->call($method, $args);
 	}
 
@@ -73,6 +74,11 @@ class Api
 			$exception = null;
 			try {
 				$result = $this->client->call($method, $args);
+				$this->eventLogger->log('API call ' . $method . ' finished', time()-$start, null, array(
+					'params' => $args,
+					'status' => $result['status'],
+					'message' => isset($result['statusMessage'])? $result['statusMessage'] : null
+				));
 				if ($result['status'] == 401) {
 					if ($method == 'client.login') {
 						throw new ApiException($result['statusMessage']);
@@ -85,7 +91,6 @@ class Api
 						// refresh session token
 						$this->session = $result['session'];
 					}
-					$this->eventLogger->log('API call ' . $method . ' finished', time()-$start, null, array('args' => $args));
 					return $result;
 				}
 			} catch (HttpException $e) {
@@ -127,6 +132,11 @@ class Api
 				throw $e;
 			}
 
+			$this->eventLogger->log('API call ' . $method . ' will be repeated', time()-$start, Event::TYPE_WARN, array(
+				'params' => $args,
+				'code' => $exception? $exception->getCode() : null,
+				'exception' => $exception? $exception->getMessage() : null
+			));
 			$this->eventLogger->log('API call ' . $method . ' will be repeated', time()-$start, null, array('args' => $args));
 
 		} while (true);
