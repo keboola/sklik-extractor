@@ -106,7 +106,7 @@ class SklikExtractor extends Extractor
 
 			$limit = 100;
 			$limits = $sk->request('api.limits');
-			foreach($limits['limits']['batchCallLimits'] as $l) {
+			foreach($limits['batchCallLimits'] as $l) {
 				if ($l['name'] == 'global.list') {
 					$limit = $l['limit'];
 					break;
