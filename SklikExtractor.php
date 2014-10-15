@@ -31,8 +31,10 @@ class SklikExtractor extends Extractor
 				'adSelection', 'createDate', 'totalBudget', 'exhaustedTotalBudget', 'totalClicks', 'exhaustedTotalClicks')
 		),
 		'stats' => array(
-			'columns' => array('accountId', 'campaignId', 'date', 'target', 'conversions', 'transactions', 'money', 'value',
-				'avgPosition', 'impressions', 'clicks')
+			'columns' => array('accountId', 'campaignId', 'date', 'target', 'impressions', 'clicks', 'ctr', 'cpc',
+				'price', 'avgPosition', 'conversions', 'conversionRatio', 'conversionAvgPrice', 'conversionValue',
+				'conversionAvgValue', 'conversionValueRatio', 'transactions', 'transactionAvgPrice', 'transactionAvgValue',
+				'transactionAvgCount')
 		)
 	);
 
@@ -97,23 +99,13 @@ class SklikExtractor extends Extractor
 
 			$startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
 			$endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 23:59:59', strtotime($until)));
-			$interval = \DateInterval::createFromDateString('1 day');
-			$downloadPeriod = new \DatePeriod($startDate, $interval, $endDate);
 
 			$this->prepareFiles();
 
-			$sk = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'], $this->eventLogger);
+			$api = new Sklik\Api($config['attributes']['username'], $config['attributes']['password'], $this->eventLogger);
+			$limit = $api->getListLimit();
 
-			$limit = 100;
-			$limits = $sk->request('api.limits');
-			foreach($limits['batchCallLimits'] as $l) {
-				if ($l['name'] == 'global.list') {
-					$limit = $l['limit'];
-					break;
-				}
-			}
-
-			$accounts = $sk->request('client.get');
+			$accounts = $api->request('client.get');
 			// Add user itself to check for reports
 			array_unshift($accounts['foreignAccounts'], array(
 				'userId' => $accounts['user']['userId'],
@@ -132,7 +124,7 @@ class SklikExtractor extends Extractor
 			foreach ($accounts['foreignAccounts'] as $account) {
 				$timer = time();
 				$this->saveToFile('accounts', $account);
-				$campaigns = $sk->request('campaigns.list', array('user' => array('userId' => $account['userId'])));
+				$campaigns = $api->request('campaigns.list', array('user' => array('userId' => $account['userId'])));
 
 				if (isset($campaigns['campaigns']) && count($campaigns['campaigns'])) {
 					$campaignIds = array();
@@ -140,59 +132,17 @@ class SklikExtractor extends Extractor
 						$campaign['accountId'] = $account['userId'];
 						$this->saveToFile('campaigns', $campaign);
 						$campaignIds[] = $campaign['id'];
-
-						foreach ($downloadPeriod as $date) {
-							/** @var \DateInterval $date */
-							$d = new \DateTime($date->format('c'));
-
-
-							// Fulltext stats
-							$stats = $sk->request('campaigns.stats', array(
-								'user' => array(
-									'userId' => $account['userId']
-								),
-								'campaignIds' => array($campaign['id']),
-								'params' => array(
-									'dateFrom' => $d,
-									'dateTo' => $d,
-									'granularity' => 'daily',
-									'includeFulltext' => true,
-									'includeContext' => false
-								)
-							));
-							foreach ($stats['report'] as $campaignReport) {
-								foreach ($campaignReport['stats'] as $stats) {
-									$stats['accountId'] = $account['userId'];
-									$stats['campaignId'] = $campaign['id'];
-									$stats['target'] = 'fulltext';
-									$this->saveToFile('stats', $stats);
-								}
-							}
-
-							// Context stats
-							$stats = $sk->request('campaigns.stats', array(
-								'user' => array(
-									'userId' => $account['userId']
-								),
-								'campaignIds' => array($campaign['id']),
-								'params' => array(
-									'dateFrom' => $d,
-									'dateTo' => $d,
-									'granularity' => 'daily',
-									'includeFulltext' => false,
-									'includeContext' => true
-								)
-							));
-							foreach ($stats['report'] as $campaignReport) {
-								foreach ($campaignReport['stats'] as $stats) {
-									$stats['accountId'] = $account['userId'];
-									$stats['campaignId'] = $campaign['id'];
-									$stats['target'] = 'context';
-									$this->saveToFile('stats', $stats);
-								}
-							}
-						}
 					}
+
+					$blocksCount = ceil(count($campaignIds) / $limit);
+					for ($i = 0; $i < $blocksCount; $i++) {
+						$campaignIdsBlock = array_slice($campaignIds, $limit * $i, $limit);
+
+						$this->getStats($api, true, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
+						$this->getStats($api, false, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
+					}
+
+					continue;
 				}
 				$this->eventLogger->log('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
 			}
@@ -203,6 +153,31 @@ class SklikExtractor extends Extractor
 			$message = 'Extraction failed' . (($e instanceof UserException)? ': ' . $e->getMessage() : null);
 			$this->eventLogger->log($message, time() - $timerAll, Event::TYPE_ERROR);
 			throw $e;
+		}
+	}
+
+	private function getStats(Sklik\Api $api, $context=false, $userId, $campaignIdsBlock, $startDate, $endDate)
+	{
+		$stats = $api->request('campaigns.stats', array(
+			'user' => array(
+				'userId' => $userId
+			),
+			'campaignIds' => $campaignIdsBlock,
+			'params' => array(
+				'dateFrom' => $startDate,
+				'dateTo' => $endDate,
+				'granularity' => 'daily',
+				'includeFulltext' => $context? false : true,
+				'includeContext' => $context? true : false
+			)
+		));
+		foreach ($stats['report'] as $campaignReport) {
+			foreach ($campaignReport['stats'] as $stats) {
+				$stats['accountId'] = $userId;
+				$stats['campaignId'] = $campaignReport['campaignId'];
+				$stats['target'] = $context? 'context' : 'fulltext';
+				$this->saveToFile('stats', $stats);
+			}
 		}
 	}
 }

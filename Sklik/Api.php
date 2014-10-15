@@ -58,6 +58,19 @@ class Api
 		}
 	}
 
+	public function getListLimit()
+	{
+		$limit = 100;
+		$limits = $this->request('api.limits');
+		foreach($limits['batchCallLimits'] as $l) {
+			if ($l['name'] == 'global.list') {
+				$limit = $l['limit'];
+				break;
+			}
+		}
+		return $limit;
+	}
+
 	public function request($method, array $args=array())
 	{
 		$args = array_merge_recursive(array('user' => array('session' => $this->session)), $args);
@@ -137,7 +150,6 @@ class Api
 				'code' => $exception? $exception->getCode() : null,
 				'exception' => $exception? $exception->getMessage() : null
 			));
-			$this->eventLogger->log('API call ' . $method . ' will be repeated', time()-$start, null, array('args' => $args));
 
 		} while (true);
 	}
