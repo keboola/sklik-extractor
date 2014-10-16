@@ -107,10 +107,13 @@ class Api
 						$this->login();
 					}
 				} else {
-					$e = new ApiException(sprintf('API Error %s: %s', $result['status'], $result['message']));
+					$message = 'API Error ' . (isset($result['status'])? $result['status'] . ': ' : null)
+						. (isset($result['status'])? $result['message'] : null);
+					$e = new ApiException($message);
 					$e->setData(array(
 						'method' => $method,
-						'args' => $args
+						'args' => $args,
+						'result' => $result
 					));
 					throw $e;
 				}
