@@ -108,7 +108,7 @@ class Api
 					}
 				} else {
 					$message = 'API Error ' . (isset($result['status'])? $result['status'] . ': ' : null)
-						. (isset($result['status'])? $result['message'] : null);
+						. (isset($result['message'])? $result['message'] : null);
 					$e = new ApiException($message);
 					$e->setData(array(
 						'method' => $method,
