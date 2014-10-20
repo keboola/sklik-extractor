@@ -5,6 +5,7 @@ namespace Keboola\SklikExtractorBundle;
 use Keboola\Csv\CsvFile;
 use Keboola\ExtractorBundle\Common\Logger;
 use Keboola\ExtractorBundle\Extractor\Extractors\JsonExtractor as Extractor;
+use Keboola\SklikExtractorBundle\Sklik\ApiException;
 use Keboola\SklikExtractorBundle\Sklik\EventLogger;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Event;
@@ -130,27 +131,31 @@ class SklikExtractor extends Extractor
 			foreach ($accounts['foreignAccounts'] as $account) {
 				$timer = time();
 				$this->saveToFile('accounts', $account);
-				$campaigns = $api->request('campaigns.list', array('user' => array('userId' => $account['userId'])));
+				try {
+					$campaigns = $api->request('campaigns.list', array('user' => array('userId' => $account['userId'])));
 
-				if (isset($campaigns['campaigns']) && count($campaigns['campaigns'])) {
-					$campaignIds = array();
-					foreach ($campaigns['campaigns'] as $campaign) {
-						$campaign['accountId'] = $account['userId'];
-						$this->saveToFile('campaigns', $campaign);
-						$campaignIds[] = $campaign['id'];
+					if (isset($campaigns['campaigns']) && count($campaigns['campaigns'])) {
+						$campaignIds = array();
+						foreach ($campaigns['campaigns'] as $campaign) {
+							$campaign['accountId'] = $account['userId'];
+							$this->saveToFile('campaigns', $campaign);
+							$campaignIds[] = $campaign['id'];
+						}
+
+						$blocksCount = ceil(count($campaignIds) / $limit);
+						for ($i = 0; $i < $blocksCount; $i++) {
+							$campaignIdsBlock = array_slice($campaignIds, $limit * $i, $limit);
+
+							$this->getStats($api, true, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
+							$this->getStats($api, false, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
+						}
+
+						continue;
 					}
-
-					$blocksCount = ceil(count($campaignIds) / $limit);
-					for ($i = 0; $i < $blocksCount; $i++) {
-						$campaignIdsBlock = array_slice($campaignIds, $limit * $i, $limit);
-
-						$this->getStats($api, true, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
-						$this->getStats($api, false, $account['userId'], $campaignIdsBlock, $startDate, $endDate);
-					}
-
-					continue;
+					$this->eventLogger->log('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
+				} catch (ApiException $e) {
+					$this->eventLogger->log('Error when downloading data for client ' . $account['username'] . ': ' . $e->getMessage(), time() - $timer, Event::TYPE_WARN);
 				}
-				$this->eventLogger->log('Data for client ' . $account['username'] . ' downloaded', time() - $timer);
 			}
 
 			$this->uploadFiles();
