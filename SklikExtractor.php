@@ -47,7 +47,12 @@ class SklikExtractor extends Extractor
 
 	protected function prepareFiles()
 	{
-		$this->incrementalUpload = false;
+		$bucketId = sprintf("in.c-%s-%s", $this->getFullName(), $this->configName);
+		if ($this->storageApi->bucketExists($bucketId)) foreach ($this->storageApi->listTables($bucketId) as $t) {
+			$this->storageApi->dropTable($t['id']);
+		}
+
+		$this->incrementalUpload = true;
 		foreach ($this->tables as $k => $v) {
 			$f = new CsvFile($this->temp->createTmpFile());
 			$f->writeRow($v['columns']);
