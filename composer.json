@@ -20,20 +20,20 @@
         }
     ],
     "require": {
-        "keboola/extractor-bundle": "~0.10.3",
+        "keboola/extractor-bundle": "~1.0.0-beta",
         "zendframework/zend-xmlrpc": "2.3.*"
     },
     "require-dev": {
     },
     "scripts": {
         "post-install-cmd": [
+            "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
             "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap"
         ],
         "post-update-cmd": [
+            "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getParameters",
             "Syrup\\CoreBundle\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache"
         ]
@@ -48,13 +48,6 @@
     "extra": {
         "symfony-app-dir": "vendor/keboola/syrup/app",
         "symfony-web-dir": "vendor/keboola/syrup/web",
-        "incenteev-parameters": {
-            "keep-outdated": true,
-            "file": "vendor/keboola/syrup/app/config/parameters.yml",
-            "dist-file": "parameters.yml"
-        },
-        "extractor-parameters": {
-            "elasticsearch-mapping-file": "Resources/elasticsearch/mapping.json"
-        }
+        "syrup-app-name": "ex-sklik"
     }
 }
