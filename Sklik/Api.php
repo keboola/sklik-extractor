@@ -142,6 +142,13 @@ class Api
 			}
 
 			if ($exception) {
+				Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' failed', array(
+					'params' => $args,
+					'code' => $exception? $exception->getCode() : null,
+					'exception' => $exception? $exception->getMessage() : null,
+					'duration' => time() - $start
+				));
+
 				$e = new ApiException($exception->getMessage(), $exception);
 				$e->setData(array(
 					'method' => $method,
