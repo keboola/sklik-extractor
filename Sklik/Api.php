@@ -145,7 +145,7 @@ class Api
 				Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' failed', array(
 					'params' => $args,
 					'code' => $exception? $exception->getCode() : null,
-					'exception' => $exception? $exception->getMessage() : null,
+					'message' => $exception? $exception->getMessage() : null,
 					'duration' => time() - $start
 				));
 
@@ -169,7 +169,7 @@ class Api
 			Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' will be repeated', array(
 				'params' => $args,
 				'code' => $exception? $exception->getCode() : null,
-				'exception' => $exception? $exception->getMessage() : null,
+				'message' => $exception? $exception->getMessage() : null,
 				'duration' => time() - $start
 			));
 
