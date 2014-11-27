@@ -8,7 +8,7 @@ namespace Keboola\SklikExtractorBundle\Sklik;
 use Keboola\ExtractorBundle\Common\Logger;
 use Syrup\ComponentBundle\Exception\UserException;
 use Zend\XmlRpc\Client;
-use Zend\XmlRpc\Client\Exception\HttpException;
+use Zend\Http\Client\Adapter\Exception\RuntimeException;
 
 class ApiException extends UserException
 {
@@ -117,7 +117,7 @@ class Api
 					));
 					throw $e;
 				}
-			} catch (HttpException $e) {
+			} catch (RuntimeException $e) {
 				switch ($e->getCode()) {
 					case 401: // Session expired or Authentication failed
 					case 502: // Bad gateway
@@ -141,25 +141,8 @@ class Api
 				$exception = $e;
 			}
 
-			if ($exception) {
-				Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' failed', array(
-					'type' => get_class($exception),
-					'params' => $args,
-					'code' => $exception? $exception->getCode() : null,
-					'message' => $exception? $exception->getMessage() : null,
-					'duration' => time() - $start
-				));
-
-				$e = new ApiException($exception->getMessage(), $exception);
-				$e->setData(array(
-					'method' => $method,
-					'args' => $args
-				));
-				throw $e;
-			}
-
 			if ($repeatCount >= $maxRepeatCount) {
-				$e = new ApiException('Sklik Api max repeats error', $exception);
+				$e = new ApiException('Sklik API max repeats error', $exception);
 				$e->setData(array(
 					'method' => $method,
 					'args' => $args
@@ -169,9 +152,12 @@ class Api
 
 			Logger::log(\Monolog\Logger::WARNING, 'API call ' . $method . ' will be repeated', array(
 				'params' => $args,
-				'code' => $exception? $exception->getCode() : null,
-				'message' => $exception? $exception->getMessage() : null,
-				'duration' => time() - $start
+				'duration' => time() - $start,
+				'error' => $exception? array(
+					'type' => get_class($exception),
+					'code' => $exception->getCode(),
+					'message' => $exception->getMessage()
+				) : null
 			));
 
 		} while (true);
