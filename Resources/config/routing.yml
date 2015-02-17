@@ -1,3 +1,0 @@
-#keboola_sklik_extractor:
-#  resource: "@KeboolaSklikExtractorBundle/Controller/ApiController.php"
-#  type: annotation
