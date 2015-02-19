@@ -58,14 +58,12 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
         ini_set('memory_limit', '2048M');
         foreach ($configIds as $configId) {
             $configuration = $configurationStorage->getConfiguration($configId);
-            $this->extract($configuration['attributes'], $startDate, $endDate);
+            $this->extract($configId, $configuration['attributes'], $startDate, $endDate);
         }
-
-        $this->userStorage->uploadData();
     }
 
 
-    public function extract($attributes, $startDate, $endDate)
+    public function extract($configId, $attributes, $startDate, $endDate)
     {
         $timerAll = time();
         try {
@@ -102,7 +100,7 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
                 }
             }
 
-            $this->userStorage->uploadData();
+            $this->userStorage->uploadData($configId);
             $this->eventLogger->log('Extraction complete', [], time() - $timerAll, Event::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $message = 'Extraction failed' . (($e instanceof UserException)? ': ' . $e->getMessage() : null);
