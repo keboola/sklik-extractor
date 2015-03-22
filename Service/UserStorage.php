@@ -11,6 +11,7 @@ use Keboola\Csv\CsvFile;
 use Keboola\StorageApi\Client;
 use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
+use Symfony\Component\Debug\Exception\ContextErrorException;
 
 class UserStorage
 {
@@ -81,14 +82,25 @@ class UserStorage
     {
         $tableId = $this->getBucketId($configId) . "." . $name;
         try {
-            $options = array();
+            $options = [];
             if ($primaryKey) {
                 $options['primaryKey'] = $primaryKey;
             }
+
             if ($this->storageApiClient->tableExists($tableId)) {
                 $this->storageApiClient->dropTable($tableId);
             }
-            $this->storageApiClient->createTableAsync($this->getBucketId($configId), $name, $file, $options);
+
+            // Allow three tries to upload
+            $success = false;
+            for($i = 0; $i <= 2 && !$success; $i++) {
+                try {
+                    $this->storageApiClient->createTableAsync($this->getBucketId($configId), $name, $file, $options);
+                    $success = true;
+                } catch (ContextErrorException $e) {
+                    //Ignore upload error
+                }
+            }
         } catch (\Keboola\StorageApi\ClientException $e) {
             throw new UserException(sprintf('Error during upload of table %s to Storage API. %s', $tableId, $e->getMessage()), $e);
         }
