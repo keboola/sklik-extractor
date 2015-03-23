@@ -28,8 +28,12 @@ class Api
         $this->logger = $logger;
 
         $client = new \Zend\Http\Client(self::API_URL, [
-            'adapter'   => 'Zend\Http\Client\Adapter\Curl',
-            'curloptions' => [CURLOPT_SSL_VERIFYPEER => false],
+            'adapter' => 'Zend\Http\Client\Adapter\Curl',
+            'curloptions' => [
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_TIMEOUT => 120
+            ],
+            'timeout' => 120
         ]);
         $this->client = new Client(self::API_URL, $client);
         $this->login();
