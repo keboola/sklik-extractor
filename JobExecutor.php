@@ -55,7 +55,6 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
         $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
         $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 23:59:59', strtotime($until)));
 
-        ini_set('memory_limit', '2048M');
         foreach ($configIds as $configId) {
             $configuration = $configurationStorage->getConfiguration($configId);
             $this->extract($configId, $configuration['attributes'], $startDate, $endDate);
@@ -109,16 +108,31 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
         }
     }
 
-    private function getStats(Sklik\Api $api, $userId, $campaignIdsBlock, $startDate, $endDate, $context = false)
+    private function getStats(Sklik\Api $api, $userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false)
     {
-        $stats = $api->getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context);
-        foreach ($stats as $campaignReport) {
-            foreach ($campaignReport['stats'] as $stats) {
-                $stats['accountId'] = $userId;
-                $stats['campaignId'] = $campaignReport['campaignId'];
-                $stats['target'] = $context ? 'context' : 'fulltext';
-                $this->userStorage->save('stats', $stats);
+        $newStartDate = new \DateTime($startDate->format('Y-m-d'));
+
+        do {
+            $newEndDate = new \DateTime($newStartDate->format('Y-m-d'));
+            $newEndDate->modify('+30 days');
+            $dateInterval = date_diff($endDate, $newStartDate, true);
+
+            if (intval($dateInterval->format('%a')) <= 30) {
+                $newEndDate = $endDate;
             }
-        }
+
+            $stats = $api->getStats($userId, $campaignIdsBlock, $newStartDate, $newEndDate, $context);
+            foreach ($stats as $campaignReport) {
+                foreach ($campaignReport['stats'] as $stats) {
+                    $stats['accountId'] = $userId;
+                    $stats['campaignId'] = $campaignReport['campaignId'];
+                    $stats['target'] = $context ? 'context' : 'fulltext';
+                    $this->userStorage->save('stats', $stats);
+                }
+            }
+
+            $newStartDate->modify('+31 days');
+
+        } while (intval($dateInterval->format('%a')) > 30);
     }
 }

@@ -91,6 +91,7 @@ class Api
                     'message' => isset($result['statusMessage'])? $result['statusMessage'] : null,
                     'duration' => time() - $start
                 ]);
+
                 if ($result['status'] == 200) {
                     if (isset($result['session'])) {
                         // refresh session token

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cdd203a726376a8eebe871cd8b5ad45e",
+    "hash": "7eee3d521e040f0d41d680dce719c029",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -2334,18 +2334,17 @@
         },
         {
             "name": "zendframework/zend-code",
-            "version": "2.3.7",
-            "target-dir": "Zend/Code",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendCode.git",
-                "reference": "a1c6c9773d0431f31c94d806c1c7d1964fa11639"
+                "reference": "cfd5951ff4348e4430850560416c7ddb755f95d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-code-a1c6c9773d0431f31c94d806c1c7d1964fa11639-zip-4ae78a.zip",
-                "reference": "2.3.7",
-                "shasum": "2f1550ee7675f2099155f2b669808e214e1a40fe"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-code-cfd5951ff4348e4430850560416c7ddb755f95d3-zip-b11cbe.zip",
+                "reference": "cfd5951ff4348e4430850560416c7ddb755f95d3",
+                "shasum": "64b8dfdc4b931c5730dd16565650bac922ba20ed"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2367,7 +2366,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Code\\": ""
                 }
             },
@@ -2381,24 +2380,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendCode/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendCode/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 17:59:08"
         },
         {
             "name": "zendframework/zend-escaper",
-            "version": "2.3.7",
-            "target-dir": "Zend/Escaper",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendEscaper.git",
-                "reference": "b3ca10e16ef875f836d46f08045349e39589766c"
+                "reference": "65b3328627362b0be1d5e9067bc846511d1fbc96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-escaper-b3ca10e16ef875f836d46f08045349e39589766c-zip-09848b.zip",
-                "reference": "2.3.7",
-                "shasum": "c77a257cd9a6f367da5e6224c028436c7c7fdb9e"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-escaper-65b3328627362b0be1d5e9067bc846511d1fbc96-zip-89ec4f.zip",
+                "reference": "65b3328627362b0be1d5e9067bc846511d1fbc96",
+                "shasum": "a0d80bd42b06f9dd769f3b3cd825a7f0560e8a6d"
             },
             "require": {
                 "php": ">=5.3.23"
@@ -2411,7 +2409,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Escaper\\": ""
                 }
             },
@@ -2425,24 +2423,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendEscaper/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendEscaper/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:02:07"
         },
         {
             "name": "zendframework/zend-eventmanager",
-            "version": "2.3.7",
-            "target-dir": "Zend/EventManager",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendEventManager.git",
-                "reference": "2f42c89b7a4996d5d75b45ce98fbf3ad4fc28e00"
+                "reference": "38df5b567d4ff4d22144745c503ba0502d0d5695"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-eventmanager-2f42c89b7a4996d5d75b45ce98fbf3ad4fc28e00-zip-519d2a.zip",
-                "reference": "2.3.7",
-                "shasum": "d4af3384608f23d4294097c7e257bf92bc3ba7ad"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-eventmanager-38df5b567d4ff4d22144745c503ba0502d0d5695-zip-86f67e.zip",
+                "reference": "38df5b567d4ff4d22144745c503ba0502d0d5695",
+                "shasum": "4c8ea8a384a869a7f2c8b7795890dd34f609b8ac"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2456,7 +2453,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\EventManager\\": ""
                 }
             },
@@ -2470,24 +2467,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendEventManager/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendEventManager/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:05:26"
         },
         {
             "name": "zendframework/zend-http",
-            "version": "2.3.7",
-            "target-dir": "Zend/Http",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendHttp.git",
-                "reference": "35f52485d4170ebcdac1f00cb24a1b0856214c2f"
+                "reference": "ee6220609845b32d1b2873c9ac694aef56d508f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-http-35f52485d4170ebcdac1f00cb24a1b0856214c2f-zip-dcbbb8.zip",
-                "reference": "2.3.7",
-                "shasum": "17d4421fa1da1c35c4977af681f97948c6d789cf"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-http-ee6220609845b32d1b2873c9ac694aef56d508f5-zip-b12688.zip",
+                "reference": "ee6220609845b32d1b2873c9ac694aef56d508f5",
+                "shasum": "5d33efb7148780276b05f15476491aeab9c5e892"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2504,7 +2500,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Http\\": ""
                 }
             },
@@ -2518,24 +2514,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendHttp/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendHttp/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:25"
         },
         {
             "name": "zendframework/zend-loader",
-            "version": "2.3.7",
-            "target-dir": "Zend/Loader",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendLoader.git",
-                "reference": "fcca80907c35f0827f992b7a58adbbff4baf728e"
+                "reference": "6868b8a0c346f17fb97724c3a63aa2cbf6b94865"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-loader-fcca80907c35f0827f992b7a58adbbff4baf728e-zip-3142b8.zip",
-                "reference": "2.3.7",
-                "shasum": "9ca1f11ef78373c133478b455b44f3fbb3bbcea8"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-loader-6868b8a0c346f17fb97724c3a63aa2cbf6b94865-zip-96a3eb.zip",
+                "reference": "6868b8a0c346f17fb97724c3a63aa2cbf6b94865",
+                "shasum": "22c2c84f6e6d52995f69dbcf076e7549f0d94d92"
             },
             "require": {
                 "php": ">=5.3.23"
@@ -2548,7 +2543,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Loader\\": ""
                 }
             },
@@ -2562,24 +2557,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendLoader/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendLoader/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:26"
         },
         {
             "name": "zendframework/zend-math",
-            "version": "2.3.7",
-            "target-dir": "Zend/Math",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendMath.git",
-                "reference": "b54a187942d331244aa5b69bd32afa21428f9785"
+                "reference": "634123f83ca90b6613f132d0d100e6b5e9890a29"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-math-b54a187942d331244aa5b69bd32afa21428f9785-zip-7ed5f5.zip",
-                "reference": "2.3.7",
-                "shasum": "157f995b8288cbdd179538c5c33417124bdff5ea"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-math-634123f83ca90b6613f132d0d100e6b5e9890a29-zip-5a2031.zip",
+                "reference": "634123f83ca90b6613f132d0d100e6b5e9890a29",
+                "shasum": "7905e4663f1c0ba8e7da02466c16827356a54ed1"
             },
             "require": {
                 "php": ">=5.3.23"
@@ -2598,7 +2592,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Math\\": ""
                 }
             },
@@ -2612,24 +2606,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendMath/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendMath/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:27"
         },
         {
             "name": "zendframework/zend-server",
-            "version": "2.3.7",
-            "target-dir": "Zend/Server",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendServer.git",
-                "reference": "cbf7b96041713cd06ef27b0e00850d5452e04556"
+                "reference": "fc73c34490908ba143af3c57c7e166b40c4b9f8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-server-cbf7b96041713cd06ef27b0e00850d5452e04556-zip-e6ee62.zip",
-                "reference": "2.3.7",
-                "shasum": "c0b4e49bf84b9954dd1c61cb05c80ff2ccef83c3"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-server-fc73c34490908ba143af3c57c7e166b40c4b9f8e-zip-144aa3.zip",
+                "reference": "fc73c34490908ba143af3c57c7e166b40c4b9f8e",
+                "shasum": "93ac9480380af2222c90922b0c446ce932aa1b08"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2644,7 +2637,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Server\\": ""
                 }
             },
@@ -2658,24 +2651,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendServer/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendServer/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:28"
         },
         {
             "name": "zendframework/zend-stdlib",
-            "version": "2.3.7",
-            "target-dir": "Zend/Stdlib",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendStdlib.git",
-                "reference": "3f6e2416183d4879a983680e1165f14164b262f4"
+                "reference": "eab586f4c18af3fa63c977611939f1f4a3cf1030"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-stdlib-3f6e2416183d4879a983680e1165f14164b262f4-zip-facdac.zip",
-                "reference": "2.3.7",
-                "shasum": "5d9fc68802ae262a210eda2935e11c3a07672f3d"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-stdlib-eab586f4c18af3fa63c977611939f1f4a3cf1030-zip-983621.zip",
+                "reference": "eab586f4c18af3fa63c977611939f1f4a3cf1030",
+                "shasum": "a4780a3f933e0434085d13b364802a275abff75d"
             },
             "require": {
                 "php": ">=5.3.23"
@@ -2700,7 +2692,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Stdlib\\": ""
                 }
             },
@@ -2714,24 +2706,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendStdlib/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendStdlib/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:29"
         },
         {
             "name": "zendframework/zend-uri",
-            "version": "2.3.7",
-            "target-dir": "Zend/Uri",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendUri.git",
-                "reference": "6dd5ee4b2543c785aa4e06643aaddf9c46f69039"
+                "reference": "53f5b162b293f80de8b951eece8e08be83c4fe16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-uri-6dd5ee4b2543c785aa4e06643aaddf9c46f69039-zip-a057cb.zip",
-                "reference": "2.3.7",
-                "shasum": "472610922044d137a4cb0b3cdb91b25a1c770439"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-uri-53f5b162b293f80de8b951eece8e08be83c4fe16-zip-71723a.zip",
+                "reference": "53f5b162b293f80de8b951eece8e08be83c4fe16",
+                "shasum": "26a328150f18463ed6d2bd208250a3064176cb5e"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2746,7 +2737,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Uri\\": ""
                 }
             },
@@ -2760,24 +2751,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendUri/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendUri/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:29"
         },
         {
             "name": "zendframework/zend-validator",
-            "version": "2.3.7",
-            "target-dir": "Zend/Validator",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendValidator.git",
-                "reference": "53ceee562ce689a6a610c7bb0bc8157c7ec63a45"
+                "reference": "eb678d20256f120a72ca27276bbb2875841701ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-validator-53ceee562ce689a6a610c7bb0bc8157c7ec63a45-zip-c7a027.zip",
-                "reference": "2.3.7",
-                "shasum": "5c7b56349f5a3b1a3932b08a6ca33d531648f8e9"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-validator-eb678d20256f120a72ca27276bbb2875841701ab-zip-5ce21c.zip",
+                "reference": "eb678d20256f120a72ca27276bbb2875841701ab",
+                "shasum": "e7cd92a7aaff333017cf1ad5595fafa4704a4f63"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2810,7 +2800,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\Validator\\": ""
                 }
             },
@@ -2824,24 +2814,23 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendValidator/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendValidator/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:30"
         },
         {
             "name": "zendframework/zend-xmlrpc",
-            "version": "2.3.7",
-            "target-dir": "Zend/XmlRpc",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/Component_ZendXmlRpc.git",
-                "reference": "2ee92bbaf8fb5bf23c42078478b533515087c580"
+                "reference": "68feef538344307ee77e02c0f01f8ef50517ad36"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packages.zendframework.com/composer/zendframework-zend-xmlrpc-2ee92bbaf8fb5bf23c42078478b533515087c580-zip-fc14ee.zip",
-                "reference": "2.3.7",
-                "shasum": "ba72ff794d1ab83aaf1c5ba7847cff14bfebb429"
+                "url": "https://packages.zendframework.com/composer/zendframework-zend-xmlrpc-68feef538344307ee77e02c0f01f8ef50517ad36-zip-c97d8f.zip",
+                "reference": "68feef538344307ee77e02c0f01f8ef50517ad36",
+                "shasum": "9a60ddc689edae547a2fd2f5a639b73e2e9ef414"
             },
             "require": {
                 "php": ">=5.3.23",
@@ -2862,7 +2851,7 @@
                 }
             },
             "autoload": {
-                "psr-0": {
+                "psr-4": {
                     "Zend\\XmlRpc\\": ""
                 }
             },
@@ -2876,9 +2865,9 @@
                 "zf2"
             ],
             "support": {
-                "source": "https://github.com/zendframework/Component_ZendXmlRpc/tree/release-2.3.7"
+                "source": "https://github.com/zendframework/Component_ZendXmlRpc/tree/release-2.4.0"
             },
-            "time": "2015-03-12 16:55:53"
+            "time": "2015-04-01 18:09:30"
         },
         {
             "name": "zendframework/zendxml",
