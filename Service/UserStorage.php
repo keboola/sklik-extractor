@@ -9,6 +9,7 @@ namespace Keboola\SklikExtractor\Service;
 
 use Keboola\Csv\CsvFile;
 use Keboola\StorageApi\Client;
+use Keboola\Syrup\Exception\ApplicationException;
 use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
 use Monolog\Logger;
@@ -111,6 +112,16 @@ class UserStorage
                         'exception' => $e
                     ]);
                 }
+            }
+
+            if (!$success) {
+                throw new ApplicationException("Table was not uploaded", [
+                    'tableId' => $tableId,
+                    'configId' => $configId,
+                    'name' => $name,
+                    'file' => $file,
+                    'options' => $options
+                ]);
             }
 
         } catch (\Keboola\StorageApi\ClientException $e) {
