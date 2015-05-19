@@ -97,17 +97,21 @@ class UserStorage
 
             // Allow three tries to upload
             $success = false;
+            $previousException = null;
             for($i = 0; $i <= 2 && !$success; $i++) {
                 try {
                     $this->storageApiClient->createTableAsync($this->getBucketId($configId), $name, $file, $options);
                     $success = true;
                 } catch (ContextErrorException $e) {
 
+                    $previousException = $e;
+
                     $this->logger->alert("Error saving data", [
                         'tableId' => $tableId,
                         'configId' => $configId,
                         'name' => $name,
                         'file' => $file,
+                        'fileSize' => filesize($file),
                         'options' => $options,
                         'exception' => $e
                     ]);
@@ -115,7 +119,7 @@ class UserStorage
             }
 
             if (!$success) {
-                throw new ApplicationException("Table was not uploaded", [
+                throw new ApplicationException("Table was not uploaded", $previousException, [
                     'tableId' => $tableId,
                     'configId' => $configId,
                     'name' => $name,
