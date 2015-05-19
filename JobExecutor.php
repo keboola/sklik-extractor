@@ -45,7 +45,7 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
     {
         $configurationStorage = new ConfigurationStorage($this->appName, $this->storageApi);
         $this->eventLogger = new EventLogger($this->appName, $this->storageApi, $job->getId());
-        $this->userStorage = new UserStorage($this->appName, $this->storageApi, $this->temp);
+        $this->userStorage = new UserStorage($this->appName, $this->storageApi, $this->temp, $this->logger);
 
         $params = $job->getParams();
         $configIds = isset($params['config'])? array($params['config']) : $configurationStorage->getConfigurationsList();

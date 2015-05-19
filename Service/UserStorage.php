@@ -11,6 +11,7 @@ use Keboola\Csv\CsvFile;
 use Keboola\StorageApi\Client;
 use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
+use Monolog\Logger;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 
 class UserStorage
@@ -27,13 +28,15 @@ class UserStorage
     protected $files = [];
     protected $tables = [];
 
+    /** @var Logger */
+    protected $logger;
 
-
-    public function __construct($appName, Client $storageApi, Temp $temp)
+    public function __construct($appName, Client $storageApi, Temp $temp, Logger $logger)
     {
         $this->appName = $appName;
         $this->storageApiClient = $storageApi;
         $this->temp = $temp;
+        $this->logger = $logger;
     }
 
     public function getBucketId($configId)
@@ -98,9 +101,18 @@ class UserStorage
                     $this->storageApiClient->createTableAsync($this->getBucketId($configId), $name, $file, $options);
                     $success = true;
                 } catch (ContextErrorException $e) {
-                    //Ignore upload error
+
+                    $this->logger->alert("Error saving data", [
+                        'tableId' => $tableId,
+                        'configId' => $configId,
+                        'name' => $name,
+                        'file' => $file,
+                        'options' => $options,
+                        'exception' => $e
+                    ]);
                 }
             }
+
         } catch (\Keboola\StorageApi\ClientException $e) {
             throw new UserException(sprintf('Error during upload of table %s to Storage API. %s', $tableId, $e->getMessage()), $e);
         }
