@@ -48,7 +48,7 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
         $this->userStorage = new UserStorage($this->appName, $this->storageApi, $this->temp, $this->logger);
 
         $params = $job->getParams();
-        $configIds = isset($params['config'])? array($params['config']) : $configurationStorage->getConfigurationsList();
+        $configIds = isset($params['config']) ? array($params['config']) : $configurationStorage->getConfigurationsList();
         $since = isset($params['since']) ? $params['since'] : '-1 day';
         $until = isset($params['until']) ? $params['until'] : '-1 day';
 
@@ -102,7 +102,7 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
             $this->userStorage->uploadData($configId);
             $this->eventLogger->log('Extraction complete', [], time() - $timerAll, Event::TYPE_SUCCESS);
         } catch (\Exception $e) {
-            $message = 'Extraction failed' . (($e instanceof UserException)? ': ' . $e->getMessage() : null);
+            $message = 'Extraction failed' . (($e instanceof UserException) ? ': ' . $e->getMessage() : null);
             $this->eventLogger->log($message, [], time() - $timerAll, Event::TYPE_ERROR);
             throw $e;
         }
@@ -111,13 +111,14 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
     private function getStats(Sklik\Api $api, $userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false)
     {
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
+        $days = 10;
 
         do {
             $newEndDate = new \DateTime($newStartDate->format('Y-m-d'));
-            $newEndDate->modify('+30 days');
+            $newEndDate->modify(sprintf("+%d days", $days));
             $dateInterval = date_diff($endDate, $newStartDate, true);
 
-            if (intval($dateInterval->format('%a')) <= 30) {
+            if (intval($dateInterval->format('%a')) <= $days) {
                 $newEndDate = $endDate;
             }
 
@@ -131,8 +132,8 @@ class JobExecutor extends \Keboola\Syrup\Job\Executor
                 }
             }
 
-            $newStartDate->modify('+31 days');
+            $newStartDate->modify(sprintf("+%d days", $days+1));
 
-        } while (intval($dateInterval->format('%a')) > 30);
+        } while (intval($dateInterval->format('%a')) > $days);
     }
 }
