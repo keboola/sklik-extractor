@@ -1,4 +1,0 @@
-services:
-    ex_sklik.job_executor:
-        class: Keboola\SklikExtractor\JobExecutor
-        arguments: [%app_name%, @syrup.temp, @logger]

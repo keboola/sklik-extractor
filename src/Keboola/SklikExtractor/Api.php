@@ -1,33 +1,32 @@
 <?php
 /**
+ * @package ex-sklik
+ * @copyright 2015 Keboola
  * @author Jakub Matejka <jakub@keboola.com>
  */
+namespace Keboola\SklikExtractor;
 
-namespace Keboola\SklikExtractor\Sklik;
-
-use Monolog\Logger;
 use Zend\XmlRpc\Client;
 use Zend\Http\Client\Adapter\Exception\RuntimeException;
 
 class Api
 {
     const API_URL = 'https://api.sklik.cz/cipisek/RPC2';
+
     private $username;
     private $password;
     private $client;
     private $session;
-    /**
-     * @var Logger
-     */
-    private $logger;
 
-    public function __construct($username, $password, Logger $logger)
+    public function __construct($username, $password, $apiUrl = null)
     {
         $this->username = $username;
         $this->password = $password;
-        $this->logger = $logger;
 
-        $client = new \Zend\Http\Client(self::API_URL, [
+        if (!$apiUrl) {
+            $apiUrl = self::API_URL;
+        }
+        $client = new \Zend\Http\Client($apiUrl, [
             'adapter' => 'Zend\Http\Client\Adapter\Curl',
             'curloptions' => [
                 CURLOPT_SSL_VERIFYPEER => false,
@@ -35,24 +34,19 @@ class Api
             ],
             'timeout' => 120
         ]);
-        $this->client = new Client(self::API_URL, $client);
+        $this->client = new Client($apiUrl, $client);
         $this->login();
-    }
-
-    public function __destruct()
-    {
-        $this->logout();
     }
 
     public function login()
     {
-        $this->call('client.login', [$this->username, $this->password]);
+        return $this->call('client.login', [$this->username, $this->password]);
     }
 
     public function logout()
     {
         if ($this->session) {
-            $this->call('client.logout', ['user' => ['session' => $this->session]]);
+            return $this->call('client.logout', ['user' => ['session' => $this->session]]);
         }
     }
 
@@ -69,28 +63,21 @@ class Api
         return $limit;
     }
 
-    public function request($method, array $args = [])
+    protected function request($method, array $args = [])
     {
         $args = array_merge_recursive(['user' => ['session' => $this->session]], $args);
         return $this->call($method, $args);
     }
 
-    private function call($method, array $args = [])
+    protected function call($method, array $args = [])
     {
         $maxRepeatCount = 10;
         $repeatCount = 0;
         do {
-            $start = time();
             $repeatCount++;
             $exception = null;
             try {
                 $result = $this->client->call($method, $args);
-                $this->logger->log(Logger::DEBUG, 'API call ' . $method . ' finished', [
-                    'params' => $args,
-                    'status' => $result['status'],
-                    'message' => isset($result['statusMessage'])? $result['statusMessage'] : null,
-                    'duration' => time() - $start
-                ]);
 
                 if ($result['status'] == 200) {
                     if (isset($result['session'])) {
@@ -100,23 +87,17 @@ class Api
                     return $result;
                 } elseif ($result['status'] == 401) {
                     if ($method == 'client.login') {
-                        throw new ApiException($result['statusMessage']);
+                        throw new Exception($result['statusMessage']);
                     } else {
                         $this->logout();
                         $this->login();
                     }
                 } else {
-                    $message = 'API Error ' . (isset($result['status'])? $result['status'] . ': ' : null)
+                    $message = (isset($result['status']) ? "{$result['status']}: " : null)
                         . (isset($result['message'])? $result['message'] : null);
-                    $e = new ApiException($message);
-                    $e->setData([
-                        'method' => $method,
-                        'args' => $args,
-                        'result' => $result
-                    ]);
-                    throw $e;
+                    throw Exception::apiError($message, $method, $args, $result);
                 }
-            } catch (ApiException $e) {
+            } catch (Exception $e) {
                 throw $e;
             } catch (RuntimeException $e) {
                 switch ($e->getCode()) {
@@ -126,10 +107,6 @@ class Api
                         $this->login();
                         break;
                     case 404: // Not found
-                        $this->logger->log(Logger::WARNING, 'API call ' . $method . ' finished with code 404', [
-                            'params' => $args,
-                            'duration' => time() - $start
-                        ]);
                         return false;
                         break;
                     case 415: // Too many requests
@@ -143,32 +120,24 @@ class Api
             }
 
             if ($repeatCount >= $maxRepeatCount) {
-                $e = new ApiException('Sklik API max repeats error', $exception);
-                $e->setData([
-                    'method' => $method,
-                    'args' => $args
-                ]);
-                throw $e;
+                $result = [];
+                if ($exception) {
+                    $result = [
+                        'exception' => $exception->getMessage(),
+                        'code' => $exception->getCode()
+                    ];
+                }
+                throw Exception::apiError('API max repeats error', $method, $args, $result);
             }
-
-            $this->logger->log(Logger::WARNING, 'API call ' . $method . ' will be repeated', [
-                'params' => $args,
-                'duration' => time() - $start,
-                'error' => $exception? [
-                    'type' => get_class($exception),
-                    'code' => $exception->getCode(),
-                    'message' => $exception->getMessage()
-                ] : null
-            ]);
 
         } while (true);
     }
 
     public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context = false)
     {
-        $stats = $this->request('campaigns.stats', [
+        $args = [
             'user' => [
-                'userId' => $userId
+                'userId' => (int)$userId
             ],
             'campaignIds' => $campaignIdsBlock,
             'params' => [
@@ -178,13 +147,12 @@ class Api
                 'includeFulltext' => $context ? false : true,
                 'includeContext' => $context ? true : false
             ]
-        ]);
+        ];
+        $stats = $this->request('campaigns.stats', $args);
         if (isset($stats['report'])) {
             return $stats['report'];
         } else {
-            $this->logger->log(Logger::ALERT, 'Bad stats format', [
-                'stats' => $stats
-            ]);
+            Exception::apiError('Stats have bad format', 'campaign.stats', $args, $stats);
         }
     }
 

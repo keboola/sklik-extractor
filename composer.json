@@ -1,7 +1,8 @@
 {
     "name": "keboola/sklik-extractor",
-    "type": "symfony-bundle",
-    "description": "Keboola Sklik extractor",
+    "license": "MIT",
+    "type": "project",
+    "description": "Keboola Docker Sklik extractor",
     "keywords": ["keboola", "sklik", "extractor"],
     "authors": [
         {
@@ -16,38 +17,19 @@
         }
     ],
     "require": {
-        "keboola/syrup": "~2.0",
+        "keboola/csv": "~1.1.3",
+        "symfony/yaml": "~2.6.3",
         "zendframework/zend-xmlrpc": "2.4.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.4",
-        "symfony/var-dumper": "~2.6",
+        "phpunit/phpunit": "~5.0",
         "squizlabs/php_codesniffer": "2.*",
         "codeclimate/php-test-reporter": "dev-master"
     },
-    "scripts": {
-        "post-install-cmd": [
-            "Keboola\\Syrup\\DeploymentHandler\\ScriptHandler::getParameters",
-            "Keboola\\Syrup\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap"
-        ],
-        "post-update-cmd": [
-            "Keboola\\Syrup\\DeploymentHandler\\ScriptHandler::getParameters",
-            "Keboola\\Syrup\\DeploymentHandler\\ScriptHandler::getSharedParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache"
-        ]
-    },
     "minimum-stability": "stable",
     "autoload": {
-        "psr-0": {
-            "Keboola\\SklikExtractor": ""
+        "psr-4": {
+            "Keboola\\": "src/Keboola/"
         }
-    },
-    "target-dir": "Keboola/SklikExtractor",
-    "extra": {
-        "symfony-app-dir": "vendor/keboola/syrup/app",
-        "symfony-web-dir": "vendor/keboola/syrup/web",
-        "syrup-app-name": "ex-sklik"
     }
 }
