@@ -3,3 +3,5 @@ vendor
 .idea
 composer.phar
 data
+build
+test.sh
