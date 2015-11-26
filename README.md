@@ -14,3 +14,73 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
 - **bucket** - Name of bucket where the data will be saved
 - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
 - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
+
+## Output
+
+Data are saved to three tables:
+
+
+**accounts** - contains data of all Sklik accounts accessible from the main account, columns are:
+
+- **userId**: account user id
+- **username**: account username
+- **access**: access type; **r** for read-only, **rw** for read-write, empty for main account
+- **relationName**: name of relation of main account to this foreign account
+- **relationStatus**: relation status; **live** means connection to the account is working, **offer** means an offer of the
+    access by a foreign account was not yet accepted, **request** means requested access to this foreign account was not yet accepted
+- **relationType**: type of the relation to this foreign account; **normal** or **agency** which means foreign account expenses are paid by main user
+- **walletCredit**: account user's credit (in halers) or nil if not permitted to get this value or no wallet is assigned to this account
+- **walletCreditWithVat**: account user's credit including VAT (in halers) or nil if not permitted to get this value or no wallet is assigned to this account
+- **walletVerified**: user's Wallet is verified; can be nil if not permitted to get this value
+- **accountLimit**: account monthly limit (in halers) or nil; account limit is valid only for agency client accounts
+- **dayBudgetSum**: sum of day budgets of all campaigns (in cents)
+
+
+**campaigns** - contains list of campaigns of all Sklik accounts accessible from the main account, columns are:
+
+- **accountId**: account user id (foreign key to table **accounts**)
+- **id**: campaign id
+- **name**: campaign name
+- **deleted**: whether campaign is deleted
+- **status**: campaign status; **active** or **suspend**
+- **dayBudget**: campaign day budget (in halers)
+- **exhaustedDayBudget**: how much of the day budget is already exhausted (in halers)
+- **adSelection**: ad selection type; **weighted** or **random**
+- **createDate**: campaign create date
+- **totalBudget**: campaign total budget (if set; in halers)
+- **exhaustedTotalBudget**: if campaign total budget is set, how much of it is exhausted (in halers)
+- **totalClicks**: campaign total clicks
+- **exhaustedTotalClicks**: if campaign total clicks is set, how much of them are exhausted
+
+
+**stats** - contains stats of campaigns of all Sklik accounts accessible from the main account, columns are:
+
+- **accountId**: account user id (foreign key to table **accounts**)
+- **campaignId**: campaign id (foreign key to table **campaigns**)
+- **date**: date of stats
+- **target**: campaign targetting; **context** or **fulltext** (each campaign has for each date both rows in the table, once with context and once with fulltext)
+- **impressions**: impression count
+- **clicks**: click count
+- **ctr**: click ratio - how much clicks per one impression (%)
+- **cpc**: cost per click - average cost per one click, in halers
+- **price**: total price paid for displaying ads (for clicks or impressions), in halers
+- **avgPosition**: average position of ad in display format
+- **conversions**: number of conversions (how many times user made an order)
+- **conversionRatio**: how many conversions per one click (%)
+- **conversionAvgPrice**: price of one conversion, in halers
+- **conversionValue**: value of conversions
+- **conversionAvgValue**: average value of conversion
+- **conversionValueRatio**: value / price ratio (%)
+- **transactions**: number of transactions
+- **transactionAvgPrice**: price of one transaction, in halers
+- **transactionAvgValue**: average value of one transaction
+- **transactionAvgCount**: average number of transactions per conversion
+
+
+> **NOTICE!**
+
+> - Main account used for access to API is queried for campaigns and stats too and is also saved to table accounts but has columns access, relationName,
+relationStatus and relationType empty.
+> - Prices are in halers so you need to divide by 100 to get prices in CZK.
+> - Each campaign has two rows in stats table for each day, one with context target and one with fulltext. Even if one of them is without stats.
+> - Extractor truncates tables before saving data so you need to transfer them away in subsequent transformation.
