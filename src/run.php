@@ -36,18 +36,25 @@ if (!isset($config['parameters']['bucket'])) {
     exit(1);
 }
 
+if (!file_exists("{$arguments['data']}/out")) {
+    mkdir("{$arguments['data']}/out");
+}
+if (!file_exists("{$arguments['data']}/out/tables")) {
+    mkdir("{$arguments['data']}/out/tables");
+}
+
 try {
     $app = new \Keboola\SklikExtractor\Extractor(
         $config['parameters']['username'],
         isset($config['parameters']['#password'])
         ? $config['parameters']['#password'] : $config['parameters']['password'],
-        $arguments['data'] . '/out/tables',
+        "{$arguments['data']}/out/tables",
         $config['parameters']['bucket']
     );
 
     $app->run(
-        isset($config['parameters']['since']) ? $config['parameters']['since'] : null,
-        isset($config['parameters']['until']) ? $config['parameters']['until'] : null
+        isset($config['parameters']['since']) ? $config['parameters']['since'] : '-1 day',
+        isset($config['parameters']['until']) ? $config['parameters']['until'] : '-1 day'
     );
 
     exit(0);
