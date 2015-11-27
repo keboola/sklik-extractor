@@ -34,7 +34,8 @@ class UserStorage
 
             file_put_contents("$this->path/$this->bucket.$table.csv.manifest", Yaml::dump([
                 'destination' => "$this->bucket.$table",
-                'incremental' => true
+                'incremental' => true,
+                'primary_key' => $this->tables[$table]['primary']
             ]));
         }
 

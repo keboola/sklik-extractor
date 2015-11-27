@@ -10,19 +10,19 @@ class Extractor
 {
     protected static $userTables = [
         'accounts' => [
-            'primary' => 'userId',
+            'primary' => ['userId'],
             'columns' => ['userId', 'username', 'access', 'relationName', 'relationStatus', 'relationType',
                 'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum']
         ],
         'campaigns' => [
-            'primary' => 'id',
+            'primary' => ['id'],
             'columns' => ['id', 'name', 'deleted', 'status', 'dayBudget', 'exhaustedDayBudget',
                 'adSelection', 'createDate', 'totalBudget', 'exhaustedTotalBudget', 'totalClicks',
                 'exhaustedTotalClicks', 'accountId']
         ],
         'stats' => [
-            'primary' => 'id',
-            'columns' => ['id', 'accountId', 'campaignId', 'date', 'target', 'impressions', 'clicks', 'ctr', 'cpc',
+            'primary' => ['accountId', 'campaignId', 'date', 'target'],
+            'columns' => ['accountId', 'campaignId', 'date', 'target', 'impressions', 'clicks', 'ctr', 'cpc',
                 'price', 'avgPosition', 'conversions', 'conversionRatio', 'conversionAvgPrice', 'conversionValue',
                 'conversionAvgValue', 'conversionValueRatio', 'transactions', 'transactionAvgPrice',
                 'transactionAvgValue', 'transactionAvgCount']
@@ -94,7 +94,6 @@ class Extractor
             $target = $context ? 'context' : 'fulltext';
             foreach ($stats as $campaignReport) {
                 foreach ($campaignReport['stats'] as $stats) {
-                    $stats['id'] = sha1("{$userId}:{$campaignReport['campaignId']}:{$stats['date']}:{$target}");
                     $stats['accountId'] = $userId;
                     $stats['campaignId'] = $campaignReport['campaignId'];
                     $stats['target'] = $target;
