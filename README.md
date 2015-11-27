@@ -90,17 +90,18 @@ relationStatus and relationType empty.
 ## Installation
 
 If you want to run this app standalone:
+
 1. Clone the repository: `git@github.com:keboola/sklik-extractor.git ex-sklik`
 2. Go to the directory: `cd ex-sklik`
 3. Install composer: `curl -s http://getcomposer.org/installer | php`
 4. Install packages: `php composer.phar install`
 5. Create folder `data`
 6. Create file `data/config.yml` with configuration, e.g.:
-```
-parameters:
-  username:
-  password:
-  bucket: in.c-sklik
-```
+    ```
+    parameters:
+      username:
+      password:
+      bucket: in.c-sklik
+    ```
 7. Run: `php src/run.php --data=./data`
 8. Data tables will be saved to directory `data/out/tables`
