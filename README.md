@@ -97,6 +97,7 @@ If you want to run this app standalone:
 4. Install packages: `php composer.phar install`
 5. Create folder `data`
 6. Create file `data/config.yml` with configuration, e.g.:
+
     ```
     parameters:
       username:
