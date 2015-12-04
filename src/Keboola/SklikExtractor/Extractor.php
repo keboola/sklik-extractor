@@ -43,7 +43,7 @@ class Extractor
         $this->userStorage = new UserStorage(self::$userTables, $folder, $bucket);
     }
 
-    public function run($since, $until)
+    public function run(\DateTime $startDate, \DateTime $endDate)
     {
         try {
             foreach ($this->api->getAccounts() as $account) {
@@ -60,8 +60,8 @@ class Extractor
                     for ($i = 0; $i < $blocksCount; $i++) {
                         $campaignIdsBlock = array_slice($campaignIds, $this->apiLimit * $i, $this->apiLimit);
 
-                        $this->getStats($account['userId'], $campaignIdsBlock, $since, $until, true);
-                        $this->getStats($account['userId'], $campaignIdsBlock, $since, $until, false);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false);
                     }
                 } catch (Exception $e) {
                     error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
@@ -73,11 +73,8 @@ class Extractor
         $this->api->logout();
     }
 
-    private function getStats($userId, $campaignIdsBlock, $since, $until, $context = false)
+    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false)
     {
-        $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
-        $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($until)));
-
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
         $days = 10;
 

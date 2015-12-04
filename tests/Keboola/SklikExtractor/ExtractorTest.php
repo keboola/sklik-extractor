@@ -14,8 +14,11 @@ class ExtractorTest extends AbstractTest
     {
         $this->createCampaign(uniqid());
 
+        $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime('-2 days')));
+        $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime('-1 day')));
+
         $e = new Extractor(EX_SK_USERNAME, EX_SK_PASSWORD, sys_get_temp_dir(), 'out.c-main', EX_SK_API_URL);
-        $e->run(date('Y-m-d'), date('Y-m-d'));
+        $e->run($startDate, $endDate);
 
         $this->assertFileExists(sys_get_temp_dir().'/out.c-main.accounts.csv');
         $fp = file(sys_get_temp_dir().'/out.c-main.accounts.csv');

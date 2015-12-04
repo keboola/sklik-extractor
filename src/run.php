@@ -52,10 +52,12 @@ try {
         $config['parameters']['bucket']
     );
 
-    $app->run(
-        isset($config['parameters']['since']) ? $config['parameters']['since'] : '-1 day',
-        isset($config['parameters']['until']) ? $config['parameters']['until'] : '-1 day'
-    );
+    $since = isset($config['parameters']['since']) ? $config['parameters']['since'] : '-1 day';
+    $until = isset($config['parameters']['until']) ? $config['parameters']['until'] : '-1 day';
+    $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
+    $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($until)));
+
+    $app->run($startDate, $endDate);
 
     exit(0);
 } catch (\Keboola\SklikExtractor\Exception $e) {
