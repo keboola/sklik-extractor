@@ -14,3 +14,7 @@ script:
 
 after_script:
   - ./codeclimate.sh
+
+addons:
+    code_climate:
+        repo_token: 9ec5d1986aa635df3b967c6fa9a50d701000fd3a26dee5a4e55cb646dcfa612f
