@@ -12,16 +12,12 @@
          bootstrap="tests/bootstrap.php">
 
     <testsuite name="Main Test">
-        <directory>tests/Keboola</directory>
+        <directory>tests/Keboola/SklikExtractor</directory>
     </testsuite>
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
+            <directory suffix=".php">./src/Keboola/SklikExtractor</directory>
         </whitelist>
     </filter>
-
-    <!--logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-    </logging-->
 </phpunit>
