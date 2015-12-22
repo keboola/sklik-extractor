@@ -84,7 +84,6 @@ Data are saved to three tables **incrementally**:
 relationStatus and relationType empty.
 > - Prices are in halers so you need to divide by 100 to get prices in CZK.
 > - Each campaign has two rows in stats table for each day, one with context target and one with fulltext. Even if one of them is without stats.
-> - Extractor truncates tables before saving data so you need to transfer them away in subsequent transformation.
 
 
 ## Installation
