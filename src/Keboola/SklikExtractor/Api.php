@@ -152,7 +152,7 @@ class Api
         if (isset($stats['report'])) {
             return $stats['report'];
         } else {
-            Exception::apiError('Stats have bad format', 'campaign.stats', $args, $stats);
+            throw Exception::apiError('Stats have bad format', 'campaign.stats', $args, $stats);
         }
     }
 
