@@ -29,7 +29,7 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
             ],
             'campaigns' => [[
                 'name' => $name,
-                'dayBudget' => 1000
+                'dayBudget' => 10000
             ]]
         ]);
         return $result['campaignIds'][0];
