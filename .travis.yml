@@ -1,20 +1,43 @@
-language: php
+sudo: required
 
-php:
-- '5.6'
-- '7'
+language: bash
+
+services:
+  - docker
+
+env:
+  DOCKER_COMPOSE_VERSION: 1.6.2
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" -y install docker-engine
+
+install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 before_script:
-  - composer self-update
-  - composer install --dev
+  - docker -v
+  - docker-compose -v
+  - docker-compose build tests-with-report
 
 script:
-  - ./vendor/bin/phpcs --standard=psr2 -n --ignore=vendor .
-  - ./vendor/bin/phpunit
+  - >
+    docker-compose run
+    --rm
+    -e EX_SK_API_URL=$EX_SK_API_URL
+    -e EX_SK_USERNAME=$EX_SK_USERNAME
+    -e EX_SK_PASSWORD=$EX_SK_PASSWORD
+    -e EX_SK_USER_ID=$EX_SK_USER_ID
+    -e CODECLIMATE_REPO_TOKEN=$CODECLIMATE_REPO_TOKEN
+    tests-with-report
+after_success:
+  - docker images
 
-after_script:
-  - ./codeclimate.sh
-
-addons:
-    code_climate:
-        repo_token: 9ec5d1986aa635df3b967c6fa9a50d701000fd3a26dee5a4e55cb646dcfa612f
+deploy:
+  provider: script
+  script: ./deploy.sh
+  on:
+    tags: true
