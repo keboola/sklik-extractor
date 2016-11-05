@@ -133,7 +133,7 @@ class Api
         } while (true);
     }
 
-    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context = false)
+    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context = false, $impressionShare)
     {
         $args = [
             'user' => [
@@ -145,9 +145,11 @@ class Api
                 'dateTo' => $endDate,
                 'granularity' => 'daily',
                 'includeFulltext' => $context ? false : true,
-                'includeContext' => $context ? true : false
+                'includeContext' => $context ? true : false,
+                'includeImpressionShare' => $impressionShare
             ]
         ];
+
         $stats = $this->request('campaigns.stats', $args);
         if (isset($stats['report'])) {
             return $stats['report'];
