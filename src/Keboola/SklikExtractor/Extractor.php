@@ -25,7 +25,7 @@ class Extractor
             'columns' => ['accountId', 'campaignId', 'date', 'target', 'impressions', 'clicks', 'ctr', 'cpc',
                 'price', 'avgPosition', 'conversions', 'conversionRatio', 'conversionAvgPrice', 'conversionValue',
                 'conversionAvgValue', 'conversionValueRatio', 'transactions', 'transactionAvgPrice',
-                'transactionAvgValue', 'transactionAvgCount']
+                'transactionAvgValue', 'transactionAvgCount', 'impressionShare']
         ]
     ];
 
@@ -43,7 +43,7 @@ class Extractor
         $this->userStorage = new UserStorage(self::$userTables, $folder, $bucket);
     }
 
-    public function run(\DateTime $startDate, \DateTime $endDate)
+    public function run(\DateTime $startDate, \DateTime $endDate, $shareImpression)
     {
         try {
             foreach ($this->api->getAccounts() as $account) {
@@ -60,8 +60,8 @@ class Extractor
                     for ($i = 0; $i < $blocksCount; $i++) {
                         $campaignIdsBlock = array_slice($campaignIds, $this->apiLimit * $i, $this->apiLimit);
 
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true);
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $shareImpression);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $shareImpression);
                     }
                 } catch (Exception $e) {
                     error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
@@ -73,7 +73,7 @@ class Extractor
         $this->api->logout();
     }
 
-    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false)
+    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false, $shareImpression)
     {
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
         $days = 10;
@@ -87,7 +87,8 @@ class Extractor
                 $newEndDate = $endDate;
             }
 
-            $stats = $this->api->getStats($userId, $campaignIdsBlock, $newStartDate, $newEndDate, $context);
+            $stats = $this->api->getStats($userId, $campaignIdsBlock, $newStartDate, $newEndDate, $context, $shareImpression);
+
             $target = $context ? 'context' : 'fulltext';
             foreach ($stats as $campaignReport) {
                 foreach ($campaignReport['stats'] as $stats) {
