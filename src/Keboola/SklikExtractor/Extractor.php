@@ -43,7 +43,7 @@ class Extractor
         $this->userStorage = new UserStorage(self::$userTables, $folder, $bucket);
     }
 
-    public function run(\DateTime $startDate, \DateTime $endDate, $shareImpression)
+    public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare)
     {
         try {
             foreach ($this->api->getAccounts() as $account) {
@@ -60,8 +60,8 @@ class Extractor
                     for ($i = 0; $i < $blocksCount; $i++) {
                         $campaignIdsBlock = array_slice($campaignIds, $this->apiLimit * $i, $this->apiLimit);
 
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $shareImpression);
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $shareImpression);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $impressionShare);
+                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $impressionShare);
                     }
                 } catch (Exception $e) {
                     error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
@@ -73,7 +73,7 @@ class Extractor
         $this->api->logout();
     }
 
-    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $shareImpression, $context = false)
+    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $impressionShare, $context = false)
     {
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
         $days = 10;
@@ -87,7 +87,7 @@ class Extractor
                 $newEndDate = $endDate;
             }
 
-            $stats = $this->api->getStats($userId, $campaignIdsBlock, $newStartDate, $newEndDate, $context, $shareImpression);
+            $stats = $this->api->getStats($userId, $campaignIdsBlock, $newStartDate, $newEndDate, $context, $impressionShare);
 
             $target = $context ? 'context' : 'fulltext';
             foreach ($stats as $campaignReport) {
