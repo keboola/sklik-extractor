@@ -72,8 +72,9 @@ class ApiTest extends AbstractTest
     {
         $campaignName = uniqid();
         $campaignId = $this->createCampaign($campaignName);
+        $impresshionShare = false;
 
-        $date = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01'));
+        $date = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01'), $impresshionShare);
         $result = $this->api->getStats(EX_SK_USER_ID, [$campaignId], $date, $date);
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('stats', $result[0]);
