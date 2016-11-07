@@ -129,11 +129,10 @@ class Api
                 }
                 throw Exception::apiError('API max repeats error', $method, $args, $result);
             }
-
         } while (true);
     }
 
-    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $impressionShare, $context = false)
+    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $impressionShare = false, $context = false)
     {
         $args = [
             'user' => [

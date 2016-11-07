@@ -100,7 +100,6 @@ class Extractor
             }
 
             $newStartDate->modify(sprintf("+%d days", $days+1));
-
         } while (intval($dateInterval->format('%a')) > $days);
     }
 }
