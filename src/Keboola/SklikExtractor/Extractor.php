@@ -43,7 +43,7 @@ class Extractor
         $this->userStorage = new UserStorage(self::$userTables, $folder, $bucket);
     }
 
-    public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare)
+    public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare = false)
     {
         try {
             foreach ($this->api->getAccounts() as $account) {
@@ -73,7 +73,7 @@ class Extractor
         $this->api->logout();
     }
 
-    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $impressionShare, $context = false)
+    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $impressionShare = false, $context = false)
     {
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
         $days = 10;
