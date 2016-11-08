@@ -55,7 +55,7 @@ class ApiTest extends AbstractTest
         $campaignId = $this->createCampaign($campaignName);
 
         $result = $this->api->getCampaigns((int)EX_SK_USER_ID);
-        $this->assertGreaterThan(1, count($result));
+        $this->assertGreaterThanOrEqual(1, count($result));
         $campaignFound = false;
         foreach ($result as $r) {
             $this->assertArrayHasKey('id', $r);

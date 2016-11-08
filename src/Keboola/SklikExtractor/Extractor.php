@@ -73,7 +73,7 @@ class Extractor
         $this->api->logout();
     }
 
-    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $impressionShare = false, $context = false)
+    private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false, $impressionShare = false)
     {
         $newStartDate = new \DateTime($startDate->format('Y-m-d'));
         $days = 10;

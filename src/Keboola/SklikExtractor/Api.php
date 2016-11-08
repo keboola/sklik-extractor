@@ -145,7 +145,7 @@ class Api
                 'granularity' => 'daily',
                 'includeFulltext' => $context ? false : true,
                 'includeContext' => $context ? true : false,
-                'includeImpressionShare' => $impressionShare
+                'includeImpressionShare' => (bool)$impressionShare
             ]
         ];
 

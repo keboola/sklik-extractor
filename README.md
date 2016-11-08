@@ -15,7 +15,7 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
     - **bucket** - Name of bucket where the data will be saved
     - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
     - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
-    - **impressionShare** *(optional)* - boolean flag if impression share should be included in stats (default false)
+    - **impressionShare** *(optional)* - 0 or 1 flag if impression share should be included in stats (default 0)
 
 ## Output
 
