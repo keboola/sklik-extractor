@@ -15,6 +15,7 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
     - **bucket** - Name of bucket where the data will be saved
     - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
     - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
+    - **impressionShare** *(optional)* - boolean flag if impression share should be included in stats (default false)
 
 ## Output
 
@@ -76,6 +77,7 @@ Data are saved to three tables **incrementally**:
 - **transactionAvgPrice**: price of one transaction, in halers
 - **transactionAvgValue**: average value of one transaction
 - **transactionAvgCount**: average number of transactions per conversion
+- **impressionShare**: impression share and missed impressions (included optionally)
 
 
 > **NOTICE!**
@@ -105,3 +107,12 @@ If you want to run this app standalone:
     ```
 7. Run: `php src/run.php --data=./data`
 8. Data tables will be saved to directory `data/out/tables`
+
+
+## Contributing
+
+Please contribute using TDD. Tests need ordinary Sklik account and can be run by command:
+
+```
+env EX_SK_USERNAME= EX_SK_PASSWORD= EX_SK_USER_ID= ./tests.sh
+```
