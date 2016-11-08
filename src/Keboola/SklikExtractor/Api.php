@@ -129,11 +129,10 @@ class Api
                 }
                 throw Exception::apiError('API max repeats error', $method, $args, $result);
             }
-
         } while (true);
     }
 
-    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context = false)
+    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $impressionShare = false, $context = false)
     {
         $args = [
             'user' => [
@@ -145,9 +144,11 @@ class Api
                 'dateTo' => $endDate,
                 'granularity' => 'daily',
                 'includeFulltext' => $context ? false : true,
-                'includeContext' => $context ? true : false
+                'includeContext' => $context ? true : false,
+                'includeImpressionShare' => $impressionShare
             ]
         ];
+
         $stats = $this->request('campaigns.stats', $args);
         if (isset($stats['report'])) {
             return $stats['report'];

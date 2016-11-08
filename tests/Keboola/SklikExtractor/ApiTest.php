@@ -72,9 +72,25 @@ class ApiTest extends AbstractTest
     {
         $campaignName = uniqid();
         $campaignId = $this->createCampaign($campaignName);
+        $impresshionShare = false;
 
         $date = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01'));
-        $result = $this->api->getStats(EX_SK_USER_ID, [$campaignId], $date, $date);
+        $result = $this->api->getStats(EX_SK_USER_ID, [$campaignId], $date, $date, $impresshionShare);
+        $this->assertCount(1, $result);
+        $this->assertArrayHasKey('stats', $result[0]);
+        $this->assertCount(1, $result[0]['stats']);
+        $this->assertArrayHasKey('conversions', $result[0]['stats'][0]);
+        $this->assertArrayHasKey('clicks', $result[0]['stats'][0]);
+    }
+
+    public function testApiGetStatsWithShareImpressionsTrue()
+    {
+        $campaignName = uniqid();
+        $campaignId = $this->createCampaign($campaignName);
+        $impresshionShare = true;
+
+        $date = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01'));
+        $result = $this->api->getStats(EX_SK_USER_ID, [$campaignId], $date, $date, $impresshionShare);
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('stats', $result[0]);
         $this->assertCount(1, $result[0]['stats']);
