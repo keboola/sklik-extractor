@@ -89,6 +89,12 @@ class Api
                     if ($method == 'client.login') {
                         throw new Exception($result['statusMessage']);
                     } else {
+                        error_log(json_encode([
+                            'error' => 'Error 401, will be retried',
+                            'method' => $method,
+                            'args' => $args,
+                            'result' => $result
+                        ]));
                         $this->logout();
                         $this->login();
                     }

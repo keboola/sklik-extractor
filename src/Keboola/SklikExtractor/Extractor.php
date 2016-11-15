@@ -45,30 +45,26 @@ class Extractor
 
     public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare = false)
     {
-        try {
-            foreach ($this->api->getAccounts() as $account) {
-                $this->userStorage->save('accounts', $account);
-                try {
-                    $campaignIds = [];
-                    foreach ($this->api->getCampaigns($account['userId']) as $campaign) {
-                        $campaign['accountId'] = $account['userId'];
-                        $this->userStorage->save('campaigns', $campaign);
-                        $campaignIds[] = $campaign['id'];
-                    }
-
-                    $blocksCount = ceil(count($campaignIds) / $this->apiLimit);
-                    for ($i = 0; $i < $blocksCount; $i++) {
-                        $campaignIdsBlock = array_slice($campaignIds, $this->apiLimit * $i, $this->apiLimit);
-
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $impressionShare);
-                        $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $impressionShare);
-                    }
-                } catch (Exception $e) {
-                    error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
+        foreach ($this->api->getAccounts() as $account) {
+            $this->userStorage->save('accounts', $account);
+            try {
+                $campaignIds = [];
+                foreach ($this->api->getCampaigns($account['userId']) as $campaign) {
+                    $campaign['accountId'] = $account['userId'];
+                    $this->userStorage->save('campaigns', $campaign);
+                    $campaignIds[] = $campaign['id'];
                 }
+
+                $blocksCount = ceil(count($campaignIds) / $this->apiLimit);
+                for ($i = 0; $i < $blocksCount; $i++) {
+                    $campaignIdsBlock = array_slice($campaignIds, $this->apiLimit * $i, $this->apiLimit);
+
+                    $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $impressionShare);
+                    $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $impressionShare);
+                }
+            } catch (Exception $e) {
+                error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
             }
-        } catch (\Exception $e) {
-            error_log('Extraction failed' . (($e instanceof Exception) ? ': ' . $e->getMessage() : null));
         }
         $this->api->logout();
     }
