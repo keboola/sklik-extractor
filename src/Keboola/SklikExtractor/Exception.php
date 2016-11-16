@@ -13,8 +13,16 @@ class Exception extends \Exception
         return new static(json_encode([
             'error' => $message,
             'method' => $method,
-            'args' => $args,
+            'args' => self::filterArgs($args),
             'result' => $result
         ]));
+    }
+
+    public static function filterArgs($args)
+    {
+        if (isset($args['user']['session'])) {
+            $args['user']['session'] = '--omitted--';
+        }
+        return $args;
     }
 }

@@ -85,23 +85,30 @@ class Api
                         $this->session = $result['session'];
                     }
                     return $result;
-                } elseif ($result['status'] == 401) {
-                    if ($method == 'client.login') {
-                        throw new Exception($result['statusMessage']);
-                    } else {
-                        error_log(json_encode([
-                            'error' => 'Error 401, will be retried',
-                            'method' => $method,
-                            'args' => $args,
-                            'result' => $result
-                        ]));
-                        $this->logout();
-                        $this->login();
-                    }
                 } else {
-                    $message = (isset($result['status']) ? "{$result['status']}: " : null)
-                        . (isset($result['message'])? $result['message'] : null);
-                    throw Exception::apiError($message, $method, $args, $result);
+                    if ($method == 'client.logout') {
+                        // Ignore errors
+                        return [];
+                    }
+                    if ($result['status'] == 401) {
+                        if ($method == 'client.login') {
+                            throw new Exception($result['statusMessage']);
+                        } else {
+                            error_log(json_encode([
+                                'error' => 'Error 401, will be retried',
+                                'result' => $result,
+                                'method' => $method,
+                                'args' => Exception::filterArgs($args)
+                            ]));
+                            sleep(rand(5, 10));
+                            $this->logout();
+                            $this->login();
+                        }
+                    } else {
+                        $message = (isset($result['status']) ? "{$result['status']}: " : null)
+                            . (isset($result['message'])? $result['message'] : null);
+                        throw Exception::apiError($message, $method, $args, $result);
+                    }
                 }
             } catch (Exception $e) {
                 throw $e;
@@ -109,6 +116,13 @@ class Api
                 switch ($e->getCode()) {
                     case 401: // Session expired or Authentication failed
                     case 502: // Bad gateway
+                        error_log(json_encode([
+                            'error' => "Error {$e->getCode()}, will be retried",
+                            'result' => null,
+                            'method' => $method,
+                            'args' => Exception::filterArgs($args),
+                        ]));
+                        sleep(rand(5, 10));
                         $this->logout();
                         $this->login();
                         break;
