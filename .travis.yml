@@ -5,9 +5,6 @@ language: bash
 services:
   - docker
 
-env:
-  DOCKER_COMPOSE_VERSION: 1.6.2
-
 before_script:
   - docker -v
   - docker-compose -v

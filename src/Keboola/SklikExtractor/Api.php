@@ -152,7 +152,7 @@ class Api
         } while (true);
     }
 
-    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $impressionShare = false, $context = false)
+    public function getStats($userId, $campaignIdsBlock, $startDate, $endDate, $context = false, $impressionShare = false)
     {
         $args = [
             'user' => [
