@@ -13,7 +13,7 @@ class Exception extends \Exception
         return new static(json_encode([
             'error' => $message,
             'method' => $method,
-            'args' => self::filterArgs($args),
+            'args' => ($method == 'client.login') ? ['--omitted--'] : self::filterArgs($args),
             'result' => $result
         ]));
     }
