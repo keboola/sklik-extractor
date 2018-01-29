@@ -7,6 +7,8 @@
 
 use Symfony\Component\Yaml\Yaml;
 
+ini_set('display_errors', true);
+date_default_timezone_set('Europe/Prague');
 set_error_handler(
     function ($errno, $errstr, $errfile, $errline, array $errcontext) {
         if (0 === error_reporting()) {
@@ -57,8 +59,9 @@ try {
     $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
     $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($until)));
     $impressionShare = isset($config['parameters']['impressionShare']) ? $config['parameters']['impressionShare'] : false;
+    $accountId = isset($config['parameters']['accountId']) ? $config['parameters']['accountId'] : false;
 
-    $app->run($startDate, $endDate, $impressionShare);
+    $app->run($startDate, $endDate, $impressionShare, $accountId);
 
     exit(0);
 } catch (\Keboola\SklikExtractor\Exception $e) {

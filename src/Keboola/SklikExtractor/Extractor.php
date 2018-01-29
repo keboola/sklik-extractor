@@ -43,9 +43,14 @@ class Extractor
         $this->userStorage = new UserStorage(self::$userTables, $folder, $bucket);
     }
 
-    public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare = false)
+    public function run(\DateTime $startDate, \DateTime $endDate, $impressionShare = false, $accountId = false)
     {
+        $accountsFound = false;
         foreach ($this->api->getAccounts() as $account) {
+            if ($accountId && $accountId != $account['userId']) {
+                continue;
+            }
+            $accountsFound = true;
             $this->userStorage->save('accounts', $account);
             try {
                 $campaignIds = [];
@@ -62,11 +67,14 @@ class Extractor
                     $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, true, $impressionShare);
                     $this->getStats($account['userId'], $campaignIdsBlock, $startDate, $endDate, false, $impressionShare);
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 error_log("Error when downloading data for client '{$account['username']}': {$e->getMessage()}");
             }
         }
         $this->api->logout();
+        if (!$accountsFound) {
+            throw new Exception('No accounts found');
+        }
     }
 
     private function getStats($userId, $campaignIdsBlock, \DateTime $startDate, \DateTime $endDate, $context = false, $impressionShare = false)
