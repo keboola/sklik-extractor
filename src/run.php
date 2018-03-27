@@ -56,6 +56,14 @@ try {
 
     $since = isset($config['parameters']['since']) ? $config['parameters']['since'] : '-1 day';
     $until = isset($config['parameters']['until']) ? $config['parameters']['until'] : '-1 day';
+
+    if (trim($since) === '') {
+        $since = '-1 day';
+    }
+    if (trim($until) === '') {
+        $until = '-1 day';
+    }
+
     $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
     $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($until)));
     $impressionShare = isset($config['parameters']['impressionShare']) ? $config['parameters']['impressionShare'] : false;
