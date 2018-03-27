@@ -2,6 +2,14 @@ version: "2"
 
 services:
 
+  app:
+    build: .
+    tty: true
+    command: bash
+    volumes:
+      - ./:/code
+    working_dir: /code
+
   tests:
     build: .
     image: keboola/sklik-extractor
