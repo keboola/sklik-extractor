@@ -6,6 +6,7 @@
  */
 
 use Symfony\Component\Yaml\Yaml;
+use Keboola\SklikExtractor\Exception as SklikExtractorException;
 
 ini_set('display_errors', true);
 date_default_timezone_set('Europe/Prague');
@@ -66,6 +67,11 @@ try {
 
     $startDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($since)));
     $endDate = \DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d 00:00:01', strtotime($until)));
+
+    if ($startDate->getTimestamp() > $endDate->getTimestamp()) {
+        throw new SklikExtractorException('Invalid "since" or "until" parameter. Parameter "since" cannot be bigger than "until".');
+    }
+
     $impressionShare = isset($config['parameters']['impressionShare']) ? $config['parameters']['impressionShare'] : false;
     $accountId = isset($config['parameters']['accountId']) ? $config['parameters']['accountId'] : false;
 
