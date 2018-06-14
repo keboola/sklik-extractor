@@ -6,29 +6,10 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="true"
-         stopOnError="true"
-         syntaxCheck="true"
-         bootstrap="tests/bootstrap.php">
-
-    <testsuite name="main">
-        <directory>tests/Keboola/SklikExtractor</directory>
+         stopOnFailure="false"
+         syntaxCheck="false"
+         bootstrap="tests/phpunit/bootstrap.php">
+    <testsuite name="Main Test Suite">
+        <directory>tests/phpunit</directory>
     </testsuite>
-
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src</directory>
-        </whitelist>
-        <blacklist>
-            <file>src/run.php</file>
-            <directory>build</directory>
-            <directory>tests</directory>
-            <directory>vendor</directory>
-        </blacklist>
-    </filter>
-
-    <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-    </logging>
-
 </phpunit>

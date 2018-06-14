@@ -1,7 +1,2 @@
-.idea
-composer.phar
-vendor
-run-test.sh
-data
-build
-vars
+/vendor
+/.idea

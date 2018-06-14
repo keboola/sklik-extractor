@@ -3,16 +3,12 @@ KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
 The Extractor gets list of accessible clients, list of their campaigns and campaign stats for previous day and saves the data to Storage API. Date of downloaded stats can be changed in configuration.
 
-## Status
-
 [![Build Status](https://travis-ci.org/keboola/sklik-extractor.svg)](https://travis-ci.org/keboola/sklik-extractor) [![Code Climate](https://codeclimate.com/github/keboola/sklik-extractor/badges/gpa.svg)](https://codeclimate.com/github/keboola/sklik-extractor) [![Test Coverage](https://codeclimate.com/github/keboola/sklik-extractor/badges/coverage.svg)](https://codeclimate.com/github/keboola/sklik-extractor/coverage)
 
 ## Configuration
 
 - **parameters**:
-    - **username** - Username to Sklik API
-    - **password** - Password to Sklik API
-    - **bucket** - Name of bucket where the data will be saved
+    - **#token** - Sklik API token
     - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
     - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
     - **impressionShare** *(optional)* - 0 or 1 flag if impression share should be included in stats (default 0)
@@ -88,31 +84,23 @@ relationStatus and relationType empty.
 > - Each campaign has two rows in stats table for each day, one with context target and one with fulltext. Even if one of them is without stats.
 
 
-## Installation
-
-If you want to run this app standalone:
-
-1. Clone the repository: `git@github.com:keboola/sklik-extractor.git ex-sklik`
-2. Go to the directory: `cd ex-sklik`
-3. Install composer: `curl -s http://getcomposer.org/installer | php`
-4. Install packages: `php composer.phar install`
-5. Create folder `data`
-6. Create file `data/config.yml` with configuration, e.g.:
-
-    ```
-    parameters:
-      username:
-      password:
-      bucket: in.c-sklik
-    ```
-7. Run: `php src/run.php --data=./data`
-8. Data tables will be saved to directory `data/out/tables`
-
-
-## Contributing
-
-Please contribute using TDD. Tests need ordinary Sklik account and can be run by command:
+## Development
+ 
+Clone this repository and init the workspace with following command:
 
 ```
-env EX_SK_USERNAME= EX_SK_PASSWORD= EX_SK_USER_ID= ./tests.sh
+git clone https://github.com/keboola/sklik-extractor
+cd sklik-extractor
+docker-compose build
+docker-compose run --rm dev composer install --no-scripts
 ```
+
+Run the test suite using this command:
+
+```
+docker-compose run --rm dev composer tests
+```
+ 
+# Integration
+
+For information about deployment and integration with KBC, please refer to the [deployment section of developers documentation](https://developers.keboola.com/extend/component/deployment/) 
