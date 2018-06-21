@@ -7,22 +7,22 @@ use Keboola\Component\UserException;
 
 class Exception extends UserException
 {
-    public static function apiError($message, $method, $params = [], $statusCode, $response = null)
+    public static function apiError($message, $method, $args = [], $statusCode, $response = null)
     {
         return new static(json_encode([
             'error' => $message,
             'method' => $method,
-            'params' => ($method == 'client.login') ? ['--omitted--'] : self::filterParamsForLog($params),
+            'args' => ($method == 'client.login') ? ['--omitted--'] : self::filterParamsForLog($args),
             'statusCode' => $statusCode,
             'response' => $response
         ]));
     }
 
-    public static function filterParamsForLog($params)
+    public static function filterParamsForLog($args)
     {
-        if (isset($params['user']['session'])) {
-            $params['user']['session'] = '--omitted--';
+        if (isset($args[0]['session'])) {
+            $args[0]['session'] = '--omitted--';
         }
-        return $params;
+        return $args;
     }
 }

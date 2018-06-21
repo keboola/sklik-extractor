@@ -10,7 +10,9 @@ class Component extends BaseComponent
 {
     public function run(): void
     {
-        $app = new SklikExtractor($this->getConfig(), $this->getLogger());
+        /** @var Config $config */
+        $config = $this->getConfig();
+        $app = new SklikExtractor($config, $this->getLogger(), $this->getDataDir() . '/out/tables');
         $app->execute();
     }
 

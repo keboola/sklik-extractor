@@ -5,3 +5,6 @@ services:
     volumes:
       - ./:/code
       - ./data:/data
+    environment:
+      - SKLIK_API_URL
+      - SKLIK_API_TOKEN

@@ -1,23 +1,22 @@
 <?php
-/**
- * @package ex-sklik
- * @copyright 2015 Keboola
- * @author Jakub Matejka <jakub@keboola.com>
- */
-namespace Keboola\SklikExtractor;
 
-class UserStorageTest extends \PHPUnit_Framework_TestCase
+namespace Keboola\SklikExtractor\Tests;
+
+use Keboola\SklikExtractor\UserStorage;
+use PHPUnit\Framework\TestCase;
+
+class UserStorageTest extends TestCase
 {
     public function testSaving()
     {
         $row1 = uniqid();
         $row2 = uniqid();
-        $storage = new UserStorage(['table' => ['columns' => ['first', 'second']]], sys_get_temp_dir(), 'out.c-main');
+        $storage = new UserStorage(['table' => ['columns' => ['first', 'second'], 'primary' => ['second']]], sys_get_temp_dir());
         $storage->save('table', ['first' => 'row1', 'second' => $row1]);
         $storage->save('table', ['first' => 'row2', 'second' => $row2]);
 
-        $this->assertFileExists(sys_get_temp_dir().'/out.c-main.table.csv');
-        $fp = fopen(sys_get_temp_dir().'/out.c-main.table.csv', 'r');
+        $this->assertFileExists(sys_get_temp_dir().'/table.csv');
+        $fp = fopen(sys_get_temp_dir().'/table.csv', 'r');
         $row = 0;
         while (($data = fgetcsv($fp, 1000, ",")) !== false) {
             $row++;
@@ -38,5 +37,14 @@ class UserStorageTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertEquals(3, $row);
         fclose($fp);
+
+        $this->assertFileExists(sys_get_temp_dir().'/table.csv.manifest');
+        $manifest = json_decode(file_get_contents(sys_get_temp_dir().'/table.csv.manifest'), true);
+        $this->assertArrayHasKey('destination', $manifest);
+        $this->assertEquals('table', $manifest['destination']);
+        $this->assertArrayHasKey('incremental', $manifest);
+        $this->assertEquals(true, $manifest['incremental']);
+        $this->assertArrayHasKey('primary_key', $manifest);
+        $this->assertEquals(['second'], $manifest['primary_key']);
     }
 }

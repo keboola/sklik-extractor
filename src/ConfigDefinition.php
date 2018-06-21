@@ -16,9 +16,17 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
-                ->scalarNode('foo')
-                    ->defaultValue('baz')
-                ->end()
+            ->scalarNode('#token')->isRequired()->cannotBeEmpty()->end()
+            ->arrayNode('accounts')->scalarPrototype()->end()
+            ->booleanNode('allowEmptyStatistics')->defaultFalse()->end()
+            ->arrayNode('reports')->children()
+                ->scalarNode('name')->isRequired()->cannotBeEmpty()->end()
+                ->arrayNode('primary')->isRequired()->defaultValue([])->end()
+                ->scalarNode('resource')->isRequired()->cannotBeEmpty()->end()
+                ->arrayNode('restrictionFilter')->isRequired()->defaultValue([])->end()
+                ->arrayNode('displayOptions')->isRequired()->defaultValue([])->end()
+                ->arrayNode('displayColumns')->isRequired()->cannotBeEmpty()->end()
+            ->end()
             ->end()
         ;
         // @formatter:on

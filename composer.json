@@ -13,6 +13,7 @@
     "require": {
         "PHP": "^7.1",
         "guzzlehttp/guzzle": "^6.3",
+        "keboola/csv": "^2.0",
         "keboola/php-component": "^4.1",
         "symfony/serializer": "^4.1"
     },
@@ -27,12 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Keboola\\": "src/Keboola/"
+            "Keboola\\SklikExtractor\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Keboola\\Tests\\": "tests/phpunit/"
+            "Keboola\\SklikExtractor\\Tests\\": "tests/phpunit/"
         }
     },
     "scripts": {

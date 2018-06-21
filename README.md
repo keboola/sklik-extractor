@@ -9,16 +9,27 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
 
 - **parameters**:
     - **#token** - Sklik API token
-    - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
-    - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
-    - **impressionShare** *(optional)* - 0 or 1 flag if impression share should be included in stats (default 0)
+    - **accounts** *(optional)* - Array of accounts you want to download the data for. It downloads data for all accounts by default.
+    - **allowEmptyStatistics** *(optional)* - Return empty statistics (default: `false`).
+    - **reports** - Array of reports to download. Each item must contain:
+        - **name** - Your name for the report, it will be used for name of the table in Storage. *Note that `accounts` is a reserved name, thus it cannot be used as report name.*
+        - **primary** - Array of columns to be used as primary key.
+        - **resource** - Name of the resource on which you want the report to be created. Supported resources are all from https://api.sklik.cz/drak/ which support `createReport` and `readReport` methods (see https://blog.seznam.cz/2017/12/spravne-pouzivat-limit-offset-metodach-statisticke-reporty-api-drak/ for more information):
+            - `ads`
+            - `banners`
+            - `campaigns`
+            - `groups`
+            - `intends`
+            - `intends.negative`
+            - etc.
+        - **restrictionFilter** - Json object of the restriction filter configuration for `createReport` API call.
+        - **displayOptions** - Json object of the display options configuration for `createReport` API call.
+        - **displayColumns** - Array of columns to get.
+    
 
 ## Output
 
-Data are saved to three tables **incrementally**:
-
-
-**accounts** - contains data of all Sklik accounts accessible from the main account, columns are:
+Table **accounts** is created by default and it contains data of all (or configured) Sklik accounts accessible from the main account, its columns are:
 
 - **userId**: account user id (*primary key*)
 - **username**: account username
@@ -33,55 +44,10 @@ Data are saved to three tables **incrementally**:
 - **accountLimit**: account monthly limit (in halers) or nil; account limit is valid only for agency client accounts
 - **dayBudgetSum**: sum of day budgets of all campaigns (in cents)
 
-
-**campaigns** - contains list of campaigns of all Sklik accounts accessible from the main account, columns are:
-
-- **id**: campaign id (*primary key*)
-- **name**: campaign name
-- **deleted**: whether campaign is deleted
-- **status**: campaign status; **active** or **suspend**
-- **dayBudget**: campaign day budget (in halers)
-- **exhaustedDayBudget**: how much of the day budget is already exhausted (in halers)
-- **adSelection**: ad selection type; **weighted** or **random**
-- **createDate**: campaign create date
-- **totalBudget**: campaign total budget (if set; in halers)
-- **exhaustedTotalBudget**: if campaign total budget is set, how much of it is exhausted (in halers)
-- **totalClicks**: campaign total clicks
-- **exhaustedTotalClicks**: if campaign total clicks is set, how much of them are exhausted
-- **accountId**: account user id (foreign key to table **accounts**)
-
-
-**stats** - contains stats of campaigns of all Sklik accounts accessible from the main account, columns are:
-
-- **accountId**: account user id (foreign key to table **accounts**, *part of primary key*)
-- **campaignId**: campaign id (foreign key to table **campaigns**, *part of primary key*)
-- **date**: date of stats (*part of primary key*)
-- **target**: campaign targetting; **context** or **fulltext** (each campaign has for each date both rows in the table, once with context and once with fulltext) (*part of primary key*)
-- **impressions**: impression count
-- **clicks**: click count
-- **ctr**: click ratio - how much clicks per one impression (%)
-- **cpc**: cost per click - average cost per one click, in halers
-- **price**: total price paid for displaying ads (for clicks or impressions), in halers
-- **avgPosition**: average position of ad in display format
-- **conversions**: number of conversions (how many times user made an order)
-- **conversionRatio**: how many conversions per one click (%)
-- **conversionAvgPrice**: price of one conversion, in halers
-- **conversionValue**: value of conversions
-- **conversionAvgValue**: average value of conversion
-- **conversionValueRatio**: value / price ratio (%)
-- **transactions**: number of transactions
-- **transactionAvgPrice**: price of one transaction, in halers
-- **transactionAvgValue**: average value of one transaction
-- **transactionAvgCount**: average number of transactions per conversion
-- **impressionShare**: impression share and missed impressions (included optionally)
-
-
 > **NOTICE!**
 
-> - Main account used for access to API is queried for campaigns and stats too and is also saved to table accounts but has columns access, relationName,
-relationStatus and relationType empty.
+> - Main account used for access to API is queried for reports by default too and is also saved to table accounts. But it has columns access, relationName, relationStatus and relationType empty.
 > - Prices are in halers so you need to divide by 100 to get prices in CZK.
-> - Each campaign has two rows in stats table for each day, one with context target and one with fulltext. Even if one of them is without stats.
 
 
 ## Development
