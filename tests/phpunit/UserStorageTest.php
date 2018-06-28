@@ -11,7 +11,8 @@ class UserStorageTest extends TestCase
     {
         $row1 = uniqid();
         $row2 = uniqid();
-        $storage = new UserStorage(['table' => ['columns' => ['first', 'second'], 'primary' => ['second']]], sys_get_temp_dir());
+        $storage = new UserStorage(sys_get_temp_dir());
+        $storage->addUserTable('table', ['first', 'second'], ['second']);
         $storage->save('table', ['first' => 'row1', 'second' => $row1]);
         $storage->save('table', ['first' => 'row2', 'second' => $row2]);
 

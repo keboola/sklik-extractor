@@ -37,7 +37,7 @@ class SklikApi
         $this->login();
     }
 
-    public function login() : array
+    public function login(): array
     {
         return $this->request('client.loginByToken', [$this->token]);
     }
@@ -55,7 +55,7 @@ class SklikApi
         return $limit;
     }
 
-    public function getAccounts() : array
+    public function getAccounts(): array
     {
         $accounts = $this->requestAuthenticated('client.get');
         // Add user itself to check for reports
@@ -75,36 +75,81 @@ class SklikApi
         return $accounts['foreignAccounts'];
     }
 
-    public function createReport($resource, $restrictionFilter = [], $displayOptions = []) : array
+    public static function getReportLimit($from, $to, $listLimit, $granularity = null)
     {
-        if (!count($restrictionFilter)) {
-            $restrictionFilter = new \stdClass();
+        if (!$granularity) {
+            return $listLimit;
         }
+
+        $numberOfDays = (int)((new \DateTime($to))->diff(new \DateTime($from)))->format('%a');
+        switch ($granularity) {
+            case 'daily':
+                $unitDivider = 1;
+                break;
+            case 'weekly':
+                $unitDivider = 7;
+                break;
+            case 'monthly':
+                $unitDivider = 28;
+                break;
+            case 'quarterly':
+                $unitDivider = 84;
+                break;
+            default:
+                $unitDivider = 365;
+        }
+
+        $numberOfUnits = $numberOfDays / $unitDivider;
+        $numberOfUnits = $numberOfUnits > 1 ? $numberOfUnits : 1;
+
+        $limit = floor($listLimit / $numberOfUnits);
+        if ($limit < 1) {
+            throw new Exception('Data limit exceeded. Decrease date interval or granularity.');
+        }
+        return (int)$limit;
+    }
+
+    public function createReport($resource, $restrictionFilter = [], $displayOptions = []): array
+    {
         if (!count($displayOptions)) {
             $displayOptions = new \stdClass();
         }
+        if (!isset($restrictionFilter['dateFrom'])) {
+            throw new Exception('Setting of dateFrom on restrictionFilter is required');
+        }
+        if (!isset($restrictionFilter['dateTo'])) {
+            throw new Exception('Setting of dateTo on restrictionFilter is required');
+        }
+
         return $this->requestAuthenticated("$resource.createReport", [$restrictionFilter, $displayOptions]);
     }
 
-    public function readReport($resource, $reportId, $displayColumns = [], $allowEmptyStatistics = false) : array
-    {
-        $listLimit = $this->getListLimit();
-        //@TODO pagination
-        return $this->requestAuthenticated("$resource.readReport", [$reportId, [
-            'offset' => 0,
-            'limit' => $listLimit,
-            'allowEmptyStatistics' => $allowEmptyStatistics,
-            'displayColumns' => $displayColumns
-        ]]);
+    public function readReport(
+        $resource,
+        $reportId,
+        $displayColumns = [],
+        $offset = 0,
+        $limit = 100
+    ): array {
+        $result = $this->requestAuthenticated("$resource.readReport", [
+            $reportId,
+            [
+                'offset' => $offset,
+                'limit' => $limit,
+                'allowEmptyStatistics' => true,
+                'displayColumns' => $displayColumns
+            ]
+        ]);
+        return $result['report'];
     }
 
-    protected function requestAuthenticated($method, $args = []) : array
+    protected function requestAuthenticated($method, $args = []): array
     {
         array_unshift($args, ['session' => $this->session]);
         return $this->request($method, $args);
     }
 
-    protected function request($method, $args = [], $retries = self::RETRIES_COUNT) : array
+    protected function request($method, $args = [], $retries = self::RETRIES_COUNT): array
     {
         $decoder = new JsonDecode(true);
         try {
@@ -147,7 +192,7 @@ class SklikApi
                     }
                     sleep(rand(5, 10));
                     $this->login();
-                    return $this->request($method, $args, $retries-1);
+                    return $this->request($method, $args, $retries - 1);
                 }
 
                 throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
@@ -157,14 +202,18 @@ class SklikApi
         }
     }
 
-    protected function initClient($apiUrl = self::API_URL) : Client
+    protected function initClient($apiUrl = self::API_URL): Client
     {
         $handlerStack = HandlerStack::create();
 
         $handlerStack->push(Middleware::retry(
-            function ($retries,
+            function (
+                $retries,
                 /** @noinspection PhpUnusedParameterInspection */
-                RequestInterface $request, ResponseInterface $response = null, $error = null) {
+                RequestInterface $request,
+                ResponseInterface $response = null,
+                $error = null
+            ) {
                 if ($retries >= self::RETRIES_COUNT) {
                     return false;
                 } elseif ($response && $response->getStatusCode() > 499) {
@@ -176,13 +225,8 @@ class SklikApi
                 }
             },
             function ($retries) {
-                return (int) pow(2, $retries - 1) * 1000;
+                return (int)pow(2, $retries - 1) * 1000;
             }
-        ));
-
-        $handlerStack->push(Middleware::log(
-            new \Monolog\Logger('ex-sklik', [new \Monolog\Handler\StreamHandler('php://stdout')]),
-            new \GuzzleHttp\MessageFormatter("{method} {uri} HTTP/{version} {req_body}\nRESPONSE: {code} - {res_body})")
         ));
 
         return new Client([

@@ -8,3 +8,5 @@ services:
     environment:
       - SKLIK_API_URL
       - SKLIK_API_TOKEN
+      - SKLIK_DATE_FROM
+      - SKLIK_DATE_TO

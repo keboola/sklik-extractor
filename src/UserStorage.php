@@ -9,14 +9,18 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class UserStorage
 {
-    protected $tables;
+    protected $tables = [
+        'accounts' => [
+            'primary' => ['userId'],
+            'columns' => ['userId', 'username', 'access', 'relationName', 'relationStatus', 'relationType',
+                'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum'],
+        ],
+    ];
     protected $path;
-
     protected $files = [];
 
-    public function __construct(array $tables, string $path)
+    public function __construct(string $path)
     {
-        $this->tables = $tables;
         $this->path = $path;
     }
 
@@ -50,6 +54,24 @@ class UserStorage
         /** @var CsvWriter $file */
         $file = $this->files[$table];
         $file->writeRow($dataToSave);
+    }
+
+    public function saveReport($name, $data)
+    {
+        $meta = [];
+        $stats = [];
+
+        foreach ($data as $row) {
+            foreach ($row['stats'] as $stat) {
+                $stats[] = ['id' => $row['id']] + $stat;
+            }
+            unset($row['stats']);
+            $meta[] = $row;
+        }
+        echo $name.PHP_EOL;
+        print_r($meta);
+        print_r($stats);
+        echo PHP_EOL.PHP_EOL;
     }
 
     public function createManifest(string $fileName, string $table, array $primary = []) : void

@@ -12,8 +12,11 @@ class Component extends BaseComponent
     {
         /** @var Config $config */
         $config = $this->getConfig();
-        $app = new SklikExtractor($config, $this->getLogger(), $this->getDataDir() . '/out/tables');
-        $app->execute();
+
+        $api = new SklikApi($config->getToken(), $this->getLogger());
+        $userStorage = new UserStorage($this->getDataDir() . '/out/tables');
+        $extractor = new Extractor($api, $userStorage, $this->getLogger());
+        $extractor->run($config);
     }
 
     protected function getConfigClass(): string

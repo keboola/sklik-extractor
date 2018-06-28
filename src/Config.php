@@ -18,11 +18,6 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'accounts'], []);
     }
 
-    public function getAllowEmptyStatistics() : bool
-    {
-        return $this->getValue(['parameters', 'allowEmptyStatistics'], false);
-    }
-
     public function getReports() : array
     {
         return $this->getValue(['parameters', 'reports'], []);
