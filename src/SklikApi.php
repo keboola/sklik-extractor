@@ -116,7 +116,7 @@ class SklikApi
         return (int) $limit;
     }
 
-    public function createReport(string $resource, array $restrictionFilter = [], array $displayOptions = []): array
+    public function createReport(string $resource, ?array $restrictionFilter = [], ?array $displayOptions = []): array
     {
         if (!count($displayOptions)) {
             $displayOptions = new \stdClass();
@@ -134,9 +134,9 @@ class SklikApi
     public function readReport(
         string $resource,
         string $reportId,
-        array $displayColumns = [],
-        int $offset = 0,
-        int $limit = 100
+        ?array $displayColumns = [],
+        ?int $offset = 0,
+        ?int $limit = 100
     ): array {
         $result = $this->requestAuthenticated("$resource.readReport", [
             $reportId,
@@ -150,13 +150,13 @@ class SklikApi
         return $result['report'];
     }
 
-    protected function requestAuthenticated(string $method, array $args = []): array
+    protected function requestAuthenticated(string $method, ?array $args = []): array
     {
         array_unshift($args, ['session' => $this->session]);
         return $this->request($method, $args);
     }
 
-    protected function request(string $method, array $args = [], int $retries = self::RETRIES_COUNT) : array
+    protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT) : array
     {
         $decoder = new JsonDecode(true);
         try {

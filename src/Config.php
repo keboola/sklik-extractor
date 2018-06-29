@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Keboola\SklikExtractor;
 
 use Keboola\Component\Config\BaseConfig;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 class Config extends BaseConfig
 {
@@ -24,12 +27,21 @@ class Config extends BaseConfig
 
     public function getReports() : array
     {
+        $decoder = new JsonDecode(true);
         $reports = $this->getValue(['parameters', 'reports'], '');
         foreach ($reports as &$report) {
-            $report['restrictionFilter'] = strlen($report['restrictionFilter']) > 0
-                ? json_decode($report['restrictionFilter'], true): [];
-            $report['displayOptions'] = strlen($report['displayOptions']) > 0
-                ? json_decode($report['displayOptions'], true): [];
+            try {
+                $report['restrictionFilter'] = strlen($report['restrictionFilter']) > 0
+                    ? $decoder->decode($report['restrictionFilter'], JsonEncoder::FORMAT) : [];
+            } catch (NotEncodableValueException $e) {
+                throw new Exception("Restriction filter for report {$report['name']} is not valid json");
+            }
+            try {
+                $report['displayOptions'] = strlen($report['displayOptions']) > 0
+                    ? $decoder->decode($report['displayOptions'], JsonEncoder::FORMAT) : [];
+            } catch (NotEncodableValueException $e) {
+                throw new Exception("Display options for report {$report['name']} is not valid json");
+            }
             $report['displayColumns'] = strlen($report['displayColumns']) > 0
                 ? array_map('trim', explode(',', $report['displayColumns'])) : [];
         }
