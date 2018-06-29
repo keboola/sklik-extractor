@@ -209,7 +209,7 @@ class SklikApi
         }
     }
 
-    protected function initClient(string $apiUrl = self::API_URL) : Client
+    protected function initClient(?string $apiUrl = self::API_URL) : Client
     {
         $handlerStack = HandlerStack::create();
 
