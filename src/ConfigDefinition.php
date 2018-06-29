@@ -17,7 +17,7 @@ class ConfigDefinition extends BaseConfigDefinition
         $parametersNode
             ->children()
             ->scalarNode('#token')->isRequired()->cannotBeEmpty()->end()
-            ->arrayNode('accounts')->scalarPrototype()->end()->end()
+            ->scalarNode('accounts')->end()
             ->arrayNode('reports')
                 ->arrayPrototype()
                     ->children()
@@ -25,7 +25,7 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('resource')->isRequired()->end()
                         ->arrayNode('restrictionFilter')->isRequired()->scalarPrototype()->end()->end()
                         ->arrayNode('displayOptions')->isRequired()->scalarPrototype()->end()->end()
-                        ->arrayNode('displayColumns')->isRequired()->scalarPrototype()->end()->end()
+                        ->scalarNode('displayColumns')->isRequired()->end()
                     ->end()
                 ->end()
             ->end()

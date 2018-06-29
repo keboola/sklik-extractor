@@ -15,11 +15,20 @@ class Config extends BaseConfig
 
     public function getAccounts() : array
     {
-        return $this->getValue(['parameters', 'accounts'], []);
+        $accounts = $this->getValue(['parameters', 'accounts'], '');
+        if (!strlen($accounts)) {
+            return [];
+        }
+        return array_map('trim', explode(',', $accounts));
     }
 
     public function getReports() : array
     {
-        return $this->getValue(['parameters', 'reports'], []);
+        $reports = $this->getValue(['parameters', 'reports'], '');
+        foreach ($reports as &$report) {
+            $report['displayColumns'] = strlen($report['displayColumns']) > 0
+                ? array_map('trim', explode(',', $report['displayColumns'])) : [];
+        }
+        return $reports;
     }
 }

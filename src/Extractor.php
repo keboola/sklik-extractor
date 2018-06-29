@@ -30,12 +30,15 @@ class Extractor
 
     public function run(Config $config, ?int $limit = null) : void
     {
-        $accounts = $config->getAccounts() ?: $this->api->getAccounts();
+        $accountsToGet = $config->getAccounts();
         $listLimit = $this->api->getListLimit();
 
-        foreach ($accounts as $account) {
+        foreach ($this->api->getAccounts() as $account) {
             if (!isset($account['userId'])) {
                 throw new Exception('Account response is missing userId: ' . json_encode($account));
+            }
+            if (count($accountsToGet) > 0 && !in_array($account['userId'], $accountsToGet)) {
+                continue;
             }
 
             $this->userStorage->save('accounts', $account);

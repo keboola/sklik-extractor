@@ -8,8 +8,8 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
 ## Configuration
 
 - **parameters**:
-    - **#token** - Sklik API token
-    - **accounts** *(optional)* - Array of accounts you want to download the data for. It downloads data for all accounts by default.
+    - **#token** - Sklik API token (You will find it under tha Account settings in Sklik)
+    - **accounts** *(optional)* - Comma separated list of accounts you want to download the data for. It downloads data for all accounts by default.
     - **reports** - Array of reports to download. Each item must contain:
         - **name** - Your name for the report, it will be used for name of the table in Storage. *Note that `accounts` is a reserved name, thus it cannot be used as report name.*
         - **resource** - Name of the resource on which you want the report to be created. Supported resources are all from https://api.sklik.cz/drak/ which support `createReport` and `readReport` methods (see https://blog.seznam.cz/2017/12/spravne-pouzivat-limit-offset-metodach-statisticke-reporty-api-drak/ for more information):
@@ -23,7 +23,7 @@ The Extractor gets list of accessible clients, list of their campaigns and campa
         - **restrictionFilter** - Json object of the restriction filter configuration for `createReport` API call.
             - `dateFrom` and `dateTo` are required values. If omitted, yesterday's and today's dates will be used
         - **displayOptions** - Json object of the display options configuration for `createReport` API call.
-        - **displayColumns** - Array of columns to get.
+        - **displayColumns** - Comma separated list of columns to get for `readReport` API call.
             - Column `id` as identifier of the resource is downloaded every time.
     
 ### API Limits
@@ -64,6 +64,33 @@ Stats table is also named after the report with suffix `-stats` and has a primar
 
 E.g. if you configure to download columns `name, clicks, impressions` from resource `campaigns` and call the report `report1`, you will get table `report1` with columns `id, name` and table `report1-stats` with columns `id, date, impressions, clicks`.
 
+
+## Example
+
+Let'say we want to download daily stats for campaigns. The report will look like this:
+- name: `report1`
+- resource: `campaigns`
+- restrictionFilter: `{ dateFrom: '2018-07-01', dateTo: '2018-07-03' }`
+- displayOptions: `{ statGranularity: 'daily' }`
+- displayColumns: `['id', 'name', 'clicks', 'impressions']`
+
+Extractor will create a table `report1` which will look like:
+
+```
+"id","name"
+"15001","Keboola.com - content"
+"15002","Keboola.com - search"
+```
+
+And table `report1-stats`:
+
+```
+"id","clicks","date","impressions"
+"15001","0","","0"
+"15002","5","20180701","26"
+"15002","0","20180702","10"
+"15002","0","20180703","2"
+```
 
 ## Development
  
