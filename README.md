@@ -56,9 +56,13 @@ Table **accounts** is created by default and it contains data of all (or configu
 
 ### Report tables
 
-Each report creates two tables. One with metadata and one with actual stats by date.
+Each report creates two tables. One with metadata and one with actual stats by date. 
 
-E.g. if you configure to download columns `id, name, clicks, impressions` from resource `campaigns` and call the report `campaigns`, you will get table `campaigns` with columns `id, name` and table `campaigns-stats` with columns `id, date, impressions, clicks`.
+Metadata table named after the report has a primary key `id` (Column `id` is added to `displayColumns` automatically).
+
+Stats table is also named after the report with suffix `-stats` and has a primary key compounded from `id` and `date`. 
+
+E.g. if you configure to download columns `name, clicks, impressions` from resource `campaigns` and call the report `report1`, you will get table `report1` with columns `id, name` and table `report1-stats` with columns `id, date, impressions, clicks`.
 
 
 ## Development

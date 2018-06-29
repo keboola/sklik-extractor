@@ -40,6 +40,14 @@ class ExtractorTest extends TestCase
         ], new ConfigDefinition());
 
         $component = new Extractor($api, $userStorage, $logger);
-        $component->run($config, 5);
+        $component->run($config);
+
+        $this->assertFileExists($temp->getTmpFolder() . '/accounts.csv');
+        $this->assertFileExists($temp->getTmpFolder() . '/report1.csv');
+        $metaFile = file($temp->getTmpFolder() . '/report1.csv');
+        $this->assertEquals('"id","name"', trim($metaFile[0]));
+        $this->assertFileExists($temp->getTmpFolder() . '/report1-stats.csv');
+        $statsFile = file($temp->getTmpFolder() . '/report1-stats.csv');
+        $this->assertEquals('"id","clicks","date","impressions"', trim($statsFile[0]));
     }
 }

@@ -57,8 +57,7 @@ class SklikApiTest extends TestCase
         $result = $this->api->readReport(
             'campaigns',
             $result['reportId'],
-            ['id', 'name', 'clicks', 'impressions'],
-            true
+            ['id', 'name', 'clicks', 'impressions']
         );
         $this->assertGreaterThanOrEqual(1, $result);
         $this->assertArrayHasKey('id', $result[0]);

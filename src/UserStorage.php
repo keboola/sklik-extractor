@@ -58,20 +58,33 @@ class UserStorage
 
     public function saveReport($name, $data)
     {
-        $meta = [];
-        $stats = [];
+        if (!count($data)) {
+            return;
+        }
 
         foreach ($data as $row) {
-            foreach ($row['stats'] as $stat) {
-                $stats[] = ['id' => $row['id']] + $stat;
+            if (isset($row['stats'])) {
+                foreach ($row['stats'] as $stat) {
+                    if (!isset($stat['date'])) {
+                        $stat['date'] = null;
+                    }
+                    ksort($stat);
+                    $save = ['id' => $row['id']] + $stat;
+
+                    if(!isset($this->tables["$name-stats"])) {
+                        $this->tables["$name-stats"] = ['columns' => array_keys($save), 'primary' => ['id', 'date']];
+                    }
+                    $this->save("$name-stats", $save);
+                }
+                unset($row['stats']);
+                ksort($row);
+
+                if(!isset($this->tables[$name])) {
+                    $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
+                }
+                $this->save($name, $row);
             }
-            unset($row['stats']);
-            $meta[] = $row;
         }
-        echo $name.PHP_EOL;
-        print_r($meta);
-        print_r($stats);
-        echo PHP_EOL.PHP_EOL;
     }
 
     public function createManifest(string $fileName, string $table, array $primary = []) : void
