@@ -209,8 +209,11 @@ class SklikApi
         }
     }
 
-    protected function initClient(string $apiUrl = self::API_URL) : Client
+    protected function initClient(?string $apiUrl = null) : Client
     {
+        if ($apiUrl) {
+            $apiUrl = self::API_URL;
+        }
         $handlerStack = HandlerStack::create();
 
         $handlerStack->push(Middleware::retry(
