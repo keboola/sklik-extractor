@@ -88,12 +88,11 @@ class UserStorage
                 }
                 unset($row['stats']);
                 ksort($row);
-
-                if (!isset($this->tables[$name])) {
-                    $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
-                }
-                $this->save($name, $row);
             }
+            if (!isset($this->tables[$name])) {
+                $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
+            }
+            $this->save($name, $row);
         }
     }
 
