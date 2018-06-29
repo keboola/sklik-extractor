@@ -44,11 +44,11 @@ class ExtractorTest extends TestCase
                     [
                         'name' => 'report1',
                         'resource' => 'campaigns',
-                        'restrictionFilter' => [
+                        'restrictionFilter' => json_encode([
                             'dateFrom' => getenv('SKLIK_DATE_FROM'),
                             'dateTo' => getenv('SKLIK_DATE_TO'),
-                        ],
-                        'displayOptions' => ['statGranularity' => 'daily'],
+                        ]),
+                        'displayOptions' => json_encode(['statGranularity' => 'daily']),
                         'displayColumns' => 'name, clicks, impressions',
                     ],
                 ],
@@ -79,11 +79,11 @@ class ExtractorTest extends TestCase
                     [
                         'name' => 'report1',
                         'resource' => 'campaigns',
-                        'restrictionFilter' => [
+                        'restrictionFilter' => json_encode([
                             'dateFrom' => getenv('SKLIK_DATE_FROM'),
                             'dateTo' => getenv('SKLIK_DATE_TO'),
-                        ],
-                        'displayOptions' => ['statGranularity' => 'daily'],
+                        ]),
+                        'displayOptions' => json_encode(['statGranularity' => 'daily']),
                         'displayColumns' => 'name, clicks, impressions',
                     ],
                 ],
