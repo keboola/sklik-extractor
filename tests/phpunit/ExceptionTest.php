@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\SklikExtractor\Exception;
@@ -7,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class ExceptionTest extends TestCase
 {
-    public function testException()
+    public function testException() : void
     {
         $e = Exception::apiError('message', 'method', ['a' => 1], 400, ['b' => 2]);
         $message = json_decode($e->getMessage(), true);

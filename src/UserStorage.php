@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Keboola\SklikExtractor;
@@ -9,6 +10,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class UserStorage
 {
+    /**
+     * @var array
+     */
     protected $tables = [
         'accounts' => [
             'primary' => ['userId'],
@@ -16,7 +20,13 @@ class UserStorage
                 'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum'],
         ],
     ];
+    /**
+     * @var string
+     */
     protected $path;
+    /**
+     * @var array
+     */
     protected $files = [];
 
     public function __construct(string $path)
@@ -44,7 +54,7 @@ class UserStorage
         }
 
         if (!is_array($data)) {
-            $data = (array)$data;
+            $data = (array) $data;
         }
         $dataToSave = [];
         foreach ($this->tables[$table]['columns'] as $c) {
@@ -56,7 +66,7 @@ class UserStorage
         $file->writeRow($dataToSave);
     }
 
-    public function saveReport($name, $data)
+    public function saveReport(string $name, array $data) : void
     {
         if (!count($data)) {
             return;
@@ -71,7 +81,7 @@ class UserStorage
                     ksort($stat);
                     $save = ['id' => $row['id']] + $stat;
 
-                    if(!isset($this->tables["$name-stats"])) {
+                    if (!isset($this->tables["$name-stats"])) {
                         $this->tables["$name-stats"] = ['columns' => array_keys($save), 'primary' => ['id', 'date']];
                     }
                     $this->save("$name-stats", $save);
@@ -79,7 +89,7 @@ class UserStorage
                 unset($row['stats']);
                 ksort($row);
 
-                if(!isset($this->tables[$name])) {
+                if (!isset($this->tables[$name])) {
                     $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
                 }
                 $this->save($name, $row);
@@ -94,7 +104,7 @@ class UserStorage
             file_put_contents("$fileName.manifest", $jsonEncode->encode([
                 'destination' => $table,
                 'incremental' => true,
-                'primary_key' => $primary
+                'primary_key' => $primary,
             ], JsonEncoder::FORMAT));
         }
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\Component\Logger;
@@ -13,24 +15,24 @@ use PHPUnit\Framework\TestCase;
 
 class ExtractorTest extends TestCase
 {
-    public function testExtractorRun()
+    public function testExtractorRun() : void
     {
         $temp = new Temp('sklik-test');
         $temp->initRunFolder();
         $logger = new Logger();
-        $api = new SklikApi(SKLIK_API_TOKEN, $logger, SKLIK_API_URL);
+        $api = new SklikApi(getenv('SKLIK_API_TOKEN'), $logger, getenv('SKLIK_API_URL'));
         $userStorage = new UserStorage($temp->getTmpFolder());
 
         $config = new Config([
             'parameters' => [
-                '#token' => SKLIK_API_TOKEN,
+                '#token' => getenv('SKLIK_API_TOKEN'),
                 'reports' => [
                     [
                         'name' => 'report1',
                         'resource' => 'campaigns',
                         'restrictionFilter' => [
-                            'dateFrom' => SKLIK_DATE_FROM,
-                            'dateTo' => SKLIK_DATE_TO,
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                            'dateTo' => getenv('SKLIK_DATE_TO'),
                         ],
                         'displayOptions' => ['statGranularity' => 'daily'],
                         'displayColumns' => ['id', 'name', 'clicks', 'impressions'],

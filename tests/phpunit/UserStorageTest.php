@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\SklikExtractor\UserStorage;
@@ -7,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserStorageTest extends TestCase
 {
-    public function testSaving()
+    public function testSaving() : void
     {
         $row1 = uniqid();
         $row2 = uniqid();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\Component\Logger;
@@ -11,14 +13,14 @@ class SklikApiTest extends TestCase
     /** @var  SklikApi */
     protected $api;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
-        $this->api = new SklikApi(SKLIK_API_TOKEN, new Logger(), SKLIK_API_URL);
+        $this->api = new SklikApi(getenv('SKLIK_API_TOKEN'), new Logger(), getenv('SKLIK_API_URL'));
     }
 
-    public function testApiLogin()
+    public function testApiLogin() : void
     {
         $result = $this->api->login();
         $this->assertArrayHasKey('status', $result);
@@ -27,13 +29,13 @@ class SklikApiTest extends TestCase
         $this->assertNotEmpty($result['session']);
     }
 
-    public function testApiGetListLimit()
+    public function testApiGetListLimit() : void
     {
         $result = $this->api->getListLimit();
         $this->assertGreaterThan(0, $result);
     }
 
-    public function testApiGetAccounts()
+    public function testApiGetAccounts() : void
     {
         $result = $this->api->getAccounts();
         $this->assertCount(1, $result);
@@ -41,13 +43,13 @@ class SklikApiTest extends TestCase
         $this->assertArrayHasKey('username', $result[0]);
     }
 
-    public function testApiCreateReadReport()
+    public function testApiCreateReadReport() : void
     {
         $result = $this->api->createReport(
             'campaigns',
             [
-                'dateFrom' => SKLIK_DATE_FROM,
-                'dateTo' => SKLIK_DATE_TO,
+                'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                'dateTo' => getenv('SKLIK_DATE_TO'),
             ],
             ['statGranularity' => 'daily']
         );

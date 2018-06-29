@@ -28,7 +28,7 @@ class Extractor
         $this->logger = $logger;
     }
 
-    public function run(Config $config, $limit = null): void
+    public function run(Config $config, ?int $limit = null) : void
     {
         $accounts = $config->getAccounts() ?: $this->api->getAccounts();
         $listLimit = $this->api->getListLimit();

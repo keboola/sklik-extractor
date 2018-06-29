@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Keboola\SklikExtractor;
@@ -15,9 +16,12 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 class SklikApi
 {
-    const API_URL = 'https://api.sklik.cz/jsonApi/drak/';
-    const RETRIES_COUNT = 5;
+    protected const API_URL = 'https://api.sklik.cz/jsonApi/drak/';
+    protected const RETRIES_COUNT = 5;
 
+    /**
+     * @var string
+     */
     private $token;
     /**
      * @var LoggerInterface
@@ -27,9 +31,12 @@ class SklikApi
      * @var Client
      */
     private $client;
+    /**
+     * @var string
+     */
     private $session;
 
-    public function __construct($token, $logger, $apiUrl = null)
+    public function __construct(string $token, LoggerInterface $logger, ?string $apiUrl = null)
     {
         $this->token = $token;
         $this->logger = $logger;
@@ -37,12 +44,12 @@ class SklikApi
         $this->login();
     }
 
-    public function login(): array
+    public function login() : array
     {
         return $this->request('client.loginByToken', [$this->token]);
     }
 
-    public function getListLimit()
+    public function getListLimit() : int
     {
         $limit = 100;
         $limits = $this->requestAuthenticated('api.limits');
@@ -55,7 +62,7 @@ class SklikApi
         return $limit;
     }
 
-    public function getAccounts(): array
+    public function getAccounts() : array
     {
         $accounts = $this->requestAuthenticated('client.get');
         // Add user itself to check for reports
@@ -70,18 +77,18 @@ class SklikApi
             'walletCreditWithVat' => $accounts['user']['walletCreditWithVat'],
             'walletVerified' => $accounts['user']['walletVerified'],
             'accountLimit' => $accounts['user']['accountLimit'],
-            'dayBudgetSum' => $accounts['user']['dayBudgetSum']
+            'dayBudgetSum' => $accounts['user']['dayBudgetSum'],
         ]);
         return $accounts['foreignAccounts'];
     }
 
-    public static function getReportLimit($from, $to, $listLimit, $granularity = null)
+    public static function getReportLimit(string $from, string $to, int $listLimit, ?string $granularity = null) : int
     {
         if (!$granularity) {
             return $listLimit;
         }
 
-        $numberOfDays = (int)((new \DateTime($to))->diff(new \DateTime($from)))->format('%a');
+        $numberOfDays = (int) ((new \DateTime($to))->diff(new \DateTime($from)))->format('%a');
         switch ($granularity) {
             case 'daily':
                 $unitDivider = 1;
@@ -106,10 +113,10 @@ class SklikApi
         if ($limit < 1) {
             throw new Exception('Data limit exceeded. Decrease date interval or granularity.');
         }
-        return (int)$limit;
+        return (int) $limit;
     }
 
-    public function createReport($resource, $restrictionFilter = [], $displayOptions = []): array
+    public function createReport(string $resource, array $restrictionFilter = [], array $displayOptions = []): array
     {
         if (!count($displayOptions)) {
             $displayOptions = new \stdClass();
@@ -125,11 +132,11 @@ class SklikApi
     }
 
     public function readReport(
-        $resource,
-        $reportId,
-        $displayColumns = [],
-        $offset = 0,
-        $limit = 100
+        string $resource,
+        string $reportId,
+        array $displayColumns = [],
+        int $offset = 0,
+        int $limit = 100
     ): array {
         $result = $this->requestAuthenticated("$resource.readReport", [
             $reportId,
@@ -137,19 +144,19 @@ class SklikApi
                 'offset' => $offset,
                 'limit' => $limit,
                 'allowEmptyStatistics' => true,
-                'displayColumns' => $displayColumns
-            ]
+                'displayColumns' => $displayColumns,
+            ],
         ]);
         return $result['report'];
     }
 
-    protected function requestAuthenticated($method, $args = []): array
+    protected function requestAuthenticated(string $method, array $args = []): array
     {
         array_unshift($args, ['session' => $this->session]);
         return $this->request($method, $args);
     }
 
-    protected function request($method, $args = [], $retries = self::RETRIES_COUNT): array
+    protected function request(string $method, array $args = [], int $retries = self::RETRIES_COUNT) : array
     {
         $decoder = new JsonDecode(true);
         try {
@@ -160,7 +167,7 @@ class SklikApi
                 $this->session = $responseJson['session'];
             }
             return $responseJson;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $response = $e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()
                 ? $e->getResponse() : null;
             if ($response) {
@@ -179,7 +186,7 @@ class SklikApi
                     $this->logger->error('Error 401', [
                         'response' => $responseJson,
                         'method' => $method,
-                        '$params' => Exception::filterParamsForLog($args)
+                        '$params' => Exception::filterParamsForLog($args),
                     ]);
                     if ($retries <= 0) {
                         throw Exception::apiError(
@@ -202,7 +209,7 @@ class SklikApi
         }
     }
 
-    protected function initClient($apiUrl = self::API_URL): Client
+    protected function initClient(string $apiUrl = self::API_URL) : Client
     {
         $handlerStack = HandlerStack::create();
 
@@ -211,8 +218,8 @@ class SklikApi
                 $retries,
                 /** @noinspection PhpUnusedParameterInspection */
                 RequestInterface $request,
-                ResponseInterface $response = null,
-                $error = null
+                ?ResponseInterface $response = null,
+                ?string $error = null
             ) {
                 if ($retries >= self::RETRIES_COUNT) {
                     return false;
@@ -225,7 +232,7 @@ class SklikApi
                 }
             },
             function ($retries) {
-                return (int)pow(2, $retries - 1) * 1000;
+                return (int) pow(2, $retries - 1) * 1000;
             }
         ));
 
@@ -235,7 +242,7 @@ class SklikApi
             'timeout' => 600,
             'headers' => [
                 'accept' => 'application/json',
-                'content-type' => 'application/json; charset=utf-8'
+                'content-type' => 'application/json; charset=utf-8',
             ],
         ]);
     }
