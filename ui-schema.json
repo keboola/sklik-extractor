@@ -13,11 +13,7 @@
       "default": ""
     },
     "accounts": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "title": "Accounts"
-      },
+      "type": "string",
       "title": "Comma separated list of accounts ids to download. You will get all accounts if empty.",
       "default": false
     },
@@ -26,7 +22,7 @@
       "title": "Reports",
       "items": {
         "type": "object",
-        "title": "AdWords Query",
+        "title": "Sklik Report",
         "properties": {
           "name": {
             "type": "string",

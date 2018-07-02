@@ -57,7 +57,8 @@ class Extractor
                 $result = $this->api->createReport(
                     $report['resource'],
                     $report['restrictionFilter'],
-                    $report['displayOptions']
+                    $report['displayOptions'],
+                    $account['userId']
                 );
 
                 $offset = 0;

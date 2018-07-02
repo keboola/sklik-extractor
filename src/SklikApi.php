@@ -116,8 +116,12 @@ class SklikApi
         return (int) $limit;
     }
 
-    public function createReport(string $resource, ?array $restrictionFilter = [], ?array $displayOptions = []): array
-    {
+    public function createReport(
+        string $resource,
+        ?array $restrictionFilter = [],
+        ?array $displayOptions = [],
+        ?int $userId = null
+    ) : array {
         if (!count($displayOptions)) {
             $displayOptions = new \stdClass();
         }
@@ -128,7 +132,11 @@ class SklikApi
             throw new Exception('Setting of dateTo on restrictionFilter is required');
         }
 
-        return $this->requestAuthenticated("$resource.createReport", [$restrictionFilter, $displayOptions]);
+        return $this->requestAuthenticated(
+            "$resource.createReport",
+            [$restrictionFilter, $displayOptions],
+            $userId
+        );
     }
 
     public function readReport(
@@ -150,9 +158,13 @@ class SklikApi
         return $result['report'];
     }
 
-    protected function requestAuthenticated(string $method, ?array $args = []): array
+    protected function requestAuthenticated(string $method, ?array $args = [], ?int $userId = null): array
     {
-        array_unshift($args, ['session' => $this->session]);
+        $user = ['session' => $this->session];
+        if ($userId) {
+            $user['userId'] = $userId;
+        }
+        array_unshift($args, $user);
         return $this->request($method, $args);
     }
 
