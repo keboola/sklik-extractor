@@ -79,7 +79,7 @@ class Extractor
                         $limit
                     );
 
-                    $this->userStorage->saveReport($report['name'], $data);
+                    $this->userStorage->saveReport($report['name'], $data, $account['userId']);
                     $offset += $limit;
                 } while (count($data) > 0);
             }

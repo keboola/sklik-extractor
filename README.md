@@ -1,7 +1,7 @@
 # sklik-extractor
 KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
-The Extractor gets list of accessible clients, list of their campaigns and campaign stats for previous day and saves the data to Storage API. Date of downloaded stats can be changed in configuration.
+The extractor gets list of all accessible accounts if you don't restrict them explicitly. Then it downloads configured reports for all these specified accounts.
 
 [![Build Status](https://travis-ci.org/keboola/sklik-extractor.svg)](https://travis-ci.org/keboola/sklik-extractor) [![Code Climate](https://codeclimate.com/github/keboola/sklik-extractor/badges/gpa.svg)](https://codeclimate.com/github/keboola/sklik-extractor) [![Test Coverage](https://codeclimate.com/github/keboola/sklik-extractor/badges/coverage.svg)](https://codeclimate.com/github/keboola/sklik-extractor/coverage)
 
@@ -58,7 +58,7 @@ Table **accounts** is created by default and it contains data of all (or configu
 
 Each report creates two tables. One with metadata and one with actual stats by date. 
 
-Metadata table named after the report has a primary key `id` (Column `id` is added to `displayColumns` automatically).
+Metadata table named after the report has a primary key `id` (Column `id` is added to `displayColumns` automatically). Dots (`.`) in nested values will be replaced with underscores (`_`). The table is complemented with column `accountId` with id of the account.
 
 Stats table is also named after the report with suffix `-stats` and has a primary key compounded from `id` and `date`. 
 

@@ -66,7 +66,7 @@ class UserStorage
         $file->writeRow($dataToSave);
     }
 
-    public function saveReport(string $name, array $data) : void
+    public function saveReport(string $name, array $data, int $accountId) : void
     {
         if (!count($data)) {
             return;
@@ -100,9 +100,10 @@ class UserStorage
                     unset($row[$colName]);
                 }
             }
+
             unset($row['id']);
             ksort($row);
-            $row = ['id' => $rowId] + $row;
+            $row = ['id' => $rowId, 'accountId' => $accountId] + $row;
 
             if (!isset($this->tables[$name])) {
                 $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
