@@ -73,13 +73,15 @@ class UserStorage
         }
 
         foreach ($data as $row) {
+            $rowId = $row['id'];
             if (isset($row['stats'])) {
+                // save stats to a separate table
                 foreach ($row['stats'] as $stat) {
                     if (!isset($stat['date'])) {
                         $stat['date'] = null;
                     }
                     ksort($stat);
-                    $save = ['id' => $row['id']] + $stat;
+                    $save = ['id' => $rowId] + $stat;
 
                     if (!isset($this->tables["$name-stats"])) {
                         $this->tables["$name-stats"] = ['columns' => array_keys($save), 'primary' => ['id', 'date']];
@@ -87,8 +89,21 @@ class UserStorage
                     $this->save("$name-stats", $save);
                 }
                 unset($row['stats']);
-                ksort($row);
             }
+
+            // flatten nested arrays
+            foreach ($row as $colName => $colValue) {
+                if (is_array($colValue)) {
+                    foreach ($colValue as $colNestedName => $colNestedValue) {
+                        $row["{$colName}_{$colNestedName}"] = $colNestedValue;
+                    }
+                    unset($row[$colName]);
+                }
+            }
+            unset($row['id']);
+            ksort($row);
+            $row = ['id' => $rowId] + $row;
+
             if (!isset($this->tables[$name])) {
                 $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
             }

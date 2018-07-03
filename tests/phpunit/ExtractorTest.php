@@ -49,7 +49,7 @@ class ExtractorTest extends TestCase
                             'dateTo' => getenv('SKLIK_DATE_TO'),
                         ]),
                         'displayOptions' => json_encode(['statGranularity' => 'daily']),
-                        'displayColumns' => 'name, clicks, impressions',
+                        'displayColumns' => 'name, clicks, impressions, budget.name',
                     ],
                 ],
             ],
@@ -60,7 +60,7 @@ class ExtractorTest extends TestCase
         $this->assertFileExists($this->temp->getTmpFolder() . '/accounts.csv');
         $this->assertFileExists($this->temp->getTmpFolder() . '/report1.csv');
         $metaFile = file($this->temp->getTmpFolder() . '/report1.csv');
-        $this->assertEquals('"id","name"', trim($metaFile[0]));
+        $this->assertEquals('"id","budget_name","name"', trim($metaFile[0]));
         $this->assertFileExists($this->temp->getTmpFolder() . '/report1-stats.csv');
         $statsFile = file($this->temp->getTmpFolder() . '/report1-stats.csv');
         $this->assertEquals('"id","clicks","date","impressions"', trim($statsFile[0]));
