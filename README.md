@@ -21,7 +21,8 @@ The extractor gets list of all accessible accounts if you don't restrict them ex
             - `intends.negative`
             - etc.
         - **restrictionFilter** - Json object of the restriction filter configuration for `createReport` API call.
-            - `dateFrom` and `dateTo` are required values. If omitted, yesterday's and today's dates will be used
+            - `dateFrom` and `dateTo` are required values. If omitted, yesterday's and today's dates will be used.
+            - the Extractor allows you to use relative days in [these supported formats](http://php.net/manual/en/datetime.formats.relative.php). 
         - **displayOptions** - Json object of the display options configuration for `createReport` API call.
         - **displayColumns** - Comma separated list of columns to get for `readReport` API call.
             - Column `id` as identifier of the resource is downloaded every time.

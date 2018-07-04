@@ -44,12 +44,11 @@ class Extractor
             $this->userStorage->save('accounts', $account);
 
             foreach ($config->getReports() as $report) {
-                if (!isset($report['restrictionFilter']['dateFrom'])) {
-                    $report['restrictionFilter']['dateFrom'] = date('Y-m-d', strtotime('-1 day'));
-                }
-                if (!isset($report['restrictionFilter']['dateTo'])) {
-                    $report['restrictionFilter']['dateTo'] = date('Y-m-d');
-                }
+                $dateFrom = $report['restrictionFilter']['dateFrom'] ?? '-1 day';
+                $report['restrictionFilter']['dateFrom'] = date('Y-m-d', strtotime($dateFrom));
+                $dateTo = $report['restrictionFilter']['dateTo'] ?? 'today';
+                $report['restrictionFilter']['dateTo'] = date('Y-m-d', strtotime($dateTo));
+
                 if (!in_array('id', $report['displayColumns'])) {
                     $report['displayColumns'][] = 'id';
                 }
