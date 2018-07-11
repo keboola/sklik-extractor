@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "title": "Sklik Extractor Configuration",
+  "required": [
+    "#token",
+    "accounts",
+    "reports"
+  ],
+  "properties": {
+    "#token": {
+      "type": "string",
+      "title": "Sklik API token. You will find it under tha Account settings in Sklik.",
+      "default": ""
+    },
+    "accounts": {
+      "type": "string",
+      "title": "Comma separated list of accounts ids to download. You will get all accounts if empty.",
+      "default": false
+    },
+    "reports": {
+      "type": "array",
+      "title": "Reports",
+      "items": {
+        "type": "object",
+        "title": "Sklik Report",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Report name",
+            "default": "",
+            "description": "Data will be saved to this table in the output bucket (accounts is a reserved name and cannot be used)."
+          },
+          "resource": {
+            "type": "string",
+            "title": "Resource name",
+            "default": "",
+            "description": "Name of the resource on which you want the report to be created. Supported resources are all from https://api.sklik.cz/drak/ which support `createReport` and `readReport` methods."
+          },
+          "restrictionFilter": {
+            "type": "string",
+            "title": "Restriction filter",
+            "default": "",
+            "description": "Json object of the restriction filter configuration for `createReport` API call. `dateFrom` and `dateTo` are required values. If omitted, yesterday's and today's dates will be used."
+          },
+          "displayOptions": {
+            "type": "string",
+            "title": "Display options",
+            "default": "",
+            "description": "Json object of the display options configuration for `createReport` API call."
+          },
+          "displayColumns": {
+            "type": "string",
+            "title": "Display columns",
+            "default": "",
+            "description": "Comma separated list of columns to get for `readReport` API call. Column `id` as identifier of the resource is downloaded every time."
+          }
+        }
+      }
+    }
+  }
+}

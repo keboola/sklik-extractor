@@ -6,25 +6,28 @@ services:
   - docker
 
 before_script:
+  - export APP_IMAGE=keboola-component
   - docker -v
-  - docker-compose -v
-  - docker-compose build tests-with-report
+  - docker build -t $APP_IMAGE .
+  - docker run -e SKLIK_API_URL -e SKLIK_API_TOKEN -e SKLIK_DATE_FROM -e SKLIK_DATE_TO $APP_IMAGE composer ci
+
+  # push test image to ECR
+  - docker pull quay.io/keboola/developer-portal-cli-v2:latest
+  - export REPOSITORY=`docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-repository $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP`
+  - docker tag $APP_IMAGE:latest $REPOSITORY:test
+  - eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
+  - docker push $REPOSITORY:test
+  - docker pull quay.io/keboola/syrup-cli:latest
+
 
 script:
-  - >
-    docker-compose run
-    --rm
-    -e EX_SK_API_URL=$EX_SK_API_URL
-    -e EX_SK_USERNAME=$EX_SK_USERNAME
-    -e EX_SK_PASSWORD=$EX_SK_PASSWORD
-    -e EX_SK_USER_ID=$EX_SK_USER_ID
-    -e CODECLIMATE_REPO_TOKEN=$CODECLIMATE_REPO_TOKEN
-    tests-with-report
-after_success:
-  - docker images
+  # run test job inside KBC
+  # - docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job $KBC_DEVELOPERPORTAL_APP $KBC_APP_TEST_CONFIG_ID test
+  - skip
 
 deploy:
   provider: script
+  skip_cleanup: true
   script: ./deploy.sh
   on:
     tags: true

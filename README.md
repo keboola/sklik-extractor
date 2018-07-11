@@ -1,28 +1,41 @@
 # sklik-extractor
 KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
-The Extractor gets list of accessible clients, list of their campaigns and campaign stats for previous day and saves the data to Storage API. Date of downloaded stats can be changed in configuration.
-
-## Status
+The extractor gets list of all accessible accounts if you don't restrict them explicitly. Then it downloads configured reports for all these specified accounts.
 
 [![Build Status](https://travis-ci.org/keboola/sklik-extractor.svg)](https://travis-ci.org/keboola/sklik-extractor) [![Code Climate](https://codeclimate.com/github/keboola/sklik-extractor/badges/gpa.svg)](https://codeclimate.com/github/keboola/sklik-extractor) [![Test Coverage](https://codeclimate.com/github/keboola/sklik-extractor/badges/coverage.svg)](https://codeclimate.com/github/keboola/sklik-extractor/coverage)
 
 ## Configuration
 
 - **parameters**:
-    - **username** - Username to Sklik API
-    - **password** - Password to Sklik API
-    - **bucket** - Name of bucket where the data will be saved
-    - **since** *(optional)* - start date of downloaded stats (default is "-1 day")
-    - **until** *(optional)* - end date of downloaded stats (default is "-1 day")
-    - **impressionShare** *(optional)* - 0 or 1 flag if impression share should be included in stats (default 0)
+    - **#token** - Sklik API token (You will find it under tha Account settings in Sklik)
+    - **accounts** *(optional)* - Comma separated list of accounts you want to download the data for. It downloads data for all accounts by default.
+    - **reports** - Array of reports to download. Each item must contain:
+        - **name** - Your name for the report, it will be used for name of the table in Storage. *Note that `accounts` is a reserved name, thus it cannot be used as report name.*
+        - **resource** - Name of the resource on which you want the report to be created. Supported resources are all from https://api.sklik.cz/drak/ which support `createReport` and `readReport` methods (see https://blog.seznam.cz/2017/12/spravne-pouzivat-limit-offset-metodach-statisticke-reporty-api-drak/ for more information):
+            - `ads`
+            - `banners`
+            - `campaigns`
+            - `groups`
+            - `intends`
+            - `intends.negative`
+            - etc.
+        - **restrictionFilter** - Json object of the restriction filter configuration for `createReport` API call.
+            - `dateFrom` and `dateTo` are required values. If omitted, yesterday's and today's dates will be used.
+            - the Extractor allows you to use relative days in [these supported formats](http://php.net/manual/en/datetime.formats.relative.php). 
+        - **displayOptions** - Json object of the display options configuration for `createReport` API call.
+        - **displayColumns** - Comma separated list of columns to get for `readReport` API call.
+            - Column `id` as identifier of the resource is downloaded every time.
+    
+### API Limits
+    
+Current listing limit supported by Sklik API is 100. A problem appears when `statGranularity` is added to `displayOptions`. If you define granularity `daily`, the limit is divided by number of days in the specified interval. Ie. interval between `dateFrom` and `dateTo` must not be bigger then 100 days. 
 
 ## Output
 
-Data are saved to three tables **incrementally**:
+### Table accounts
 
-
-**accounts** - contains data of all Sklik accounts accessible from the main account, columns are:
+Table **accounts** is created by default and it contains data of all (or configured) Sklik accounts accessible from the main account, its columns are:
 
 - **userId**: account user id (*primary key*)
 - **username**: account username
@@ -37,82 +50,66 @@ Data are saved to three tables **incrementally**:
 - **accountLimit**: account monthly limit (in halers) or nil; account limit is valid only for agency client accounts
 - **dayBudgetSum**: sum of day budgets of all campaigns (in cents)
 
-
-**campaigns** - contains list of campaigns of all Sklik accounts accessible from the main account, columns are:
-
-- **id**: campaign id (*primary key*)
-- **name**: campaign name
-- **deleted**: whether campaign is deleted
-- **status**: campaign status; **active** or **suspend**
-- **dayBudget**: campaign day budget (in halers)
-- **exhaustedDayBudget**: how much of the day budget is already exhausted (in halers)
-- **adSelection**: ad selection type; **weighted** or **random**
-- **createDate**: campaign create date
-- **totalBudget**: campaign total budget (if set; in halers)
-- **exhaustedTotalBudget**: if campaign total budget is set, how much of it is exhausted (in halers)
-- **totalClicks**: campaign total clicks
-- **exhaustedTotalClicks**: if campaign total clicks is set, how much of them are exhausted
-- **accountId**: account user id (foreign key to table **accounts**)
-
-
-**stats** - contains stats of campaigns of all Sklik accounts accessible from the main account, columns are:
-
-- **accountId**: account user id (foreign key to table **accounts**, *part of primary key*)
-- **campaignId**: campaign id (foreign key to table **campaigns**, *part of primary key*)
-- **date**: date of stats (*part of primary key*)
-- **target**: campaign targetting; **context** or **fulltext** (each campaign has for each date both rows in the table, once with context and once with fulltext) (*part of primary key*)
-- **impressions**: impression count
-- **clicks**: click count
-- **ctr**: click ratio - how much clicks per one impression (%)
-- **cpc**: cost per click - average cost per one click, in halers
-- **price**: total price paid for displaying ads (for clicks or impressions), in halers
-- **avgPosition**: average position of ad in display format
-- **conversions**: number of conversions (how many times user made an order)
-- **conversionRatio**: how many conversions per one click (%)
-- **conversionAvgPrice**: price of one conversion, in halers
-- **conversionValue**: value of conversions
-- **conversionAvgValue**: average value of conversion
-- **conversionValueRatio**: value / price ratio (%)
-- **transactions**: number of transactions
-- **transactionAvgPrice**: price of one transaction, in halers
-- **transactionAvgValue**: average value of one transaction
-- **transactionAvgCount**: average number of transactions per conversion
-- **impressionShare**: impression share and missed impressions (included optionally)
-
-
 > **NOTICE!**
 
-> - Main account used for access to API is queried for campaigns and stats too and is also saved to table accounts but has columns access, relationName,
-relationStatus and relationType empty.
+> - Main account used for access to API is queried for reports by default too and is also saved to table accounts. But it has columns access, relationName, relationStatus and relationType empty.
 > - Prices are in halers so you need to divide by 100 to get prices in CZK.
-> - Each campaign has two rows in stats table for each day, one with context target and one with fulltext. Even if one of them is without stats.
+
+### Report tables
+
+Each report creates two tables. One with metadata and one with actual stats by date. 
+
+Metadata table named after the report has a primary key `id` (Column `id` is added to `displayColumns` automatically). Dots (`.`) in nested values will be replaced with underscores (`_`). The table is complemented with column `accountId` with id of the account.
+
+Stats table is also named after the report with suffix `-stats` and has a primary key compounded from `id` and `date`. 
+
+E.g. if you configure to download columns `name, clicks, impressions` from resource `campaigns` and call the report `report1`, you will get table `report1` with columns `id, name` and table `report1-stats` with columns `id, date, impressions, clicks`.
 
 
-## Installation
+## Example
 
-If you want to run this app standalone:
+Let'say we want to download daily stats for campaigns. The report will look like this:
+- name: `report1`
+- resource: `campaigns`
+- restrictionFilter: `{ dateFrom: '2018-07-01', dateTo: '2018-07-03' }`
+- displayOptions: `{ statGranularity: 'daily' }`
+- displayColumns: `['id', 'name', 'clicks', 'impressions']`
 
-1. Clone the repository: `git@github.com:keboola/sklik-extractor.git ex-sklik`
-2. Go to the directory: `cd ex-sklik`
-3. Install composer: `curl -s http://getcomposer.org/installer | php`
-4. Install packages: `php composer.phar install`
-5. Create folder `data`
-6. Create file `data/config.yml` with configuration, e.g.:
-
-    ```
-    parameters:
-      username:
-      password:
-      bucket: in.c-sklik
-    ```
-7. Run: `php src/run.php --data=./data`
-8. Data tables will be saved to directory `data/out/tables`
-
-
-## Contributing
-
-Please contribute using TDD. Tests need ordinary Sklik account and can be run by command:
+Extractor will create a table `report1` which will look like:
 
 ```
-env EX_SK_USERNAME= EX_SK_PASSWORD= EX_SK_USER_ID= ./tests.sh
+"id","name"
+"15001","Keboola.com - content"
+"15002","Keboola.com - search"
 ```
+
+And table `report1-stats`:
+
+```
+"id","clicks","date","impressions"
+"15001","0","","0"
+"15002","5","20180701","26"
+"15002","0","20180702","10"
+"15002","0","20180703","2"
+```
+
+## Development
+ 
+Clone this repository and init the workspace with following command:
+
+```
+git clone https://github.com/keboola/sklik-extractor
+cd sklik-extractor
+docker-compose build
+docker-compose run --rm dev composer install --no-scripts
+```
+
+Run the test suite using this command:
+
+```
+docker-compose run --rm dev composer tests
+```
+ 
+# Integration
+
+For information about deployment and integration with KBC, please refer to the [deployment section of developers documentation](https://developers.keboola.com/extend/component/deployment/) 

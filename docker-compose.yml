@@ -1,25 +1,12 @@
-version: "2"
-
+version: '2'
 services:
-
-  app:
+  dev:
     build: .
-    tty: true
-    command: bash
     volumes:
       - ./:/code
-    working_dir: /code
-
-  tests:
-    build: .
-    image: keboola/sklik-extractor
-    tty: true
-    stdin_open: true
-    command: ./tests.sh
-
-  tests-with-report:
-    extends:
-      service: tests
-    volumes:
-      - ./.git:/code/.git
-    command: sh -c './tests.sh && ./vendor/bin/test-reporter'
+      - ./data:/data
+    environment:
+      - SKLIK_API_URL
+      - SKLIK_API_TOKEN
+      - SKLIK_DATE_FROM
+      - SKLIK_DATE_TO
