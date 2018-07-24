@@ -48,9 +48,10 @@ class Extractor
                 $report['restrictionFilter']['dateFrom'] = date('Y-m-d', strtotime($dateFrom));
                 $dateTo = $report['restrictionFilter']['dateTo'] ?? 'today';
                 $report['restrictionFilter']['dateTo'] = date('Y-m-d', strtotime($dateTo));
+                $primary = ($report['resource'] === 'queries') ? 'query' : 'id';
 
-                if (!in_array('id', $report['displayColumns']) && $report['resource'] !== 'queries') {
-                    $report['displayColumns'][] = 'id';
+                if (!in_array('id', $report['displayColumns'])) {
+                    $report['displayColumns'][] = $primary;
                 }
 
                 $result = $this->api->createReport(
@@ -78,7 +79,7 @@ class Extractor
                         $limit
                     );
 
-                    $this->userStorage->saveReport($report['name'], $data, $account['userId']);
+                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
                     $offset += $limit;
                 } while (count($data) > 0);
             }

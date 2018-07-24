@@ -66,14 +66,14 @@ class UserStorage
         $file->writeRow($dataToSave);
     }
 
-    public function saveReport(string $name, array $data, int $accountId) : void
+    public function saveReport(string $name, array $data, int $accountId, string $primary = 'id') : void
     {
         if (!count($data)) {
             return;
         }
 
         foreach ($data as $row) {
-            $rowId = $row['id'];
+            $rowId = $row[$primary];
             if (isset($row['stats'])) {
                 // save stats to a separate table
                 foreach ($row['stats'] as $stat) {
@@ -81,10 +81,13 @@ class UserStorage
                         $stat['date'] = null;
                     }
                     ksort($stat);
-                    $save = ['id' => $rowId] + $stat;
+                    $save = [$primary => $rowId] + $stat;
 
                     if (!isset($this->tables["$name-stats"])) {
-                        $this->tables["$name-stats"] = ['columns' => array_keys($save), 'primary' => ['id', 'date']];
+                        $this->tables["$name-stats"] = [
+                            'columns' => array_keys($save),
+                            'primary' => [$primary, 'date'],
+                        ];
                     }
                     $this->save("$name-stats", $save);
                 }
@@ -101,12 +104,12 @@ class UserStorage
                 }
             }
 
-            unset($row['id']);
+            unset($row[$primary]);
             ksort($row);
-            $row = ['id' => $rowId, 'accountId' => $accountId] + $row;
+            $row = [$primary => $rowId, 'accountId' => $accountId] + $row;
 
             if (!isset($this->tables[$name])) {
-                $this->tables[$name] = ['columns' => array_keys($row), 'primary' => ['id']];
+                $this->tables[$name] = ['columns' => array_keys($row), 'primary' => [$primary]];
             }
             $this->save($name, $row);
         }
