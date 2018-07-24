@@ -49,7 +49,7 @@ class Extractor
                 $dateTo = $report['restrictionFilter']['dateTo'] ?? 'today';
                 $report['restrictionFilter']['dateTo'] = date('Y-m-d', strtotime($dateTo));
 
-                if (!in_array('id', $report['displayColumns'])) {
+                if (!in_array('id', $report['displayColumns']) && $report['resource'] !== 'queries') {
                     $report['displayColumns'][] = 'id';
                 }
 

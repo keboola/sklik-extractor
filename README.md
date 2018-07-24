@@ -25,7 +25,7 @@ The extractor gets list of all accessible accounts if you don't restrict them ex
             - the Extractor allows you to use relative days in [these supported formats](http://php.net/manual/en/datetime.formats.relative.php). 
         - **displayOptions** - Json object of the display options configuration for `createReport` API call.
         - **displayColumns** - Comma separated list of columns to get for `readReport` API call.
-            - Column `id` as identifier of the resource is downloaded every time.
+            - Column `id` as identifier of the resource is downloaded every time (except for resource `queries` which does not support `id`).
     
 ### API Limits
     
