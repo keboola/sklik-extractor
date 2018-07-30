@@ -71,9 +71,9 @@ E.g. if you configure to download columns `name, clicks, impressions` from resou
 Let'say we want to download daily stats for campaigns. The report will look like this:
 - name: `report1`
 - resource: `campaigns`
-- restrictionFilter: `{ dateFrom: '2018-07-01', dateTo: '2018-07-03' }`
-- displayOptions: `{ statGranularity: 'daily' }`
-- displayColumns: `['id', 'name', 'clicks', 'impressions']`
+- restrictionFilter: `{ "dateFrom": "2018-07-01", "dateTo": "2018-07-03" }`
+- displayOptions: `{ "statGranularity": "daily" }`
+- displayColumns: `id, name, clicks, impressions`
 
 Extractor will create a table `report1` which will look like:
 
