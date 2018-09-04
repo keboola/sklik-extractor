@@ -38,7 +38,7 @@ class SklikApiTest extends TestCase
     public function testApiGetAccounts() : void
     {
         $result = $this->api->getAccounts();
-        $this->assertCount(1, $result);
+        $this->assertGreaterThanOrEqual(1, count($result));
         $this->assertArrayHasKey('userId', $result[0]);
         $this->assertArrayHasKey('username', $result[0]);
     }
