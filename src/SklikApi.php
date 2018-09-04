@@ -132,11 +132,21 @@ class SklikApi
             throw new Exception('Setting of dateTo on restrictionFilter is required');
         }
 
-        return $this->requestAuthenticated(
+        $result = $this->requestAuthenticated(
             "$resource.createReport",
             [$restrictionFilter, $displayOptions],
             $userId
         );
+        if (empty($result['reportId'])) {
+            throw Exception::apiError(
+                'Report Id is missing from createReport API call',
+                "$resource.createReport",
+                [$restrictionFilter, $displayOptions],
+                200,
+                $result
+            );
+        }
+        return $result;
     }
 
     public function readReport(
