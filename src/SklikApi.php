@@ -156,15 +156,22 @@ class SklikApi
         ?int $offset = 0,
         ?int $limit = 100
     ): array {
-        $result = $this->requestAuthenticated("$resource.readReport", [
-            $reportId,
-            [
-                'offset' => $offset,
-                'limit' => $limit,
-                'allowEmptyStatistics' => true,
-                'displayColumns' => $displayColumns,
-            ],
-        ]);
+        $args = [
+            'offset' => $offset,
+            'limit' => $limit,
+            'allowEmptyStatistics' => true,
+            'displayColumns' => $displayColumns,
+        ];
+        $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
+        if (!isset($result['report'])) {
+            throw Exception::apiError(
+                'Result is missing "report" field.',
+                "$resource.readReport",
+                $args,
+                200,
+                $result
+            );
+        }
         return $result['report'];
     }
 
