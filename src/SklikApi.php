@@ -187,7 +187,6 @@ class SklikApi
 
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT) : array
     {
-        echo json_encode(['method' => $method, 'args' => $args]).PHP_EOL;
         $decoder = new JsonDecode(true);
         try {
             $response = $this->client->post($method, ['json' => $args]);
