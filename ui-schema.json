@@ -12,6 +12,16 @@
       "title": "Sklik API token. You will find it under tha Account settings in Sklik.",
       "default": ""
     },
+    "username": {
+      "type": "string",
+      "title": "Sklik username. Along with password serves as an alternative authorization to API token.",
+      "default": ""
+    },
+    "#password": {
+      "type": "string",
+      "title": "Sklik password. Along with username serves as an alternative authorization to API token.",
+      "default": ""
+    },
     "accounts": {
       "type": "string",
       "title": "Comma separated list of accounts ids to download. You will get all accounts if empty.",

@@ -17,12 +17,25 @@ class SklikApiTest extends TestCase
     {
         parent::setUp();
 
-        $this->api = new SklikApi(getenv('SKLIK_API_TOKEN'), new Logger(), getenv('SKLIK_API_URL'));
+        $this->api = new SklikApi(new Logger(), getenv('SKLIK_API_URL'));
+        $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
     }
 
     public function testApiLogin() : void
     {
         $result = $this->api->login();
+        $this->assertArrayHasKey('status', $result);
+        $this->assertEquals(200, $result['status']);
+        $this->assertArrayHasKey('session', $result);
+        $this->assertNotEmpty($result['session']);
+    }
+
+    public function testApiLoginByPassword() : void
+    {
+        $result = $this->api->loginByPassword(
+            getenv('SKLIK_API_USERNAME'),
+            getenv('SKLIK_API_PASSWORD')
+        );
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals(200, $result['status']);
         $this->assertArrayHasKey('session', $result);
