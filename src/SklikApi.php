@@ -199,7 +199,7 @@ class SklikApi
 
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT) : array
     {
-        $decoder = new JsonDecode(true);
+        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         try {
             $response = $this->client->post($method, ['json' => $args]);
             $responseJson = $decoder->decode($response->getBody(), JsonEncoder::FORMAT);
