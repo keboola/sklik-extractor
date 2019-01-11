@@ -16,7 +16,9 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
-            ->scalarNode('#token')->isRequired()->cannotBeEmpty()->end()
+            ->scalarNode('#token')->end()
+            ->scalarNode('username')->end()
+            ->scalarNode('#password')->end()
             ->scalarNode('accounts')->end()
             ->arrayNode('reports')
                 ->arrayPrototype()
