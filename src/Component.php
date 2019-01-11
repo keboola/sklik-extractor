@@ -20,7 +20,13 @@ class Component extends BaseComponent
             mkdir($this->getDataDir() . '/out/tables');
         }
 
-        $api = new SklikApi($config->getToken(), $this->getLogger());
+        $api = new SklikApi($this->getLogger());
+        $token = $config->getToken();
+        if ($token) {
+            $api->loginByToken($config->getToken());
+        } else {
+            $api->loginByPassword($config->getCredentials()[0], $config->getCredentials()[1]);
+        }
         $userStorage = new UserStorage($this->getDataDir() . '/out/tables');
         $extractor = new Extractor($api, $userStorage, $this->getLogger());
         $extractor->run($config);

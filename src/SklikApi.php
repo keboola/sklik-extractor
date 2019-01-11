@@ -19,10 +19,10 @@ class SklikApi
     protected const API_URL = 'https://api.sklik.cz/jsonApi/drak/';
     protected const RETRIES_COUNT = 5;
 
-    /**
-     * @var string
-     */
-    private $token;
+    /** @var string */
+    private $loginMethod;
+    /** @var array */
+    private $loginParams;
     /**
      * @var LoggerInterface
      */
@@ -36,17 +36,29 @@ class SklikApi
      */
     private $session;
 
-    public function __construct(string $token, LoggerInterface $logger, ?string $apiUrl = null)
+    public function __construct(LoggerInterface $logger, ?string $apiUrl = null)
     {
-        $this->token = $token;
         $this->logger = $logger;
         $this->client = $this->initClient($apiUrl);
-        $this->login();
+    }
+
+    public function loginByToken(string $token) : array
+    {
+        $this->loginMethod = 'client.loginByToken';
+        $this->loginParams = [$token];
+        return $this->login();
+    }
+
+    public function loginByPassword(string $username, string $password) : array
+    {
+        $this->loginMethod = 'client.login';
+        $this->loginParams = [$username, $password];
+        return $this->login();
     }
 
     public function login() : array
     {
-        return $this->request('client.loginByToken', [$this->token]);
+        return $this->request($this->loginMethod, $this->loginParams);
     }
 
     public function getListLimit() : int
@@ -187,7 +199,7 @@ class SklikApi
 
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT) : array
     {
-        $decoder = new JsonDecode(true);
+        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         try {
             $response = $this->client->post($method, ['json' => $args]);
             $responseJson = $decoder->decode($response->getBody(), JsonEncoder::FORMAT);
@@ -209,7 +221,7 @@ class SklikApi
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
                 if ($response->getStatusCode() === 401) {
-                    if ($method == 'client.loginByToken') {
+                    if ($method == 'client.loginByToken' || $method == 'client.login') {
                         throw Exception::apiError($message, $method, [], 401, $responseJson);
                     }
                     $this->logger->error('Error 401', [

@@ -3,12 +3,15 @@ KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
 The extractor gets list of all accessible accounts if you don't restrict them explicitly. Then it downloads configured reports for all these specified accounts.
 
+You can use API token or Sklik credentials for authorization.
+
 [![Build Status](https://travis-ci.org/keboola/sklik-extractor.svg)](https://travis-ci.org/keboola/sklik-extractor) [![Code Climate](https://codeclimate.com/github/keboola/sklik-extractor/badges/gpa.svg)](https://codeclimate.com/github/keboola/sklik-extractor) [![Test Coverage](https://codeclimate.com/github/keboola/sklik-extractor/badges/coverage.svg)](https://codeclimate.com/github/keboola/sklik-extractor/coverage)
 
 ## Configuration
 
 - **parameters**:
-    - **#token** - Sklik API token (You will find it under tha Account settings in Sklik)
+    - **#token** - Sklik API token (You will find it under the Account settings in Sklik)
+    - **username** and **#password** - Sklik credentials is an alternative to authorization using API token
     - **accounts** *(optional)* - Comma separated list of accounts you want to download the data for. It downloads data for all accounts by default.
     - **reports** - Array of reports to download. Each item must contain:
         - **name** - Your name for the report, it will be used for name of the table in Storage. *Note that `accounts` is a reserved name, thus it cannot be used as report name.*

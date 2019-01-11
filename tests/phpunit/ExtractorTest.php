@@ -29,7 +29,8 @@ class ExtractorTest extends TestCase
         $this->temp = new Temp('sklik-test');
         $this->temp->initRunFolder();
         $logger = new Logger();
-        $api = new SklikApi(getenv('SKLIK_API_TOKEN'), $logger, getenv('SKLIK_API_URL'));
+        $api = new SklikApi($logger, getenv('SKLIK_API_URL'));
+        $api->loginByToken(getenv('SKLIK_API_TOKEN'));
         $userStorage = new UserStorage($this->temp->getTmpFolder());
 
         $this->extractor = new Extractor($api, $userStorage, $logger);

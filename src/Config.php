@@ -16,6 +16,14 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#token']);
     }
 
+    public function getCredentials() : array
+    {
+        return [
+            $this->getValue(['parameters', 'username']),
+            $this->getValue(['parameters', '#password']),
+        ];
+    }
+
     public function getAccounts() : array
     {
         $accounts = $this->getValue(['parameters', 'accounts'], '');
@@ -27,7 +35,7 @@ class Config extends BaseConfig
 
     public function getReports() : array
     {
-        $decoder = new JsonDecode(true);
+        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         $reports = $this->getValue(['parameters', 'reports'], '');
         foreach ($reports as &$report) {
             try {
