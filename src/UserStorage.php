@@ -34,12 +34,12 @@ class UserStorage
         $this->path = $path;
     }
 
-    public function addUserTable(string $table, array $columns, array $primary = []) : void
+    public function addUserTable(string $table, array $columns, array $primary = []): void
     {
         $this->tables[$table] = ['columns' => $columns, 'primary' => $primary];
     }
 
-    public function save(string $table, array $data) : void
+    public function save(string $table, array $data): void
     {
         if (!isset($this->files[$table])) {
             $file = new CsvWriter("$this->path/$table.csv");
@@ -66,7 +66,7 @@ class UserStorage
         $file->writeRow($dataToSave);
     }
 
-    public function saveReport(string $name, array $data, int $accountId, string $primary = 'id') : void
+    public function saveReport(string $name, array $data, int $accountId, string $primary = 'id'): void
     {
         if (!count($data)) {
             return;
@@ -115,7 +115,7 @@ class UserStorage
         }
     }
 
-    public function createManifest(string $fileName, string $table, array $primary = []) : void
+    public function createManifest(string $fileName, string $table, array $primary = []): void
     {
         if (!file_exists("$fileName.manifest")) {
             $jsonEncode = new JsonEncode();

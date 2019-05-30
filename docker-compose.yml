@@ -1,7 +1,10 @@
 version: '2'
 services:
   dev:
-    build: .
+    image: keboola/sklik-extractor
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./:/code
       - ./data:/data

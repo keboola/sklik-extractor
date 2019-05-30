@@ -3,33 +3,40 @@
   "title": "Sklik Extractor Configuration",
   "required": [
     "#token",
+    "username",
+    "#password",
     "accounts",
     "reports"
   ],
   "properties": {
     "#token": {
       "type": "string",
-      "title": "Sklik API token. You will find it under tha Account settings in Sklik.",
-      "default": ""
+      "title": "Sklik API token. You will find it under the Account settings in Sklik.",
+      "default": "",
+      "propertyOrder": 1
     },
     "username": {
       "type": "string",
       "title": "Sklik username. Along with password serves as an alternative authorization to API token.",
-      "default": ""
+      "default": "",
+      "propertyOrder": 2
     },
     "#password": {
       "type": "string",
       "title": "Sklik password. Along with username serves as an alternative authorization to API token.",
-      "default": ""
+      "default": "",
+      "propertyOrder": 3
     },
     "accounts": {
       "type": "string",
       "title": "Comma separated list of accounts ids to download. You will get all accounts if empty.",
-      "default": false
+      "default": false,
+      "propertyOrder": 4
     },
     "reports": {
       "type": "array",
       "title": "Reports",
+      "propertyOrder": 5,
       "items": {
         "type": "object",
         "title": "Sklik Report",

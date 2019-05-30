@@ -11,12 +11,12 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 class Config extends BaseConfig
 {
-    public function getToken() : string
+    public function getToken(): string
     {
         return $this->getValue(['parameters', '#token']);
     }
 
-    public function getCredentials() : array
+    public function getCredentials(): array
     {
         return [
             $this->getValue(['parameters', 'username']),
@@ -24,7 +24,7 @@ class Config extends BaseConfig
         ];
     }
 
-    public function getAccounts() : array
+    public function getAccounts(): array
     {
         $accounts = $this->getValue(['parameters', 'accounts'], '');
         if (!strlen($accounts)) {
@@ -33,7 +33,7 @@ class Config extends BaseConfig
         return array_map('trim', explode(',', $accounts));
     }
 
-    public function getReports() : array
+    public function getReports(): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         $reports = $this->getValue(['parameters', 'reports'], '');

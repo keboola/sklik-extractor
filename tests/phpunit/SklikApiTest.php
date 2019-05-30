@@ -13,15 +13,22 @@ class SklikApiTest extends TestCase
     /** @var  SklikApi */
     protected $api;
 
-    public function setUp() : void
+    public function setUp(): void
     {
         parent::setUp();
+
+        if (getenv('SKLIK_API_URL') === false) {
+            throw new \Exception('Sklik API url not set in env.');
+        }
+        if (getenv('SKLIK_API_TOKEN') === false) {
+            throw new \Exception('Sklik API token not set in env.');
+        }
 
         $this->api = new SklikApi(new Logger(), getenv('SKLIK_API_URL'));
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
     }
 
-    public function testApiLogin() : void
+    public function testApiLogin(): void
     {
         $result = $this->api->login();
         $this->assertArrayHasKey('status', $result);
@@ -30,8 +37,15 @@ class SklikApiTest extends TestCase
         $this->assertNotEmpty($result['session']);
     }
 
-    public function testApiLoginByPassword() : void
+    public function testApiLoginByPassword(): void
     {
+        if (getenv('SKLIK_API_USERNAME') === false) {
+            throw new \Exception('Sklik API username not set in env.');
+        }
+        if (getenv('SKLIK_API_PASSWORD') === false) {
+            throw new \Exception('Sklik API password not set in env.');
+        }
+
         $result = $this->api->loginByPassword(
             getenv('SKLIK_API_USERNAME'),
             getenv('SKLIK_API_PASSWORD')
@@ -42,13 +56,13 @@ class SklikApiTest extends TestCase
         $this->assertNotEmpty($result['session']);
     }
 
-    public function testApiGetListLimit() : void
+    public function testApiGetListLimit(): void
     {
         $result = $this->api->getListLimit();
         $this->assertGreaterThan(0, $result);
     }
 
-    public function testApiGetAccounts() : void
+    public function testApiGetAccounts(): void
     {
         $result = $this->api->getAccounts();
         $this->assertGreaterThanOrEqual(1, count($result));
@@ -56,7 +70,7 @@ class SklikApiTest extends TestCase
         $this->assertArrayHasKey('username', $result[0]);
     }
 
-    public function testApiCreateReadReport() : void
+    public function testApiCreateReadReport(): void
     {
         $result = $this->api->createReport(
             'campaigns',
