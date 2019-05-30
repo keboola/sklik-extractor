@@ -22,9 +22,16 @@ class ExtractorTest extends TestCase
     /** @var Extractor */
     protected $extractor;
 
-    public function setUp() : void
+    public function setUp(): void
     {
         parent::setUp();
+
+        if (getenv('SKLIK_API_URL') === false) {
+            throw new \Exception('Sklik API url not set in env.');
+        }
+        if (getenv('SKLIK_API_TOKEN') === false) {
+            throw new \Exception('Sklik API token not set in env.');
+        }
 
         $this->temp = new Temp('sklik-test');
         $this->temp->initRunFolder();
@@ -36,7 +43,7 @@ class ExtractorTest extends TestCase
         $this->extractor = new Extractor($api, $userStorage, $logger);
     }
 
-    public function testExtractorRun() : void
+    public function testExtractorRun(): void
     {
         $config = new Config([
             'parameters' => [
@@ -83,7 +90,7 @@ class ExtractorTest extends TestCase
     /**
      * No account should be downloaded
      */
-    public function testExtractorRunChooseAccounts() : void
+    public function testExtractorRunChooseAccounts(): void
     {
         $config = new Config([
             'parameters' => [

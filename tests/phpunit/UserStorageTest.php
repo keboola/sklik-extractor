@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserStorageTest extends TestCase
 {
-    public function testSaving() : void
+    public function testSaving(): void
     {
         $row1 = uniqid();
         $row2 = uniqid();
@@ -20,8 +20,11 @@ class UserStorageTest extends TestCase
 
         $this->assertFileExists(sys_get_temp_dir().'/table.csv');
         $fp = fopen(sys_get_temp_dir().'/table.csv', 'r');
+        if ($fp === false) {
+            throw new \Exception(sys_get_temp_dir().'/table.csv not found');
+        }
         $row = 0;
-        while (($data = fgetcsv($fp, 1000, ",")) !== false) {
+        while (($data = fgetcsv($fp, 1000, ',')) !== false) {
             $row++;
             $this->assertCount(2, $data);
             switch ($row) {
@@ -42,7 +45,11 @@ class UserStorageTest extends TestCase
         fclose($fp);
 
         $this->assertFileExists(sys_get_temp_dir().'/table.csv.manifest');
-        $manifest = json_decode(file_get_contents(sys_get_temp_dir().'/table.csv.manifest'), true);
+        $manifestFile = file_get_contents(sys_get_temp_dir().'/table.csv.manifest');
+        if ($manifestFile === false) {
+            throw new \Exception(sys_get_temp_dir().'/table.csv.manifest not found');
+        }
+        $manifest = json_decode($manifestFile, true);
         $this->assertArrayHasKey('destination', $manifest);
         $this->assertEquals('table', $manifest['destination']);
         $this->assertArrayHasKey('incremental', $manifest);

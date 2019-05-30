@@ -42,31 +42,31 @@ class SklikApi
         $this->client = $this->initClient($apiUrl);
     }
 
-    public function loginByToken(string $token) : array
+    public function loginByToken(string $token): array
     {
         $this->loginMethod = 'client.loginByToken';
         $this->loginParams = [$token];
         return $this->login();
     }
 
-    public function loginByPassword(string $username, string $password) : array
+    public function loginByPassword(string $username, string $password): array
     {
         $this->loginMethod = 'client.login';
         $this->loginParams = [$username, $password];
         return $this->login();
     }
 
-    public function login() : array
+    public function login(): array
     {
         return $this->request($this->loginMethod, $this->loginParams);
     }
 
-    public function getListLimit() : int
+    public function getListLimit(): int
     {
         $limit = 100;
         $limits = $this->requestAuthenticated('api.limits');
         foreach ($limits['batchCallLimits'] as $l) {
-            if ($l['name'] == 'global.list') {
+            if ($l['name'] === 'global.list') {
                 $limit = $l['limit'];
                 break;
             }
@@ -74,7 +74,7 @@ class SklikApi
         return $limit;
     }
 
-    public function getAccounts() : array
+    public function getAccounts(): array
     {
         $accounts = $this->requestAuthenticated('client.get');
         // Add user itself to check for reports
@@ -94,7 +94,7 @@ class SklikApi
         return $accounts['foreignAccounts'];
     }
 
-    public static function getReportLimit(string $from, string $to, int $listLimit, ?string $granularity = null) : int
+    public static function getReportLimit(string $from, string $to, int $listLimit, ?string $granularity = null): int
     {
         if (!$granularity) {
             return $listLimit;
@@ -133,7 +133,7 @@ class SklikApi
         ?array $restrictionFilter = [],
         ?array $displayOptions = [],
         ?int $userId = null
-    ) : array {
+    ): array {
         if (!count($displayOptions)) {
             $displayOptions = new \stdClass();
         }
@@ -197,12 +197,12 @@ class SklikApi
         return $this->request($method, $args);
     }
 
-    protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT) : array
+    protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         try {
             $response = $this->client->post($method, ['json' => $args]);
-            $responseJson = $decoder->decode($response->getBody(), JsonEncoder::FORMAT);
+            $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
             if (isset($responseJson['session'])) {
                 // refresh session token
                 $this->session = $responseJson['session'];
@@ -213,7 +213,7 @@ class SklikApi
                 ? $e->getResponse() : null;
             if ($response) {
                 try {
-                    $responseJson = $decoder->decode($response->getBody(), JsonEncoder::FORMAT);
+                    $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
                 } catch (NotEncodableValueException $e) {
                     $responseJson = [];
                 }
@@ -221,7 +221,7 @@ class SklikApi
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
                 if ($response->getStatusCode() === 401) {
-                    if ($method == 'client.loginByToken' || $method == 'client.login') {
+                    if ($method === 'client.loginByToken' || $method === 'client.login') {
                         throw Exception::apiError($message, $method, [], 401, $responseJson);
                     }
                     $this->logger->error('Error 401', [
@@ -250,7 +250,7 @@ class SklikApi
         }
     }
 
-    protected function initClient(?string $apiUrl = null) : Client
+    protected function initClient(?string $apiUrl = null): Client
     {
         if (!$apiUrl) {
             $apiUrl = self::API_URL;
