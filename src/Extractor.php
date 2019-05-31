@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor;
 
+use Keboola\Component\UserException;
 use Psr\Log\LoggerInterface;
 
 class Extractor
@@ -28,6 +29,16 @@ class Extractor
         $this->logger = $logger;
     }
 
+    protected static function formatDate(string $input): string
+    {
+        $inputFixed = empty($input) ? '-1 day' : $input;
+        $inputTime = strtotime($inputFixed);
+        if ($inputTime === false) {
+            throw new UserException("Date '$input' in restrictionFilter is not valid.");
+        }
+        return date('Y-m-d', $inputTime);
+    }
+
     public function run(Config $config, ?int $limit = null): void
     {
         $accountsToGet = $config->getAccounts();
@@ -44,10 +55,10 @@ class Extractor
             $this->userStorage->save('accounts', $account);
 
             foreach ($config->getReports() as $report) {
-                $dateFrom = $report['restrictionFilter']['dateFrom'] ?? '-1 day';
-                $report['restrictionFilter']['dateFrom'] = date('Y-m-d', strtotime($dateFrom));
-                $dateTo = $report['restrictionFilter']['dateTo'] ?? '-1 day';
-                $report['restrictionFilter']['dateTo'] = date('Y-m-d', strtotime($dateTo));
+                $report['restrictionFilter']['dateFrom']
+                    = Extractor::formatDate($report['restrictionFilter']['dateFrom']);
+                $report['restrictionFilter']['dateTo']
+                    = Extractor::formatDate($report['restrictionFilter']['dateTo']);
                 $primary = ($report['resource'] === 'queries') ? 'query' : 'id';
 
                 if (!in_array('id', $report['displayColumns'])) {
