@@ -66,6 +66,14 @@ class SklikApi
     {
         $limit = 100;
         $limits = $this->requestAuthenticated('api.limits');
+        if (!isset($limits['batchCallLimits'])) {
+            $message = 'API returned unexpected result to api.limits request. It is missing \'batchCallLimits\'.';
+            $this->logger->error($message, [
+                'method' => 'api.limits',
+                'response' => $limits,
+            ]);
+            throw new UserException($message);
+        }
         foreach ($limits['batchCallLimits'] as $l) {
             if ($l['name'] === 'global.list') {
                 $limit = $l['limit'];
@@ -79,15 +87,12 @@ class SklikApi
     {
         $accounts = $this->requestAuthenticated('client.get');
         if (!isset($accounts['user'])) {
-            $this->logger->error(
-                'API returned unexpected result to client.get request. It is missing \'user\' information.',
-                [
-                    'method' => 'client.get',
-                    'response' => $accounts,
-                ]
-            );
-            throw new UserException('API returned unexpected result to client.get request. '
-                . 'It is missing \'user\' information.');
+            $message = 'API returned unexpected result to client.get request. It is missing \'user\' information.';
+            $this->logger->error($message, [
+                'method' => 'client.get',
+                'response' => $accounts,
+            ]);
+            throw new UserException($message);
         }
         // Add user itself to check for reports
         array_unshift($accounts['foreignAccounts'], [
