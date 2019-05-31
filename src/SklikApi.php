@@ -7,6 +7,7 @@ namespace Keboola\SklikExtractor;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Keboola\Component\UserException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -77,6 +78,17 @@ class SklikApi
     public function getAccounts(): array
     {
         $accounts = $this->requestAuthenticated('client.get');
+        if (!isset($accounts['user'])) {
+            $this->logger->error(
+                'API returned unexpected result to client.get request. It is missing \'user\' information.',
+                [
+                    'method' => 'client.get',
+                    'response' => $accounts,
+                ]
+            );
+            throw new UserException('API returned unexpected result to client.get request. '
+                . 'It is missing \'user\' information.');
+        }
         // Add user itself to check for reports
         array_unshift($accounts['foreignAccounts'], [
             'userId' => $accounts['user']['userId'],
