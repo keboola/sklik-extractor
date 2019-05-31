@@ -46,7 +46,7 @@ class Extractor
             foreach ($config->getReports() as $report) {
                 $dateFrom = $report['restrictionFilter']['dateFrom'] ?? '-1 day';
                 $report['restrictionFilter']['dateFrom'] = date('Y-m-d', strtotime($dateFrom));
-                $dateTo = $report['restrictionFilter']['dateTo'] ?? 'today';
+                $dateTo = $report['restrictionFilter']['dateTo'] ?? '-1 day';
                 $report['restrictionFilter']['dateTo'] = date('Y-m-d', strtotime($dateTo));
                 $primary = ($report['resource'] === 'queries') ? 'query' : 'id';
 
