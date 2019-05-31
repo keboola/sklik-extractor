@@ -237,30 +237,26 @@ class SklikApi
 
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
-                if ($response->getStatusCode() === 401) {
-                    if ($method === 'client.loginByToken' || $method === 'client.login') {
-                        throw Exception::apiError($message, $method, [], 401, $responseJson);
-                    }
-                    $this->logger->error('Error 401', [
-                        'response' => $responseJson,
-                        'method' => $method,
-                        '$params' => Exception::filterParamsForLog($args),
-                    ]);
-                    if ($retries <= 0) {
-                        throw Exception::apiError(
-                            'API keeps failing on error 401',
-                            $method,
-                            $args,
-                            $response->getStatusCode(),
-                            $responseJson
-                        );
-                    }
-                    sleep(rand(5, 10));
-                    $this->login();
-                    return $this->request($method, $args, $retries - 1);
+                // Throw on wrong credentials
+                if ($response->getStatusCode() === 401
+                    && ($method === 'client.loginByToken' || $method === 'client.login')) {
+                    throw Exception::apiError($message, $method, [], 401, $responseJson);
                 }
 
-                throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
+                // Throw on other user error or 500 after retries
+                if ($response->getStatusCode() < 500 || $retries <= 0) {
+                    throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
+                }
+
+                // Retry 500 errors
+                $this->logger->error('API Error, will be retried', [
+                    'response' => $responseJson,
+                    'method' => $method,
+                    'params' => Exception::filterParamsForLog($args),
+                ]);
+                sleep(rand(5, 10));
+                $this->login();
+                return $this->request($method, $args, $retries - 1);
             }
 
             throw $e;
