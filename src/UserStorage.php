@@ -95,6 +95,12 @@ class UserStorage
                 unset($row['stats']);
             }
 
+            // save regions to a separate table
+            if (isset($row['regions']) && !empty($row['regions'])) {
+                $this->processRegions($name, $rowId, $row['regions']);
+                unset($row['regions']);
+            }
+
             // flatten nested arrays
             $row = flattenArray($row, '', '_');
 
@@ -118,6 +124,28 @@ class UserStorage
                 'incremental' => true,
                 'primary_key' => $primary,
             ], JsonEncoder::FORMAT));
+        }
+    }
+
+    private function processRegions(string $parentName, string $campaignId, array $regionsData): void
+    {
+        $reportName = $parentName . '-regions';
+        foreach ($regionsData as $item) {
+            ksort($item);
+            $dataToSave = [
+                'campaignId' => $campaignId,
+            ] + $item;
+
+            if (!isset($this->tables[$reportName])) {
+                $this->tables[$reportName] = [
+                    'columns' => array_keys($dataToSave),
+                    'primary' => [
+                        'campaignId',
+                        'id',
+                    ],
+                ];
+            }
+            $this->save($reportName, $dataToSave);
         }
     }
 }

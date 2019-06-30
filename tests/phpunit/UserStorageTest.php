@@ -135,4 +135,67 @@ CSV
 CSV
             , file_get_contents($path . '/campaigns.csv'));
     }
+
+    public function testSaveReportWithCampaignRegions(): void
+    {
+        $path = sys_get_temp_dir() . '/save-report-campaign-with-regions';
+        (new Filesystem())->mkdir($path);
+
+        $storage = new UserStorage($path);
+        $storage->saveReport('campaigns', [
+            [
+                'id' => '1',
+                'name' => 'Campaign with regions',
+                'regions' => [
+                    [
+                        'id' => '1',
+                        'parentId' => null,
+                        'name' => 'Cela CR',
+                    ],
+                    [
+                        'id' => '2',
+                        'parentId' => '1',
+                        'name' => 'Jihomoravsky',
+                    ],
+                    [
+                        'id' => '3',
+                        'parentId' => '1',
+                        'name' => 'Pardubicky',
+                    ],
+                ],
+            ],
+        ], 112233);
+
+        // campaigns
+
+        $this->assertFileExists($path . '/campaigns.csv');
+        $this->assertEquals(<<<CSV
+"id","accountId","name"
+"1","112233","Campaign with regions"\n
+CSV
+            , file_get_contents($path . '/campaigns.csv'));
+
+        $this->assertFileExists($path . '/campaigns.csv.manifest');
+        $this->assertEquals(<<<JSON
+{"destination":"campaigns","incremental":true,"primary_key":["id"]}
+JSON
+            , file_get_contents($path . '/campaigns.csv.manifest'));
+
+        // campaigns regions
+
+        $this->assertFileExists($path . '/campaigns-regions.csv');
+        $this->assertEquals(<<<CSV
+"campaignId","id","name","parentId"
+"1","1","Cela CR",""
+"1","2","Jihomoravsky","1"
+"1","3","Pardubicky","1"\n
+CSV
+            , file_get_contents($path . '/campaigns-regions.csv'));
+
+        $this->assertFileExists($path . '/campaigns-regions.csv.manifest');
+        $this->assertEquals(<<<JSON
+{"destination":"campaigns-regions","incremental":true,"primary_key":["campaignId","id"]}
+JSON
+            , file_get_contents($path . '/campaigns-regions.csv.manifest'));
+    }
 }
