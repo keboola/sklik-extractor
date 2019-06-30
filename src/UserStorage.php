@@ -95,14 +95,7 @@ class UserStorage
             }
 
             // flatten nested arrays
-            foreach ($row as $colName => $colValue) {
-                if (is_array($colValue)) {
-                    foreach ($colValue as $colNestedName => $colNestedValue) {
-                        $row["{$colName}_{$colNestedName}"] = $colNestedValue;
-                    }
-                    unset($row[$colName]);
-                }
-            }
+            $row = $this->flattenArray($row, '', '_');
 
             unset($row[$primary]);
             ksort($row);
@@ -125,5 +118,23 @@ class UserStorage
                 'primary_key' => $primary,
             ], JsonEncoder::FORMAT));
         }
+    }
+
+    /**
+     * Flatten array recursively
+     *
+     * https://github.com/keboola/php-utils/blob/807af72673f572baf8a4f976f349fb696ac9d98f/src/Keboola/Utils/flattenArray.php
+     */
+    private function flattenArray(array $array, string $prefix = '', string $glue = '.'): array
+    {
+        $result = [];
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $result = array_merge($result, $this->flattenArray($value, $prefix . $key . $glue));
+            } else {
+                $result[$prefix . $key] = $value;
+            }
+        }
+        return $result;
     }
 }
