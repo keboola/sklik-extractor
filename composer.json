@@ -11,12 +11,13 @@
         }
     ],
     "require": {
+        "ext-json": "*",
         "PHP": "^7.1",
         "guzzlehttp/guzzle": "^6.3",
         "keboola/csv": "^2.0",
         "keboola/php-component": "^7.0",
-        "symfony/serializer": "^4.1",
-        "ext-json": "*"
+        "keboola/php-utils": "^3.0",
+        "symfony/serializer": "^4.1"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^1.0",

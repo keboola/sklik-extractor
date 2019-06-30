@@ -6,6 +6,7 @@ namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\SklikExtractor\UserStorage;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Filesystem;
 
 class UserStorageTest extends TestCase
 {
@@ -56,5 +57,82 @@ class UserStorageTest extends TestCase
         $this->assertEquals(true, $manifest['incremental']);
         $this->assertArrayHasKey('primary_key', $manifest);
         $this->assertEquals(['second'], $manifest['primary_key']);
+    }
+
+    public function testSaveReportNoNested(): void
+    {
+        $path = sys_get_temp_dir() . '/save-report-no-nested';
+        (new Filesystem())->mkdir($path);
+
+        $storage = new UserStorage($path);
+        $storage->saveReport('campaigns', [
+            [
+                'id' => '1',
+                'regions.id' => '1',
+                'regions.parentId' => null,
+                'regions.name' => 'Jihomoravsky',
+            ],
+        ], 112233);
+
+        $this->assertFileExists($path . '/campaigns.csv');
+        $this->assertEquals(<<<CSV
+"id","accountId","regions.id","regions.name","regions.parentId"
+"1","112233","1","Jihomoravsky",""\n
+CSV
+, file_get_contents($path . '/campaigns.csv'));
+    }
+
+    public function testSaveReportNestedLevel1(): void
+    {
+        $path = sys_get_temp_dir() . '/save-report-nested-level-1';
+        (new Filesystem())->mkdir($path);
+
+        $storage = new UserStorage($path);
+        $storage->saveReport('campaigns', [
+            [
+                'id' => '1',
+                'level1' => [
+                    'regions.id' => '1',
+                    'regions.parentId' => null,
+                    'regions.name' => 'Jihomoravsky',
+                ],
+
+            ],
+        ], 112233);
+
+        $this->assertFileExists($path . '/campaigns.csv');
+        $this->assertEquals(<<<CSV
+"id","accountId","level1_regions.id","level1_regions.name","level1_regions.parentId"
+"1","112233","1","Jihomoravsky",""\n
+CSV
+            , file_get_contents($path . '/campaigns.csv'));
+    }
+
+    public function testSaveReportNestedLevel2(): void
+    {
+        $path = sys_get_temp_dir() . '/save-report-nested-level-2';
+        (new Filesystem())->mkdir($path);
+
+        $storage = new UserStorage($path);
+        $storage->saveReport('campaigns', [
+            [
+                'id' => '1',
+                'level1' => [
+                    'level2' => [
+                        'regions.id' => '1',
+                        'regions.parentId' => null,
+                        'regions.name' => 'Jihomoravsky',
+                    ],
+                ],
+
+            ],
+        ], 112233);
+
+        $this->assertFileExists($path . '/campaigns.csv');
+        $this->assertEquals(<<<CSV
+"id","accountId","level1_level2_regions.id","level1_level2_regions.name","level1_level2_regions.parentId"
+"1","112233","1","Jihomoravsky",""\n
+CSV
+            , file_get_contents($path . '/campaigns.csv'));
     }
 }

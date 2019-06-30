@@ -7,6 +7,7 @@ namespace Keboola\SklikExtractor;
 use Keboola\Csv\CsvWriter;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use function Keboola\Utils\flattenArray;
 
 class UserStorage
 {
@@ -95,14 +96,7 @@ class UserStorage
             }
 
             // flatten nested arrays
-            foreach ($row as $colName => $colValue) {
-                if (is_array($colValue)) {
-                    foreach ($colValue as $colNestedName => $colNestedValue) {
-                        $row["{$colName}_{$colNestedName}"] = $colNestedValue;
-                    }
-                    unset($row[$colName]);
-                }
-            }
+            $row = flattenArray($row, '', '_');
 
             unset($row[$primary]);
             ksort($row);
