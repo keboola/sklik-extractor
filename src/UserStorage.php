@@ -97,7 +97,7 @@ class UserStorage
 
             // save regions to a separate table
             if (isset($row['regions']) && is_array($row['regions']) && !empty($row['regions'])) {
-                $this->processRegions($name, $rowId, $row['regions']);
+                $this->processRegions($name, (string) $rowId, $row['regions']);
                 unset($row['regions']);
             }
 

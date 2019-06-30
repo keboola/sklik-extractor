@@ -144,7 +144,7 @@ CSV
         $storage = new UserStorage($path);
         $storage->saveReport('campaigns', [
             [
-                'id' => '1',
+                'id' => 1,
                 'name' => 'Campaign with regions',
                 'regions' => [
                     [
