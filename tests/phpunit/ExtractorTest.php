@@ -7,6 +7,7 @@ namespace Keboola\SklikExtractor\Tests;
 use Keboola\Component\Logger;
 use Keboola\SklikExtractor\Config;
 use Keboola\SklikExtractor\ConfigDefinition;
+use Keboola\SklikExtractor\Exception;
 use Keboola\SklikExtractor\Extractor;
 use Keboola\SklikExtractor\SklikApi;
 use Keboola\SklikExtractor\UserStorage;
@@ -116,5 +117,29 @@ class ExtractorTest extends TestCase
         $this->assertFileNotExists($this->temp->getTmpFolder() . '/accounts.csv');
         $this->assertFileNotExists($this->temp->getTmpFolder() . '/report1.csv');
         $this->assertFileNotExists($this->temp->getTmpFolder() . '/report1-stats.csv');
+    }
+
+    public function testConfigInvalidRestrictionFilter(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('todo');
+        new Config([
+            'parameters' => [
+                '#token' => getenv('SKLIK_API_TOKEN'),
+                'accounts' => '123,456',
+                'reports' => [
+                    [
+                        'name' => 'report1',
+                        'resource' => 'campaigns',
+                        'restrictionFilter' => json_encode([
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                            'dateTo' => getenv('SKLIK_DATE_TO'),
+                        ]),
+                        'displayOptions' => json_encode(['statGranularity' => 'daily']),
+                        'displayColumns' => 'name, clicks, impressions',
+                    ],
+                ],
+            ],
+        ], new ConfigDefinition());
     }
 }
