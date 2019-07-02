@@ -121,9 +121,7 @@ class ExtractorTest extends TestCase
 
     public function testConfigInvalidRestrictionFilter(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('todo');
-        new Config([
+        $config = new Config([
             'parameters' => [
                 '#token' => getenv('SKLIK_API_TOKEN'),
                 'accounts' => '123,456',
@@ -132,7 +130,6 @@ class ExtractorTest extends TestCase
                         'name' => 'report1',
                         'resource' => 'campaigns',
                         'restrictionFilter' => json_encode([
-                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
                             'dateTo' => getenv('SKLIK_DATE_TO'),
                         ]),
                         'displayOptions' => json_encode(['statGranularity' => 'daily']),
@@ -141,5 +138,8 @@ class ExtractorTest extends TestCase
                 ],
             ],
         ], new ConfigDefinition());
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Setting of dateFrom on restrictionFilter is required');
+        $config->getReports();
     }
 }
