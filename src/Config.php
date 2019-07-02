@@ -53,14 +53,14 @@ class Config extends BaseConfig
             }
             $report['displayColumns'] = strlen($report['displayColumns']) > 0
                 ? array_map('trim', explode(',', $report['displayColumns'])) : [];
+
             if (!count($report['displayOptions'])) {
                 $report['displayOptions'] = new stdClass();
             }
-
-            if (!isset($restrictionFilter['dateFrom'])) {
+            if (!isset($report['restrictionFilter']['dateFrom'])) {
                 throw new Exception('Setting of dateFrom on restrictionFilter is required');
             }
-            if (!isset($restrictionFilter['dateTo'])) {
+            if (!isset($report['restrictionFilter']['dateTo'])) {
                 throw new Exception('Setting of dateTo on restrictionFilter is required');
             }
         }
