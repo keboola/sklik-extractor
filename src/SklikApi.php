@@ -151,16 +151,6 @@ class SklikApi
         ?array $displayOptions = [],
         ?int $userId = null
     ): array {
-        if (!count($displayOptions)) {
-            $displayOptions = new \stdClass();
-        }
-        if (!isset($restrictionFilter['dateFrom'])) {
-            throw new Exception('Setting of dateFrom on restrictionFilter is required');
-        }
-        if (!isset($restrictionFilter['dateTo'])) {
-            throw new Exception('Setting of dateTo on restrictionFilter is required');
-        }
-
         $result = $this->requestAuthenticated(
             "$resource.createReport",
             [$restrictionFilter, $displayOptions],
