@@ -58,10 +58,10 @@ class Config extends BaseConfig
                 $report['displayOptions'] = new stdClass();
             }
             if (!isset($report['restrictionFilter']['dateFrom'])) {
-                throw new Exception('Setting of dateFrom on restrictionFilter is required');
+                $report['restrictionFilter']['dateFrom'] = '-1 day';
             }
             if (!isset($report['restrictionFilter']['dateTo'])) {
-                throw new Exception('Setting of dateTo on restrictionFilter is required');
+                $report['restrictionFilter']['dateTo'] = '-1 day';
             }
         }
         return $reports;

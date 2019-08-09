@@ -119,7 +119,7 @@ class ExtractorTest extends TestCase
         $this->assertFileNotExists($this->temp->getTmpFolder() . '/report1-stats.csv');
     }
 
-    public function testConfigInvalidRestrictionFilter(): void
+    public function testConfigIncompleteRestrictionFilter(): void
     {
         $config = new Config([
             'parameters' => [
@@ -138,8 +138,10 @@ class ExtractorTest extends TestCase
                 ],
             ],
         ], new ConfigDefinition());
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Setting of dateFrom on restrictionFilter is required');
-        $config->getReports();
+        $reports =  $config->getReports();
+        $this->assertCount(1, $reports);
+        $this->assertArrayHasKey('restrictionFilter', $reports[0]);
+        $this->assertArrayHasKey('dateFrom', $reports[0]['restrictionFilter']);
+        $this->assertEquals('-1 day', $reports[0]['restrictionFilter']['dateFrom']);
     }
 }
