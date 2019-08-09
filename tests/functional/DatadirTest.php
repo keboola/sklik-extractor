@@ -23,7 +23,8 @@ class DatadirTest extends AbstractDatadirTestCase
                     [
                         'name' => 'queries',
                         'resource' => 'queries',
-                        'restrictionFilter' => '{"dateFrom":"-1 day","dateTo":"-1 day"}',
+                        'restrictionFilter' => '{"dateFrom":"'.getenv('SKLIK_DATE_FROM')
+                            .'","dateTo":"'.getenv('SKLIK_DATE_TO').'"}',
                         'displayOptions' => '{"statGranularity":"daily"}',
                         'displayColumns' => 'query,campaign.name,impressions,clicks',
                     ],
