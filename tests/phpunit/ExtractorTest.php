@@ -130,7 +130,7 @@ class ExtractorTest extends TestCase
                         'name' => 'report1',
                         'resource' => 'campaigns',
                         'restrictionFilter' => json_encode([
-                            'dateTo' => getenv('SKLIK_DATE_TO'),
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
                         ]),
                         'displayOptions' => json_encode(['statGranularity' => 'daily']),
                         'displayColumns' => 'name, clicks, impressions',
