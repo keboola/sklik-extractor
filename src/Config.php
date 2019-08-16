@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Keboola\SklikExtractor;
 
 use Keboola\Component\Config\BaseConfig;
-use stdClass;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
@@ -55,7 +54,7 @@ class Config extends BaseConfig
                 ? array_map('trim', explode(',', $report['displayColumns'])) : [];
 
             if (!count($report['displayOptions'])) {
-                $report['displayOptions'] = new stdClass();
+                $report['displayOptions'] = [];
             }
             if (!isset($report['restrictionFilter']['dateFrom'])) {
                 $report['restrictionFilter']['dateFrom'] = '-1 day';
