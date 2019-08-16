@@ -153,7 +153,7 @@ class SklikApi
     ): array {
         $result = $this->requestAuthenticated(
             "$resource.createReport",
-            [json_decode(json_encode($restrictionFilter)), json_decode(json_encode($displayOptions))],
+            [json_decode((string) json_encode($restrictionFilter)), json_decode((string) json_encode($displayOptions))],
             $userId
         );
         if (empty($result['reportId'])) {
