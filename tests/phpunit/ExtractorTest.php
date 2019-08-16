@@ -159,7 +159,7 @@ class ExtractorTest extends TestCase
                         ]),
                         'displayOptions' => json_encode([]),
                         'displayColumns' => 'name, clicks, impressions, budget.name',
-                    ]
+                    ],
                 ],
             ],
         ], new ConfigDefinition());
