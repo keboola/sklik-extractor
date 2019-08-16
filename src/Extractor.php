@@ -67,8 +67,8 @@ class Extractor
 
                 $result = $this->api->createReport(
                     $report['resource'],
-                    $report['restrictionFilter'],
-                    $report['displayOptions'],
+                    (array) $report['restrictionFilter'],
+                    (array) $report['displayOptions'],
                     $account['userId']
                 );
 
