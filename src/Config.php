@@ -53,9 +53,6 @@ class Config extends BaseConfig
             $report['displayColumns'] = strlen($report['displayColumns']) > 0
                 ? array_map('trim', explode(',', $report['displayColumns'])) : [];
 
-            if (!count($report['displayOptions'])) {
-                $report['displayOptions'] = [];
-            }
             if (!isset($report['restrictionFilter']['dateFrom'])) {
                 $report['restrictionFilter']['dateFrom'] = '-1 day';
             }
