@@ -11,6 +11,7 @@ use Keboola\Component\UserException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use stdClass;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
@@ -151,9 +152,15 @@ class SklikApi
         ?array $displayOptions = [],
         ?int $userId = null
     ): array {
+        if (!$restrictionFilter) {
+            $restrictionFilter = new stdClass();
+        }
+        if (!$displayOptions) {
+            $displayOptions = new stdClass();
+        }
         $result = $this->requestAuthenticated(
             "$resource.createReport",
-            [json_decode((string) json_encode($restrictionFilter)), json_decode((string) json_encode($displayOptions))],
+            [$restrictionFilter, $displayOptions],
             $userId
         );
         if (empty($result['reportId'])) {
