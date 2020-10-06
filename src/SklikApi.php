@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 class SklikApi
 {
-    protected const API_URL = 'https://api.sklik.cz/jsonApi/drak/';
+    protected const API_URL = 'https://api.sklik.cz/drak/json/';
     protected const RETRIES_COUNT = 5;
 
     /** @var string */
