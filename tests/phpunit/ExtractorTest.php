@@ -88,6 +88,44 @@ class ExtractorTest extends TestCase
         $this->assertEquals('"query","accountId","group_name","keyword_id"', trim($metaFile[0]));
     }
 
+
+    public function testDevicesStats(): void
+    {
+        $config = new Config([
+            'parameters' => [
+                '#token' => getenv('SKLIK_API_TOKEN'),
+                'reports' => [
+                    [
+                        'name' => 'report1',
+                        'resource' => 'campaigns',
+                        'restrictionFilter' => json_encode([
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                            'dateTo' => getenv('SKLIK_DATE_TO'),
+                            'deviceType' => [
+                                'devicePhone',
+                                'deviceDesktop',
+                            ],
+                        ]),
+                        'displayOptions' => json_encode(['statGranularity' => 'daily']),
+                        'displayColumns' => 'name, impressions, clicks, totalMoney',
+                    ],
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        $this->extractor->run($config);
+
+        $this->assertFileExists($this->temp->getTmpFolder() . '/accounts.csv');
+        $this->assertFileExists($this->temp->getTmpFolder() . '/report1.csv');
+        $metaFile = file($this->temp->getTmpFolder() . '/report1.csv');
+        $this->assertEquals('"id","accountId","name"', trim($metaFile[0]));
+        $this->assertFileExists($this->temp->getTmpFolder() . '/report1-stats.csv');
+        $statsFile = file($this->temp->getTmpFolder() . '/report1-stats.csv');
+        // @phpcs:disable
+        $this->assertEquals('"id","date","deviceDesktop_clicks","deviceDesktop_impressions","deviceDesktop_totalMoney","devicePhone_clicks","devicePhone_impressions","devicePhone_totalMoney"', trim($statsFile[0]));
+        // @phpcs:enable
+    }
+
     /**
      * No account should be downloaded
      */

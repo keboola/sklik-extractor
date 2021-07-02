@@ -37,25 +37,6 @@ class SklikApiTest extends TestCase
         $this->assertNotEmpty($result['session']);
     }
 
-    public function testApiLoginByPassword(): void
-    {
-        if (getenv('SKLIK_API_USERNAME') === false) {
-            throw new \Exception('Sklik API username not set in env.');
-        }
-        if (getenv('SKLIK_API_PASSWORD') === false) {
-            throw new \Exception('Sklik API password not set in env.');
-        }
-
-        $result = $this->api->loginByPassword(
-            getenv('SKLIK_API_USERNAME'),
-            getenv('SKLIK_API_PASSWORD')
-        );
-        $this->assertArrayHasKey('status', $result);
-        $this->assertEquals(200, $result['status']);
-        $this->assertArrayHasKey('session', $result);
-        $this->assertNotEmpty($result['session']);
-    }
-
     public function testApiGetListLimit(): void
     {
         $result = $this->api->getListLimit();
