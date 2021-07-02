@@ -18,7 +18,7 @@ class Exception extends UserException
         return new static(json_encode([
             'error' => $message,
             'method' => $method,
-            'args' => ($method === 'client.login') ? ['--omitted--'] : self::filterParamsForLog($args),
+            'args' => self::filterParamsForLog($args),
             'statusCode' => $statusCode,
             'response' => $response,
         ]));

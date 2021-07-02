@@ -21,12 +21,7 @@ class Component extends BaseComponent
         }
 
         $api = new SklikApi($this->getLogger());
-        $token = $config->getToken();
-        if ($token) {
-            $api->loginByToken($config->getToken());
-        } else {
-            $api->loginByPassword($config->getCredentials()[0], $config->getCredentials()[1]);
-        }
+        $api->loginByToken($config->getToken());
         $userStorage = new UserStorage($this->getDataDir() . '/out/tables');
         $extractor = new Extractor($api, $userStorage, $this->getLogger());
         $extractor->run($config);
