@@ -81,8 +81,7 @@ class UserStorage
                     if (!isset($stat['date'])) {
                         $stat['date'] = null;
                     }
-                    ksort($stat);
-                    $save = [$primary => $rowId] + $stat;
+                    $save = [$primary => $rowId] + $this->prepareDataToSave($stat);
 
                     if (!isset($this->tables["$name-stats"])) {
                         $this->tables["$name-stats"] = [
@@ -147,5 +146,21 @@ class UserStorage
             }
             $this->save($reportName, $dataToSave);
         }
+    }
+
+    private function prepareDataToSave(array $stat): array
+    {
+        $result = [];
+        foreach ($stat as $k => $item) {
+            if (is_array($item)) {
+                foreach ($item as $key => $value) {
+                    $result[sprintf('%s_%s', $k, $key)] = $value;
+                }
+            } else {
+                $result[$k] = $item;
+            }
+        }
+        ksort($result);
+        return $result;
     }
 }
