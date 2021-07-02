@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor;
 
+use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Keboola\Component\UserException;
@@ -15,6 +17,7 @@ use stdClass;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Throwable;
 
 class SklikApi
 {
@@ -48,13 +51,6 @@ class SklikApi
     {
         $this->loginMethod = 'client.loginByToken';
         $this->loginParams = [$token];
-        return $this->login();
-    }
-
-    public function loginByPassword(string $username, string $password): array
-    {
-        $this->loginMethod = 'client.login';
-        $this->loginParams = [$username, $password];
         return $this->login();
     }
 
@@ -118,7 +114,7 @@ class SklikApi
             return $listLimit;
         }
 
-        $numberOfDays = (int) ((new \DateTime($to))->diff(new \DateTime($from)))->format('%a');
+        $numberOfDays = (int) ((new DateTime($to))->diff(new DateTime($from)))->format('%a');
         switch ($granularity) {
             case 'daily':
                 $unitDivider = 1;
@@ -222,8 +218,8 @@ class SklikApi
                 $this->session = $responseJson['session'];
             }
             return $responseJson;
-        } catch (\Throwable $e) {
-            $response = $e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()
+        } catch (Throwable $e) {
+            $response = $e instanceof RequestException && $e->hasResponse()
                 ? $e->getResponse() : null;
             if ($response) {
                 try {
@@ -235,8 +231,7 @@ class SklikApi
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
                 // Throw on wrong credentials
-                if ($response->getStatusCode() === 401
-                    && ($method === 'client.loginByToken' || $method === 'client.login')) {
+                if ($response->getStatusCode() === 401 && $method === 'client.loginByToken') {
                     throw Exception::apiError($message, $method, [], 401, $responseJson);
                 }
 
@@ -270,7 +265,6 @@ class SklikApi
         $handlerStack->push(Middleware::retry(
             function (
                 $retries,
-                /** @noinspection PhpUnusedParameterInspection */
                 RequestInterface $request,
                 ?ResponseInterface $response = null,
                 ?string $error = null

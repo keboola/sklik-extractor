@@ -16,14 +16,6 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#token']);
     }
 
-    public function getCredentials(): array
-    {
-        return [
-            $this->getValue(['parameters', 'username']),
-            $this->getValue(['parameters', '#password']),
-        ];
-    }
-
     public function getAccounts(): array
     {
         $accounts = $this->getValue(['parameters', 'accounts'], '');
