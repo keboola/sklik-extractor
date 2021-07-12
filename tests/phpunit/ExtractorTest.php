@@ -88,7 +88,7 @@ class ExtractorTest extends TestCase
         $this->assertEquals('"query","accountId","group_name","keyword_id"', trim($metaFile[0]));
     }
 
-    public function testIgnoreExtraKeys()
+    public function testIgnoreExtraKeys(): void
     {
         $config = new Config([
             'parameters' => [
