@@ -88,6 +88,32 @@ class ExtractorTest extends TestCase
         $this->assertEquals('"query","accountId","group_name","keyword_id"', trim($metaFile[0]));
     }
 
+    public function testIgnoreExtraKeys()
+    {
+        $config = new Config([
+            'parameters' => [
+                'username' => 'testUsername',
+                '#password' => 'testPassword',
+                '#token' => getenv('SKLIK_API_TOKEN'),
+                'reports' => [
+                    [
+                        'name' => 'report1',
+                        'resource' => 'campaigns',
+                        'restrictionFilter' => json_encode([
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                            'dateTo' => getenv('SKLIK_DATE_TO'),
+                        ]),
+                        'displayOptions' => json_encode(['statGranularity' => 'daily']),
+                        'displayColumns' => 'name, impressions, clicks, totalMoney',
+                    ],
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        $this->assertArrayNotHasKey('#password', $config->getParameters());
+        $this->assertArrayNotHasKey('username', $config->getParameters());
+    }
+
 
     public function testDevicesStats(): void
     {
