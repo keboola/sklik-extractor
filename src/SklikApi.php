@@ -51,7 +51,11 @@ class SklikApi
     {
         $this->loginMethod = 'client.loginByToken';
         $this->loginParams = [$token];
-        return $this->login();
+        $loginStatus = $this->login();
+        if ($loginStatus['status'] !== 200) {
+            throw new UserException($loginStatus['statusMessage'], $loginStatus['status']);
+        }
+        return $loginStatus;
     }
 
     public function login(): array
