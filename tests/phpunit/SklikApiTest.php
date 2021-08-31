@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\Component\Logger;
+use Keboola\Component\UserException;
 use Keboola\SklikExtractor\SklikApi;
 use PHPUnit\Framework\TestCase;
 
@@ -76,5 +77,12 @@ class SklikApiTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $result[0]['stats']);
         $this->assertArrayHasKey('clicks', $result[0]['stats'][0]);
         $this->assertArrayHasKey('impressions', $result[0]['stats'][0]);
+    }
+
+    public function testLoginFailed(): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Authentication failed');
+        $this->api->loginByToken('unexistsToken');
     }
 }
