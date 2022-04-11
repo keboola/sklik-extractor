@@ -90,13 +90,13 @@ jobs:
       -
         name: Run tests
         run: |
-          docker run
-           -e SKLIK_API_URL
-           -e SKLIK_API_TOKEN
-           -e SKLIK_API_USERNAME
-           -e SKLIK_API_PASSWORD
-           -e SKLIK_DATE_FROM
-           -e SKLIK_DATE_TO
+          docker run \
+           -e SKLIK_API_URL \
+           -e SKLIK_API_TOKEN \
+           -e SKLIK_API_USERNAME \
+           -e SKLIK_API_PASSWORD \
+           -e SKLIK_DATE_FROM \
+           -e SKLIK_DATE_TO \
           $APP_IMAGE composer ci
 
   tests-in-kbc:
