@@ -16,6 +16,8 @@ env:
   SKLIK_API_USERNAME: "sklik@keboola.com"
   SKLIK_DATE_FROM: "2018-05-15"
   SKLIK_DATE_TO: "2018-05-25"
+  SKLIK_API_PASSWORD: ${{ secrets.SKLIK_API_PASSWORD }}
+  SKLIK_API_TOKEN: ${{ secrets.SKLIK_API_TOKEN }}
 
   # DockerHub login
   DOCKERHUB_USER: "keboolabot"
