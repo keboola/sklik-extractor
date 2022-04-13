@@ -6,13 +6,18 @@ namespace Keboola\SklikExtractor\Tests;
 
 use Keboola\Component\Logger;
 use Keboola\Component\UserException;
+use Keboola\SklikExtractor\Exception;
 use Keboola\SklikExtractor\SklikApi;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\Test\TestLogger;
 
 class SklikApiTest extends TestCase
 {
     /** @var  SklikApi */
     protected $api;
+
+    /** @var TestLogger $logger */
+    private $logger;
 
     public function setUp(): void
     {
@@ -25,7 +30,9 @@ class SklikApiTest extends TestCase
             throw new \Exception('Sklik API token not set in env.');
         }
 
-        $this->api = new SklikApi(new Logger(), getenv('SKLIK_API_URL'));
+        $this->logger = new TestLogger();
+
+        $this->api = new SklikApi($this->logger, getenv('SKLIK_API_URL'));
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
     }
 
@@ -84,5 +91,44 @@ class SklikApiTest extends TestCase
         $this->expectException(UserException::class);
         $this->expectExceptionMessage('Authentication failed');
         $this->api->loginByToken('unexistsToken');
+    }
+
+    public function testRetry(): void
+    {
+        try {
+            $this->api->createReport(
+                'unknownResource',
+                [
+                    'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                    'dateTo' => getenv('SKLIK_DATE_TO'),
+                ],
+                ['statGranularity' => 'daily']
+            );
+            $this->fail('create report must throw exception.');
+        } catch (Exception $exception) {
+            $this->assertStringContainsString(
+                '"error":"Not Found","method":"unknownResource.createReport"',
+                $exception->getMessage()
+            );
+        }
+
+        $this->assertTrue(
+            $this->logger->hasInfo(
+                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
+                . ' resulted in a `404 Not Found` response. Retrying... [1x]'
+            ),
+            implode(array_map(function ($v) {
+                return $v['message'];
+            }, $this->logger->records))
+        );
+        $this->assertTrue(
+            $this->logger->hasInfo(
+                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
+                ' resulted in a `404 Not Found` response. Retrying... [4x]'
+            ),
+            implode(array_map(function ($v) {
+                return $v['message'];
+            }, $this->logger->records))
+        );
     }
 }
