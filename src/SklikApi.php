@@ -45,6 +45,10 @@ class SklikApi
      */
     private $session;
 
+    private const RETRY_MAX_ATTEMPTS = 5;
+
+    private const RETRY_INITIAL_INTERVAL = 1000;
+
     public function __construct(LoggerInterface $logger, ?string $apiUrl = null)
     {
         $this->logger = $logger;
@@ -218,8 +222,15 @@ class SklikApi
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
-        $retryPolicy = new SimpleRetryPolicy(5, [RequestException::class, ClientException::class]);
-        $retryProxy = new RetryProxy($retryPolicy, new ExponentialBackOffPolicy(1000), $this->logger);
+        $retryPolicy = new SimpleRetryPolicy(
+            self::RETRY_MAX_ATTEMPTS,
+            [RequestException::class, ClientException::class]
+        );
+        $retryProxy = new RetryProxy(
+            $retryPolicy,
+            new ExponentialBackOffPolicy(self::RETRY_INITIAL_INTERVAL),
+            $this->logger
+        );
 
         try {
             $response = $retryProxy->call(function () use ($method, $args): ResponseInterface {
