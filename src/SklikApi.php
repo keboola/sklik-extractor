@@ -6,6 +6,7 @@ namespace Keboola\SklikExtractor;
 
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -13,6 +14,9 @@ use Keboola\Component\UserException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\ExponentialBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 use stdClass;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -214,8 +218,14 @@ class SklikApi
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
+        $retryPolicy = new SimpleRetryPolicy(5, [RequestException::class, ClientException::class]);
+        $retryProxy = new RetryProxy($retryPolicy, new ExponentialBackOffPolicy(1000), $this->logger);
+
         try {
-            $response = $this->client->post($method, ['json' => $args]);
+            $response = $retryProxy->call(function () use ($method, $args): ResponseInterface {
+                return $this->client->post($method, ['json' => $args]);
+            });
+
             $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
             if (isset($responseJson['session'])) {
                 // refresh session token
