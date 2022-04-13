@@ -114,8 +114,8 @@ class SklikApiTest extends TestCase
 
         $this->assertTrue(
             $this->logger->hasInfo(
-                'Client error: `POST https://api.sklik.cz/drak/json/unknownResource.createReport`' .
-                ' resulted in a `404 Not Found` response. Retrying... [1x]'
+                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
+                . ' resulted in a `404 Not Found` response. Retrying... [1x]'
             ),
             implode(array_map(function ($v) {
                 return $v['message'];
@@ -123,7 +123,7 @@ class SklikApiTest extends TestCase
         );
         $this->assertTrue(
             $this->logger->hasInfo(
-                'Client error: `POST https://api.sklik.cz/drak/json/unknownResource.createReport`' .
+                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
                 ' resulted in a `404 Not Found` response. Retrying... [4x]'
             ),
             implode(array_map(function ($v) {
