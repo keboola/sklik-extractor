@@ -25,6 +25,15 @@ class Config extends BaseConfig
         return array_map('trim', explode(',', $accounts));
     }
 
+    public function getLimit(): ?int
+    {
+        $limit = $this->getValue(['parameters', 'accounts'], '');
+        if (empty($limit)) {
+            return null;
+        }
+        return $limit;
+    }
+
     public function getReports(): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
