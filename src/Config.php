@@ -27,7 +27,7 @@ class Config extends BaseConfig
 
     public function getLimit(): ?int
     {
-        $limit = $this->getValue(['parameters', 'accounts'], '');
+        $limit = $this->getValue(['parameters', 'limit'], '');
         if (empty($limit)) {
             return null;
         }
