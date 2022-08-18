@@ -260,10 +260,8 @@ class SklikApi
                     throw Exception::apiError($message, $method, [], 401, $responseJson);
                 }
 
-                $is500inResponse = $response->getStatusCode() == 200 && isset($responseJson['code']) && $responseJson['code'] == 500;
-
                 // Throw on other user error or 500 after retries
-                if (($response->getStatusCode() < 500 && !$is500inResponse) || $retries <= 0) {
+                if ($response->getStatusCode() < 500 || $retries <= 0) {
                     throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
                 }
 
