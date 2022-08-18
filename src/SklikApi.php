@@ -196,6 +196,7 @@ class SklikApi
             'allowEmptyStatistics' => true,
             'displayColumns' => $displayColumns,
         ];
+        sleep(120);
         $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
         if (!isset($result['report'])) {
             throw Exception::apiError(
