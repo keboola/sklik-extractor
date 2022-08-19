@@ -243,6 +243,7 @@ class SklikApi
                 // refresh session token
                 $this->session = $responseJson['session'];
             }
+            $this->logger->info('Response - ' . $response->getStatusCode());
             return $responseJson;
         } catch (Throwable $e) {
             $response = $e instanceof RequestException && $e->hasResponse()
