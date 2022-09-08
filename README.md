@@ -29,6 +29,9 @@ You can use API token or Sklik credentials for authorization.
         - **displayOptions** - Json object of the display options configuration for `createReport` API call.
         - **displayColumns** - Comma separated list of columns to get for `readReport` API call.
             - Column `id` as identifier of the resource is downloaded every time (except for resource `queries` which has `query` instead).
+        - **skip** *(optional)* - Skip first N records.
+        - **limit** *(optional)* - Batch size.
+        - **totalLimit** *(optional)* - The maximum number of records to read.
     
 ### API Limits
     
