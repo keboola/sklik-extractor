@@ -34,7 +34,7 @@ class DatadirTest extends AbstractDatadirTestCase
         $specification = new DatadirTestSpecification(
             __DIR__ . '/run/source/data',
             0,
-            '',
+            null, // anything
             ''
         );
         $tempDatadir = $this->getTempDatadir($specification);
