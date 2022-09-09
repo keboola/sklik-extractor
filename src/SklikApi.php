@@ -248,20 +248,27 @@ class SklikApi
                 ? $e->getResponse() : null;
             if ($response) {
                 try {
-                    $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
+                    $responseJson = $decoder->decode((string) $response->b, JsonEncoder::FORMAT);
                 } catch (NotEncodableValueException $e) {
                     $responseJson = [];
                 }
 
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
+                // Get status code
+                // The API returns some errors (500, 429) with HTTP code OK 200, but with a status code in the body.
+                $statusCode = $response->getStatusCode();
+                if ($statusCode === 200 && isset($responseJson['code'])) {
+                    $statusCode = (int) $responseJson['code'];
+                }
+
                 // Throw on wrong credentials
-                if ($response->getStatusCode() === 401 && $method === 'client.loginByToken') {
-                    throw Exception::apiError($message, $method, [], 401, $responseJson);
+                if ($statusCode === 401 && $method === 'client.loginByToken') {
+                    throw Exception::apiError($message, $method, [], $response->getStatusCode(), $responseJson);
                 }
 
                 // Throw on other user error or 500 after retries
-                if ($response->getStatusCode() < 500 || $retries <= 0) {
+                if ($statusCode < 500 || $retries <= 0) {
                     throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
                 }
 
@@ -294,9 +301,12 @@ class SklikApi
                 ?ResponseInterface $response = null,
                 ?string $error = null
             ) {
+                // Get status code
+                $statusCode = $response === null ? null : $response->getStatusCode();
+
                 if ($retries >= self::RETRIES_COUNT) {
                     return false;
-                } elseif ($response && $response->getStatusCode() > 499) {
+                } elseif ($statusCode && ($statusCode > 499 || $statusCode === 429)) {
                     return true;
                 } elseif ($error) {
                     return true;
