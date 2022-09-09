@@ -166,21 +166,11 @@ class SklikApi
         if (!$displayOptions) {
             $displayOptions = new stdClass();
         }
-        $result = $this->requestAuthenticated(
+        return $this->requestAuthenticated(
             "$resource.createReport",
             [$restrictionFilter, $displayOptions],
             $userId
         );
-        if (empty($result['reportId'])) {
-            throw Exception::apiError(
-                'Report Id is missing from createReport API call',
-                "$resource.createReport",
-                [$restrictionFilter, $displayOptions],
-                200,
-                $result
-            );
-        }
-        return $result;
     }
 
     public function readReport(
@@ -197,15 +187,6 @@ class SklikApi
             'displayColumns' => $displayColumns,
         ];
         $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
-        if (!isset($result['report'])) {
-            throw Exception::apiError(
-                'Result is missing "report" field.',
-                "$resource.readReport",
-                $args,
-                200,
-                $result
-            );
-        }
         return $result['report'];
     }
 
@@ -221,7 +202,7 @@ class SklikApi
 
     protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT): array
     {
-        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
+        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true]);
         $retryPolicy = new SimpleRetryPolicy(
             self::RETRY_MAX_ATTEMPTS,
             [RequestException::class, ClientException::class]
@@ -233,35 +214,70 @@ class SklikApi
         );
 
         try {
-            $response = $retryProxy->call(function () use ($method, $args): ResponseInterface {
-                return $this->client->post($method, ['json' => $args]);
-            });
+            return $retryProxy->call(function () use ($method, $args, $decoder): ResponseInterface {
+                $response = $this->client->post($method, ['json' => $args]);
+                $responseJson = $decoder->decode($response->getBody()->getContents(), JsonEncoder::FORMAT);
+                if (isset($responseJson['session'])) {
+                    // refresh session token
+                    $this->session = $responseJson['session'];
+                }
 
-            $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
-            if (isset($responseJson['session'])) {
-                // refresh session token
-                $this->session = $responseJson['session'];
-            }
-            return $responseJson;
+                // Retry on missing reportId
+                if (substr($method, -strlen('.createReport')) === '.createReport') {
+                    if (empty($result['reportId'])) {
+                        throw Exception::apiError(
+                            'Report Id is missing from createReport API call',
+                            $method,
+                            $args,
+                            $result['code'] ?? 500,
+                            $responseJson
+                        );
+                    }
+                }
+
+                // Retry on missing report
+                if (substr($method, -strlen('.readReport')) === '.readReport') {
+                    if (!isset($result['report'])) {
+                        throw Exception::apiError(
+                            'Result is missing "report" field.',
+                            $method,
+                            $args,
+                            $result['code'] ?? 500,
+                            $responseJson
+                        );
+                    }
+                }
+
+                return $responseJson;
+            });
         } catch (Throwable $e) {
             $response = $e instanceof RequestException && $e->hasResponse()
                 ? $e->getResponse() : null;
             if ($response) {
                 try {
-                    $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
+                    $body = $response->getBody();
+                    $body->rewind();
+                    $responseJson = $decoder->decode($body->getContents(), JsonEncoder::FORMAT);
                 } catch (NotEncodableValueException $e) {
                     $responseJson = [];
                 }
 
                 $message = $responseJson['message'] ?? $response->getReasonPhrase();
 
+                // Get status code
+                // The API returns some errors (500, 429) with HTTP code OK 200, but with a status code in the body.
+                $statusCode = $response->getStatusCode();
+                if ($statusCode === 200 && isset($responseJson['code'])) {
+                    $statusCode = (int) $responseJson['code'];
+                }
+
                 // Throw on wrong credentials
-                if ($response->getStatusCode() === 401 && $method === 'client.loginByToken') {
-                    throw Exception::apiError($message, $method, [], 401, $responseJson);
+                if ($statusCode === 401 && $method === 'client.loginByToken') {
+                    throw Exception::apiError($message, $method, [], $response->getStatusCode(), $responseJson);
                 }
 
                 // Throw on other user error or 500 after retries
-                if ($response->getStatusCode() < 500 || $retries <= 0) {
+                if (($statusCode < 500 && $statusCode !== 429) || $retries <= 0) {
                     throw Exception::apiError($message, $method, $args, $response->getStatusCode(), $responseJson);
                 }
 
@@ -294,9 +310,12 @@ class SklikApi
                 ?ResponseInterface $response = null,
                 ?string $error = null
             ) {
+                // Get status code
+                $statusCode = $response === null ? null : $response->getStatusCode();
+
                 if ($retries >= self::RETRIES_COUNT) {
                     return false;
-                } elseif ($response && $response->getStatusCode() > 499) {
+                } elseif ($statusCode && ($statusCode > 499 || $statusCode === 429)) {
                     return true;
                 } elseif ($error) {
                     return true;
