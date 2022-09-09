@@ -229,7 +229,7 @@ class SklikApi
                             'Report Id is missing from createReport API call',
                             $method,
                             $args,
-                            $result['code'] ?? 500,
+                            (int) ($result['code'] ?? $result['status'] ?? 500),
                             $result
                         );
                     }
@@ -242,7 +242,7 @@ class SklikApi
                             'Result is missing "report" field.',
                             $method,
                             $args,
-                            $result['code'] ?? 500,
+                            (int) ($result['code'] ?? $result['status'] ?? 500),
                             $result
                         );
                     }
@@ -266,10 +266,7 @@ class SklikApi
 
                 // Get status code
                 // The API returns some errors (500, 429) with HTTP code OK 200, but with a status code in the body.
-                $statusCode = $response->getStatusCode();
-                if ($statusCode === 200 && isset($responseJson['code'])) {
-                    $statusCode = (int) $responseJson['code'];
-                }
+                $statusCode = (int) ($responseJson['code'] ?? $responseJson['status'] ?? $response->getStatusCode());
 
                 // Throw on wrong credentials
                 if ($statusCode === 401 && $method === 'client.loginByToken') {
