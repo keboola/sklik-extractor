@@ -157,7 +157,7 @@ class Extractor
                     $now = new \DateTimeImmutable();
                     if ($now->sub(new \DateInterval('PT1M')) > $lastLogAt) {
                         $lastLogAt = $now;
-                        $this->logger->info(sprintf('Reading %d. batch <%d;%d>.', $batch, $offset, $offset + $limit));
+                        $this->logger->info(sprintf('Reading batch %d <%d;%d>.', $batch, $offset, $offset + $limit));
                     }
 
                     // Read report
