@@ -3,15 +3,12 @@ KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
 The extractor gets list of all accessible accounts if you don't restrict them explicitly. Then it downloads configured reports for all these specified accounts.
 
-You can use API token or Sklik credentials for authorization.
-
-[![Build Status](https://travis-ci.com/keboola/sklik-extractor.svg)](https://travis-ci.com/keboola/sklik-extractor) [![Code Climate](https://codeclimate.com/github/keboola/sklik-extractor/badges/gpa.svg)](https://codeclimate.com/github/keboola/sklik-extractor) [![Test Coverage](https://codeclimate.com/github/keboola/sklik-extractor/badges/coverage.svg)](https://codeclimate.com/github/keboola/sklik-extractor/coverage)
+You will be using Sklik API token for authorization.
 
 ## Configuration
 
 - **parameters**:
     - **#token** - Sklik API token (You will find it under the Account settings in Sklik)
-    - **username** and **#password** - Sklik credentials is an alternative to authorization using API token
     - **accounts** *(optional)* - Comma separated list of accounts you want to download the data for. It downloads data for all accounts by default.
     - **reports** - Array of reports to download. Each item must contain:
         - **name** - Your name for the report, it will be used for name of the table in Storage. *Note that `accounts` is a reserved name, thus it cannot be used as report name.*
@@ -32,13 +29,13 @@ You can use API token or Sklik credentials for authorization.
     
 ### API Limits
     
-Current listing limit supported by Sklik API is 100. A problem appears when `statGranularity` is added to `displayOptions`. If you define granularity `daily`, the limit is divided by number of days in the specified interval. Ie. interval between `dateFrom` and `dateTo` must not be bigger then 100 days. 
+Current listing limit supported by Sklik API is 100. A problem appears when `statGranularity` is added to `displayOptions`. If you define granularity `daily`, the limit is divided by number of days in the specified interval. I.e. interval between `dateFrom` and `dateTo` must not be bigger than 100 days. 
 
 ## Output
 
 ### Table accounts
 
-Table **accounts** is created by default and it contains data of all (or configured) Sklik accounts accessible from the main account, its columns are:
+Table **accounts** is created by default, and it contains data of all (or configured) Sklik accounts accessible from the main account, its columns are:
 
 - **userId**: account user id (*primary key*)
 - **username**: account username
@@ -56,7 +53,7 @@ Table **accounts** is created by default and it contains data of all (or configu
 > **NOTICE!**
 
 > - Main account used for access to API is queried for reports by default too and is also saved to table accounts. But it has columns access, relationName, relationStatus and relationType empty.
-> - Prices are in halers so you need to divide by 100 to get prices in CZK.
+> - Prices are in halers, so you need to divide by 100 to get prices in CZK.
 
 ### Report tables
 
@@ -71,7 +68,7 @@ E.g. if you configure to download columns `name, clicks, impressions` from resou
 
 ## Example
 
-Let'say we want to download daily stats for campaigns. The report will look like this:
+Let's say we want to download daily stats for campaigns. The report will look like this:
 - name: `report1`
 - resource: `campaigns`
 - restrictionFilter: `{ "dateFrom": "2018-07-01", "dateTo": "2018-07-03" }`
@@ -106,6 +103,8 @@ cd sklik-extractor
 docker-compose build
 docker-compose run --rm dev composer install --no-scripts
 ```
+
+Create `.env` file from template `.env.dist` and fill Sklik API token
 
 Run the test suite using this command:
 
