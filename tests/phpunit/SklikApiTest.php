@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor\Tests;
 
-use Keboola\Component\Logger;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
 use Keboola\Component\UserException;
 use Keboola\SklikExtractor\Exception;
 use Keboola\SklikExtractor\SklikApi;
@@ -130,5 +132,68 @@ class SklikApiTest extends TestCase
                 return $v['message'];
             }, $this->logger->records))
         );
+    }
+
+    public function testRetryOnInternalErrorWithSuccessHTTPCode(): void
+    {
+        if (getenv('SKLIK_API_TOKEN') === false) {
+            throw new \Exception('Sklik API token not set in env.');
+        }
+
+        $this->api = new SklikApi(
+            $this->logger,
+            getenv('SKLIK_API_URL'),
+            HandlerStack::create(new MockHandler($this->getResponses(6)))
+        );
+        $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
+
+        try {
+            $this->api->createReport(
+                'campaigns',
+                [
+                    'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                    'dateTo' => getenv('SKLIK_DATE_TO'),
+                ],
+                ['statGranularity' => 'daily']
+            );
+            $this->fail('create report must throw exception.');
+        } catch (Exception $exception) {
+            $this->assertStringContainsString(
+                '{"status":"error","message":"Server error","code":500}',
+                $exception->getMessage()
+            );
+        }
+
+        $this->assertTrue(
+            $this->logger->hasError(
+                'API Error, will be retried. Retry count: 1x'
+            ),
+            implode(array_map(function ($v) {
+                return $v['message'];
+            }, $this->logger->records))
+        );
+
+        $this->assertTrue(
+            $this->logger->hasError(
+                'API Error, will be retried. Retry count: 5x'
+            ),
+            implode(array_map(function ($v) {
+                return $v['message'];
+            }, $this->logger->records))
+        );
+    }
+
+    private function getResponses(int $count): array
+    {
+        $responses = [];
+
+        for ($x = 0; $x < $count; $x++) {
+            // @phpcs:ignore
+            $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"1YGLTg9vEdngwPjochR59L-K3TCqjzsur_90WYb2IdPJBaFT8sAcyO0LqRg7dYZWFeUgoQBr1nPBo"}'); //login response
+            // @phpcs:ignore
+            $responses[] = new Response(200, [], '{"status":"error","message":"Server error","code":500}'); //request response
+        }
+
+        return $responses;
     }
 }
