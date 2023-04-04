@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
 use Keboola\Component\UserException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -49,10 +50,10 @@ class SklikApi
 
     private const RETRY_INITIAL_INTERVAL = 1000;
 
-    public function __construct(LoggerInterface $logger, ?string $apiUrl = null)
+    public function __construct(LoggerInterface $logger, ?string $apiUrl = null, ?HandlerStack $handlerStack = null)
     {
         $this->logger = $logger;
-        $this->client = $this->initClient($apiUrl);
+        $this->client = $this->initClient($apiUrl, $handlerStack);
     }
 
     public function loginByToken(string $token): array
@@ -242,51 +243,85 @@ class SklikApi
                 // refresh session token
                 $this->session = $responseJson['session'];
             }
+            if (isset($responseJson['status']) && $responseJson['status'] === 'error') {
+                $this->handleErrorResponse($responseJson, $method, $retries, $args);
+            }
+
             return $responseJson;
         } catch (Throwable $e) {
             $response = $e instanceof RequestException && $e->hasResponse()
                 ? $e->getResponse() : null;
+
             if ($response) {
-                try {
-                    $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
-                } catch (NotEncodableValueException $e) {
-                    $responseJson = [];
-                }
-
-                $message = $responseJson['message'] ?? $response->getReasonPhrase();
-
-                // Throw on wrong credentials
-                if ($response->getStatusCode() === 401 && $method === 'client.loginByToken') {
-                    throw Exception::apiError($message, $method, [], 401, $responseJson);
-                }
-
-                // Throw on other user error or 500 after retries
-                $statusCode = $responseJson['code'] ?? $response->getStatusCode();
-                if ($statusCode < 500 || $retries <= 0) {
-                    throw Exception::apiError($message, $method, $args, $statusCode, $responseJson);
-                }
-
-                // Retry 500 errors
-                $this->logger->error('API Error, will be retried', [
-                    'response' => $responseJson,
-                    'method' => $method,
-                    'params' => Exception::filterParamsForLog($args),
-                ]);
-                sleep(rand(5, 10));
-                $this->login();
-                return $this->request($method, $args, $retries - 1);
+                return $this->handleErrorResponse($response, $method, $retries, $args);
             }
 
             throw $e;
         }
     }
 
-    protected function initClient(?string $apiUrl = null): Client
+    /**
+     * @param ResponseInterface|array $response
+     * @throws \Keboola\SklikExtractor\Exception
+     * @throws \Throwable
+     */
+    protected function handleErrorResponse(
+        $response,
+        string $method,
+        ?int $retries,
+        ?array $args
+    ): array {
+        $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
+
+        if ($response instanceof ResponseInterface) {
+            try {
+                $responseJson = $decoder->decode((string) $response->getBody(), JsonEncoder::FORMAT);
+            } catch (NotEncodableValueException $e) {
+                $responseJson = [];
+            }
+
+            $message = $responseJson['message'] ?? $response->getReasonPhrase();
+
+            // Throw on wrong credentials
+            if ($response->getStatusCode() === 401 && $method === 'client.loginByToken') {
+                throw Exception::apiError($message, $method, [], 401, $responseJson);
+            }
+            $statusCode = $response->getStatusCode();
+        } else {
+            $responseJson = $response;
+            $statusCode = $responseJson['code'];
+            $message = $responseJson['message'];
+        }
+
+        // Throw on other user error or 500 after retries
+        if ($statusCode < 500 || $retries <= 0) {
+            throw Exception::apiError($message, $method, $args, $statusCode, $responseJson);
+        }
+
+        // Retry 500 errors
+        $this->logger->error(
+            sprintf('API Error, will be retried. Retry count: %dx', self::RETRIES_COUNT - ($retries - 1)),
+            [
+                'response' => $responseJson,
+                'method' => $method,
+                'params' => Exception::filterParamsForLog($args),
+            ]
+        );
+        sleep(rand(5, 10));
+        $this->login();
+
+        return $this->request($method, $args, $retries - 1);
+    }
+
+    protected function initClient(?string $apiUrl = null, ?HandlerStack $handlerStack = null): Client
     {
         if (!$apiUrl) {
             $apiUrl = self::API_URL;
         }
-        $handlerStack = HandlerStack::create();
+
+        if (!$handlerStack) {
+            $handlerStack = HandlerStack::create();
+        }
 
         $handlerStack->push(Middleware::retry(
             function (
