@@ -64,7 +64,7 @@ class ExtractorTest extends TestCase
                         'name' => 'queries',
                         'resource' => 'queries',
                         'restrictionFilter' => json_encode([
-                            'dateFrom' => '-9 days',
+                            'dateFrom' => '-1 days',
                             'dateTo' => 'now',
                         ]),
                         'displayOptions' => json_encode(['statGranularity' => 'daily']),
