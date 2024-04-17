@@ -194,7 +194,7 @@ class SklikApi
         $args = [
             'offset' => $offset,
             'limit' => $limit,
-            'allowEmptyStatistics' => true,
+            'allowEmptyStatistics' => false,
             'displayColumns' => $displayColumns,
         ];
         $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
