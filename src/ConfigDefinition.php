@@ -27,6 +27,7 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->scalarNode('restrictionFilter')->isRequired()->end()
                         ->scalarNode('displayOptions')->isRequired()->end()
                         ->scalarNode('displayColumns')->isRequired()->end()
+                        ->booleanNode('allowEmptyStatistics')->defaultTrue()->end()
                     ->end()
                 ->end()
             ->end()

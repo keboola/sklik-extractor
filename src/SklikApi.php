@@ -187,6 +187,7 @@ class SklikApi
     public function readReport(
         string $resource,
         string $reportId,
+        bool $allowEmptyStatistics,
         ?array $displayColumns = [],
         ?int $offset = 0,
         ?int $limit = 100
@@ -194,7 +195,7 @@ class SklikApi
         $args = [
             'offset' => $offset,
             'limit' => $limit,
-            'allowEmptyStatistics' => true,
+            'allowEmptyStatistics' => $allowEmptyStatistics,
             'displayColumns' => $displayColumns,
         ];
         $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
