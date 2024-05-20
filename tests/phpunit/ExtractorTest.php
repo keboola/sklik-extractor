@@ -238,4 +238,35 @@ class ExtractorTest extends TestCase
         $statsFile = file($this->temp->getTmpFolder() . '/report1-stats.csv');
         $this->assertEquals('"id","clicks","date","impressions"', trim($statsFile[0]));
     }
+
+    public function testConfigAllowEmptyStatisticsDisabled(): void
+    {
+        $config = new Config([
+            'parameters' => [
+                '#token' => getenv('SKLIK_API_TOKEN'),
+                'reports' => [
+                    [
+                        'name' => 'report1',
+                        'resource' => 'campaigns',
+                        'restrictionFilter' => json_encode([
+                            'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                        ]),
+                        'displayOptions' => json_encode([]),
+                        'displayColumns' => 'name, clicks, impressions, budget.name',
+                        'allowEmptyStatistics' => false,
+                    ],
+                ],
+            ],
+        ], new ConfigDefinition());
+
+        $this->extractor->run($config);
+
+        $this->assertFileExists($this->temp->getTmpFolder() . '/accounts.csv');
+        $this->assertFileExists($this->temp->getTmpFolder() . '/report1.csv');
+        $metaFile = file($this->temp->getTmpFolder() . '/report1.csv');
+        $this->assertNotEquals('"1320846","196379","","Kampaň č. 1"', trim($metaFile[1]));
+        $this->assertFileExists($this->temp->getTmpFolder() . '/report1-stats.csv');
+        $statsFile = file($this->temp->getTmpFolder() . '/report1-stats.csv');
+        $this->assertNotEquals('"1320846","0","","0"', trim($statsFile[1]));
+    }
 }

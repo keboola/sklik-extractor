@@ -85,10 +85,12 @@ class Extractor
                     $data = $this->api->readReport(
                         $report['resource'],
                         $result['reportId'],
+                        $report['allowEmptyStatistics'],
                         $report['displayColumns'],
                         $offset,
                         $limit
                     );
+                    //var_dump($data);
 
                     $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
                     $offset += $limit;

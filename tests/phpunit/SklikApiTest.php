@@ -77,6 +77,7 @@ class SklikApiTest extends TestCase
         $result = $this->api->readReport(
             'campaigns',
             $result['reportId'],
+            true,
             ['id', 'name', 'clicks', 'impressions']
         );
         $this->assertGreaterThanOrEqual(1, $result);
@@ -86,6 +87,28 @@ class SklikApiTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $result[0]['stats']);
         $this->assertArrayHasKey('clicks', $result[0]['stats'][0]);
         $this->assertArrayHasKey('impressions', $result[0]['stats'][0]);
+    }
+
+    public function testApiCreateReadReportWithoutEmptyStatistics(): void
+    {
+        $result = $this->api->createReport(
+            'campaigns',
+            [
+                'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                'dateTo' => getenv('SKLIK_DATE_TO'),
+            ],
+            ['statGranularity' => 'daily']
+        );
+        $this->assertArrayHasKey('reportId', $result);
+        $this->assertNotEmpty($result['reportId']);
+
+        $result = $this->api->readReport(
+            'campaigns',
+            $result['reportId'],
+            false,
+            ['id', 'name', 'clicks', 'impressions']
+        );
+        $this->assertEmpty($result);
     }
 
     public function testLoginFailed(): void
