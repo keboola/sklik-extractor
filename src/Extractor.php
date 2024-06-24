@@ -90,7 +90,6 @@ class Extractor
                         $offset,
                         $limit
                     );
-                    //var_dump($data);
 
                     $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
                     $offset += $limit;
