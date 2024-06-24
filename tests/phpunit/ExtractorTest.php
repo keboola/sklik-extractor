@@ -16,12 +16,8 @@ use PHPUnit\Framework\TestCase;
 
 class ExtractorTest extends TestCase
 {
-    /**
-     * @var Temp
-     */
-    protected $temp;
-    /** @var Extractor */
-    protected $extractor;
+    protected Temp $temp;
+    protected Extractor $extractor;
 
     public function setUp(): void
     {

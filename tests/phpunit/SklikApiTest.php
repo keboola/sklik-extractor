@@ -15,11 +15,9 @@ use Psr\Log\Test\TestLogger;
 
 class SklikApiTest extends TestCase
 {
-    /** @var  SklikApi */
-    protected $api;
+    protected SklikApi $api;
 
-    /** @var TestLogger $logger */
-    private $logger;
+    private TestLogger $logger;
 
     public function setUp(): void
     {
@@ -69,7 +67,7 @@ class SklikApiTest extends TestCase
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
             ],
-            ['statGranularity' => 'daily']
+            ['statGranularity' => 'daily'],
         );
         $this->assertArrayHasKey('reportId', $result);
         $this->assertNotEmpty($result['reportId']);
@@ -78,7 +76,7 @@ class SklikApiTest extends TestCase
             'campaigns',
             $result['reportId'],
             true,
-            ['id', 'name', 'clicks', 'impressions']
+            ['id', 'name', 'clicks', 'impressions'],
         );
         $this->assertGreaterThanOrEqual(1, $result);
         $this->assertArrayHasKey('id', $result[0]);
@@ -97,7 +95,7 @@ class SklikApiTest extends TestCase
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
             ],
-            ['statGranularity' => 'daily']
+            ['statGranularity' => 'daily'],
         );
         $this->assertArrayHasKey('reportId', $result);
         $this->assertNotEmpty($result['reportId']);
@@ -106,7 +104,7 @@ class SklikApiTest extends TestCase
             'campaigns',
             $result['reportId'],
             false,
-            ['id', 'name', 'clicks', 'impressions']
+            ['id', 'name', 'clicks', 'impressions'],
         );
         $this->assertEmpty($result);
     }
@@ -127,33 +125,33 @@ class SklikApiTest extends TestCase
                     'dateFrom' => getenv('SKLIK_DATE_FROM'),
                     'dateTo' => getenv('SKLIK_DATE_TO'),
                 ],
-                ['statGranularity' => 'daily']
+                ['statGranularity' => 'daily'],
             );
             $this->fail('create report must throw exception.');
         } catch (Exception $exception) {
             $this->assertStringContainsString(
                 '"error":"Not Found","method":"unknownResource.createReport"',
-                $exception->getMessage()
+                $exception->getMessage(),
             );
         }
 
         $this->assertTrue(
             $this->logger->hasInfo(
                 'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
-                . ' resulted in a `404 Not Found` response. Retrying... [1x]'
+                . ' resulted in a `404 Not Found` response. Retrying... [1x]',
             ),
             implode(array_map(function ($v) {
                 return $v['message'];
-            }, $this->logger->records))
+            }, $this->logger->records)),
         );
         $this->assertTrue(
             $this->logger->hasInfo(
                 'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
-                ' resulted in a `404 Not Found` response. Retrying... [4x]'
+                ' resulted in a `404 Not Found` response. Retrying... [4x]',
             ),
             implode(array_map(function ($v) {
                 return $v['message'];
-            }, $this->logger->records))
+            }, $this->logger->records)),
         );
     }
 
@@ -166,7 +164,7 @@ class SklikApiTest extends TestCase
         $this->api = new SklikApi(
             $this->logger,
             getenv('SKLIK_API_URL'),
-            HandlerStack::create(new MockHandler($this->getResponses(6)))
+            HandlerStack::create(new MockHandler($this->getResponses(6))),
         );
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
 
@@ -177,32 +175,32 @@ class SklikApiTest extends TestCase
                     'dateFrom' => getenv('SKLIK_DATE_FROM'),
                     'dateTo' => getenv('SKLIK_DATE_TO'),
                 ],
-                ['statGranularity' => 'daily']
+                ['statGranularity' => 'daily'],
             );
             $this->fail('create report must throw exception.');
         } catch (Exception $exception) {
             $this->assertStringContainsString(
                 '{"status":"error","message":"Server error","code":500}',
-                $exception->getMessage()
+                $exception->getMessage(),
             );
         }
 
         $this->assertTrue(
             $this->logger->hasError(
-                'API Error, will be retried. Retry count: 1x'
+                'API Error, will be retried. Retry count: 1x',
             ),
             implode(array_map(function ($v) {
                 return $v['message'];
-            }, $this->logger->records))
+            }, $this->logger->records)),
         );
 
         $this->assertTrue(
             $this->logger->hasError(
-                'API Error, will be retried. Retry count: 5x'
+                'API Error, will be retried. Retry count: 5x',
             ),
             implode(array_map(function ($v) {
                 return $v['message'];
-            }, $this->logger->records))
+            }, $this->logger->records)),
         );
     }
 

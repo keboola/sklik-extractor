@@ -9,18 +9,9 @@ use Psr\Log\LoggerInterface;
 
 class Extractor
 {
-    /**
-     * @var SklikApi
-     */
-    protected $api;
-    /**
-     * @var UserStorage
-     */
-    protected $userStorage;
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected SklikApi $api;
+    protected UserStorage $userStorage;
+    protected LoggerInterface $logger;
 
     public function __construct(SklikApi $api, UserStorage $userStorage, LoggerInterface $logger)
     {
@@ -69,7 +60,7 @@ class Extractor
                     $report['resource'],
                     $report['restrictionFilter'],
                     $report['displayOptions'],
-                    $account['userId']
+                    $account['userId'],
                 );
 
                 $offset = 0;
@@ -78,7 +69,7 @@ class Extractor
                         $report['restrictionFilter']['dateFrom'],
                         $report['restrictionFilter']['dateTo'],
                         $listLimit,
-                        $report['displayOptions']['statGranularity'] ?? null
+                        $report['displayOptions']['statGranularity'] ?? null,
                     );
                 }
                 do {
@@ -88,7 +79,7 @@ class Extractor
                         $report['allowEmptyStatistics'],
                         $report['displayColumns'],
                         $offset,
-                        $limit
+                        $limit,
                     );
 
                     $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);

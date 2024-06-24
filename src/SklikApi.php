@@ -29,22 +29,11 @@ class SklikApi
     protected const API_URL = 'https://api.sklik.cz/drak/json/';
     protected const RETRIES_COUNT = 5;
 
-    /** @var string */
-    private $loginMethod;
-    /** @var array */
-    private $loginParams;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    /**
-     * @var Client
-     */
-    private $client;
-    /**
-     * @var string
-     */
-    private $session;
+    private string $loginMethod;
+    private array $loginParams;
+    private LoggerInterface $logger;
+    private Client $client;
+    private string $session;
 
     private const RETRY_MAX_ATTEMPTS = 5;
 
@@ -159,7 +148,7 @@ class SklikApi
         string $resource,
         ?array $restrictionFilter = [],
         ?array $displayOptions = [],
-        ?int $userId = null
+        ?int $userId = null,
     ): array {
         if (!$restrictionFilter) {
             $restrictionFilter = new stdClass();
@@ -170,7 +159,7 @@ class SklikApi
         $result = $this->requestAuthenticated(
             "$resource.createReport",
             [$restrictionFilter, $displayOptions],
-            $userId
+            $userId,
         );
         if (empty($result['reportId'])) {
             throw Exception::apiError(
@@ -178,7 +167,7 @@ class SklikApi
                 "$resource.createReport",
                 [$restrictionFilter, $displayOptions],
                 200,
-                $result
+                $result,
             );
         }
         return $result;
@@ -190,7 +179,7 @@ class SklikApi
         bool $allowEmptyStatistics,
         ?array $displayColumns = [],
         ?int $offset = 0,
-        ?int $limit = 100
+        ?int $limit = 100,
     ): array {
         $args = [
             'offset' => $offset,
@@ -205,7 +194,7 @@ class SklikApi
                 "$resource.readReport",
                 $args,
                 200,
-                $result
+                $result,
             );
         }
         return $result['report'];
@@ -226,12 +215,12 @@ class SklikApi
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         $retryPolicy = new SimpleRetryPolicy(
             self::RETRY_MAX_ATTEMPTS,
-            [RequestException::class, ClientException::class]
+            [RequestException::class, ClientException::class],
         );
         $retryProxy = new RetryProxy(
             $retryPolicy,
             new ExponentialBackOffPolicy(self::RETRY_INITIAL_INTERVAL),
-            $this->logger
+            $this->logger,
         );
 
         try {
@@ -262,15 +251,14 @@ class SklikApi
     }
 
     /**
-     * @param ResponseInterface|array $response
      * @throws \Keboola\SklikExtractor\Exception
      * @throws \Throwable
      */
     protected function handleErrorResponse(
-        $response,
+        ResponseInterface|array $response,
         string $method,
         ?int $retries,
-        ?array $args
+        ?array $args,
     ): array {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
 
@@ -306,7 +294,7 @@ class SklikApi
                 'response' => $responseJson,
                 'method' => $method,
                 'params' => Exception::filterParamsForLog($args),
-            ]
+            ],
         );
         sleep(rand(5, 10));
         $this->login();
@@ -329,7 +317,7 @@ class SklikApi
                 $retries,
                 RequestInterface $request,
                 ?ResponseInterface $response = null,
-                ?string $error = null
+                ?string $error = null,
             ) {
                 if ($retries >= self::RETRIES_COUNT) {
                     return false;
@@ -343,7 +331,7 @@ class SklikApi
             },
             function ($retries) {
                 return (int) pow(2, $retries - 1) * 1000;
-            }
+            },
         ));
 
         return new Client([

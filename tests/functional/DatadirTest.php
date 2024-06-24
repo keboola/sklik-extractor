@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor\Tests\Functional;
 
+use Exception;
 use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\DatadirTestSpecification;
+use function GuzzleHttp\json_encode;
 
 class DatadirTest extends AbstractDatadirTestCase
 {
@@ -13,7 +15,7 @@ class DatadirTest extends AbstractDatadirTestCase
     public function testRun(): void
     {
         if (getenv('SKLIK_API_TOKEN') === false) {
-            throw new \Exception('Sklik API token not set in env.');
+            throw new Exception('Sklik API token not set in env.');
         }
         $config = [
             'action' => 'run',
@@ -35,10 +37,10 @@ class DatadirTest extends AbstractDatadirTestCase
             __DIR__ . '/run/source/data',
             0,
             '',
-            ''
+            '',
         );
         $tempDatadir = $this->getTempDatadir($specification);
-        file_put_contents($tempDatadir->getTmpFolder() . '/config.json', \GuzzleHttp\json_encode($config));
+        file_put_contents($tempDatadir->getTmpFolder() . '/config.json', json_encode($config));
         $process = $this->runScript($tempDatadir->getTmpFolder());
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
         $this->assertFileExists($tempDatadir->getTmpFolder() . '/out/tables/accounts.csv');

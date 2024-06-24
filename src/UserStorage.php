@@ -11,24 +11,15 @@ use function Keboola\Utils\flattenArray;
 
 class UserStorage
 {
-    /**
-     * @var array
-     */
-    protected $tables = [
+    protected array $tables = [
         'accounts' => [
             'primary' => ['userId'],
             'columns' => ['userId', 'username', 'access', 'relationName', 'relationStatus', 'relationType',
                 'walletCredit', 'walletCreditWithVat', 'walletVerified', 'accountLimit', 'dayBudgetSum'],
         ],
     ];
-    /**
-     * @var string
-     */
-    protected $path;
-    /**
-     * @var array
-     */
-    protected $files = [];
+    protected string $path;
+    protected array $files = [];
 
     public function __construct(string $path)
     {
@@ -50,7 +41,7 @@ class UserStorage
             $this->createManifest(
                 "$this->path/$table.csv",
                 $table,
-                $this->tables[$table]['primary'] ?? []
+                $this->tables[$table]['primary'] ?? [],
             );
         }
 

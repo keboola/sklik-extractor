@@ -13,7 +13,7 @@ class Exception extends UserException
         string $method,
         array $args = [],
         ?int $statusCode = null,
-        ?array $response = null
+        ?array $response = null,
     ): Exception {
         return new static(json_encode([
             'error' => $message,
