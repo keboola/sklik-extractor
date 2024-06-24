@@ -1,4 +1,3 @@
-version: '2'
 services:
   dev:
     image: keboola/sklik-extractor
