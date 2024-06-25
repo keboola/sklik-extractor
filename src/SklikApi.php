@@ -225,6 +225,13 @@ class SklikApi
 
         try {
             $response = $retryProxy->call(function () use ($method, $args): ResponseInterface {
+                $this->logger->debug(
+                    sprintf(
+                        'Sklik API request: %s, json: %s',
+                        $method,
+                        json_encode(Exception::filterParamsForLog($args ?? [])),
+                    ),
+                );
                 return $this->client->post($method, ['json' => $args]);
             });
 
