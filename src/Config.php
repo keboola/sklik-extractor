@@ -16,6 +16,7 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#token']);
     }
 
+    /** @return string[] */
     public function getAccounts(): array
     {
         $accounts = $this->getValue(['parameters', 'accounts'], '');

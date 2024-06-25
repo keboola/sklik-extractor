@@ -13,6 +13,7 @@ class ExceptionTest extends TestCase
     {
         $e = Exception::apiError('message', 'method', ['a' => 1], 400, ['b' => 2]);
         $message = json_decode($e->getMessage(), true);
+        $this->assertIsArray($message);
         $this->assertNotFalse($message);
         $this->assertArrayHasKey('error', $message);
         $this->assertArrayHasKey('method', $message);

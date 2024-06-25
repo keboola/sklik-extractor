@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor\Tests;
 
+use ColinODell\PsrTestLogger\TestLogger;
+use Exception;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Keboola\Component\UserException;
-use Keboola\SklikExtractor\Exception;
+use Keboola\SklikExtractor\Exception as SklikException;
 use Keboola\SklikExtractor\SklikApi;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\Test\TestLogger;
 
 class SklikApiTest extends TestCase
 {
@@ -24,10 +25,10 @@ class SklikApiTest extends TestCase
         parent::setUp();
 
         if (getenv('SKLIK_API_URL') === false) {
-            throw new \Exception('Sklik API url not set in env.');
+            throw new Exception('Sklik API url not set in env.');
         }
         if (getenv('SKLIK_API_TOKEN') === false) {
-            throw new \Exception('Sklik API token not set in env.');
+            throw new Exception('Sklik API token not set in env.');
         }
 
         $this->logger = new TestLogger();
@@ -128,7 +129,7 @@ class SklikApiTest extends TestCase
                 ['statGranularity' => 'daily'],
             );
             $this->fail('create report must throw exception.');
-        } catch (Exception $exception) {
+        } catch (SklikException $exception) {
             $this->assertStringContainsString(
                 '"error":"Not Found","method":"unknownResource.createReport"',
                 $exception->getMessage(),
@@ -158,12 +159,12 @@ class SklikApiTest extends TestCase
     public function testRetryOnInternalErrorWithSuccessHTTPCode(): void
     {
         if (getenv('SKLIK_API_TOKEN') === false) {
-            throw new \Exception('Sklik API token not set in env.');
+            throw new Exception('Sklik API token not set in env.');
         }
 
         $this->api = new SklikApi(
             $this->logger,
-            getenv('SKLIK_API_URL'),
+            getenv('SKLIK_API_URL') ?: null,
             HandlerStack::create(new MockHandler($this->getResponses(6))),
         );
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
@@ -178,7 +179,7 @@ class SklikApiTest extends TestCase
                 ['statGranularity' => 'daily'],
             );
             $this->fail('create report must throw exception.');
-        } catch (Exception $exception) {
+        } catch (SklikException $exception) {
             $this->assertStringContainsString(
                 '{"status":"error","message":"Server error","code":500}',
                 $exception->getMessage(),
@@ -204,6 +205,7 @@ class SklikApiTest extends TestCase
         );
     }
 
+    /** @return Response[] */
     private function getResponses(int $count): array
     {
         $responses = [];

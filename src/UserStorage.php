@@ -11,6 +11,7 @@ use function Keboola\Utils\flattenArray;
 
 class UserStorage
 {
+    /** @var array<string, array<string, string[]>>  */
     protected array $tables = [
         'accounts' => [
             'primary' => ['userId'],
@@ -19,6 +20,8 @@ class UserStorage
         ],
     ];
     protected string $path;
+
+    /** @var array<string, CsvWriter> */
     protected array $files = [];
 
     public function __construct(string $path)
@@ -50,7 +53,7 @@ class UserStorage
         }
         $dataToSave = [];
         foreach ($this->tables[$table]['columns'] as $c) {
-            $dataToSave[$c] = $data[$c] ?? null;
+            $dataToSave[$c] = $data[$c] ?? '';
         }
 
         /** @var CsvWriter $file */

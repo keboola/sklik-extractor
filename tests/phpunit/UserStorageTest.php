@@ -51,7 +51,9 @@ class UserStorageTest extends TestCase
         if ($manifestFile === false) {
             throw new Exception(sys_get_temp_dir().'/table.csv.manifest not found');
         }
+        /* @var $manifest string[]|null */
         $manifest = json_decode($manifestFile, true);
+        $this->assertIsArray($manifest);
         $this->assertArrayHasKey('destination', $manifest);
         $this->assertEquals('table', $manifest['destination']);
         $this->assertArrayHasKey('incremental', $manifest);

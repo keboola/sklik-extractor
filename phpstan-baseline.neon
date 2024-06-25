@@ -1,0 +1,286 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'dateFrom' on mixed\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'dateTo' on mixed\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'displayColumns' on mixed\\.$#"
+			count: 3
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'displayOptions' on mixed\\.$#"
+			count: 3
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'name' on mixed\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Cannot access offset 'restrictionFilter' on mixed\\.$#"
+			count: 7
+			path: src/Config.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Config\\:\\:getReports\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Config.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Config\\:\\:getReports\\(\\) should return array but returns mixed\\.$#"
+			count: 1
+			path: src/Config.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Config\\:\\:getToken\\(\\) should return string but returns mixed\\.$#"
+			count: 1
+			path: src/Config.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of method Symfony\\\\Component\\\\Serializer\\\\Encoder\\\\JsonDecode\\:\\:decode\\(\\) expects string, mixed given\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function strlen expects string, mixed given\\.$#"
+			count: 4
+			path: src/Config.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, mixed given\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Part \\$report\\['name'\\] \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 2
+			path: src/Config.php
+
+		-
+			message: "#^Cannot call method scalarNode\\(\\) on Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeParentInterface\\|null\\.$#"
+			count: 1
+			path: src/ConfigDefinition.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Exception\\:\\:apiError\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Exception\\:\\:apiError\\(\\) has parameter \\$response with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Exception\\:\\:filterParamsForLog\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\Exception\\:\\:filterParamsForLog\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Parameter \\#1 \\$message of class Keboola\\\\SklikExtractor\\\\Exception constructor expects string, string\\|false given\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Exception.php
+
+		-
+			message: "#^Cannot access offset 'message' on mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Cannot access offset 'session' on mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Cannot access offset 'status' on mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Cannot call method getBody\\(\\) on mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:createReport\\(\\) has parameter \\$displayOptions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:createReport\\(\\) has parameter \\$restrictionFilter with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:createReport\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:getAccounts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:handleErrorResponse\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:handleErrorResponse\\(\\) has parameter \\$response with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:handleErrorResponse\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:login\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:loginByToken\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:readReport\\(\\) has parameter \\$displayColumns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:readReport\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:request\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:request\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:request\\(\\) should return array but returns mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:requestAuthenticated\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:requestAuthenticated\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#1 \\$args of static method Keboola\\\\SklikExtractor\\\\Exception\\:\\:filterParamsForLog\\(\\) expects array, array\\|null given\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of function array_unshift expects array, array\\|null given\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#1 \\$message of static method Keboola\\\\SklikExtractor\\\\Exception\\:\\:apiError\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#1 \\$response of method Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:handleErrorResponse\\(\\) expects array\\|Psr\\\\Http\\\\Message\\\\ResponseInterface, mixed given\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#3 \\$args of static method Keboola\\\\SklikExtractor\\\\Exception\\:\\:apiError\\(\\) expects array, array\\|null given\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Parameter \\#5 \\$response of static method Keboola\\\\SklikExtractor\\\\Exception\\:\\:apiError\\(\\) expects array\\|null, mixed given\\.$#"
+			count: 2
+			path: src/SklikApi.php
+
+		-
+			message: "#^Property Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:\\$loginParams type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Property Keboola\\\\SklikExtractor\\\\SklikApi\\:\\:\\$session \\(string\\) does not accept mixed\\.$#"
+			count: 1
+			path: src/SklikApi.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:addUserTable\\(\\) has parameter \\$columns with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:addUserTable\\(\\) has parameter \\$primary with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:createManifest\\(\\) has parameter \\$primary with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:prepareDataToSave\\(\\) has parameter \\$stat with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:prepareDataToSave\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:processRegions\\(\\) has parameter \\$regionsData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:save\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
+
+		-
+			message: "#^Method Keboola\\\\SklikExtractor\\\\UserStorage\\:\\:saveReport\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/UserStorage.php
