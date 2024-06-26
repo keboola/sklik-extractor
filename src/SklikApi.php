@@ -229,7 +229,7 @@ class SklikApi
                     sprintf(
                         'Sklik API request: %s, json: %s',
                         $method,
-                        json_encode(Exception::filterParamsForLog($args ?? [])),
+                        json_encode(Exception::filterParamsForLog($args ?? [], $method)),
                     ),
                 );
                 return $this->client->post($method, ['json' => $args]);
@@ -300,7 +300,7 @@ class SklikApi
             [
                 'response' => $responseJson,
                 'method' => $method,
-                'params' => Exception::filterParamsForLog($args),
+                'params' => Exception::filterParamsForLog($args, $method),
             ],
         );
         sleep(rand(5, 10));

@@ -18,14 +18,18 @@ class Exception extends UserException
         return new static(json_encode([
             'error' => $message,
             'method' => $method,
-            'args' => self::filterParamsForLog($args),
+            'args' => self::filterParamsForLog($args, $method),
             'statusCode' => $statusCode,
             'response' => $response,
         ]));
     }
 
-    public static function filterParamsForLog(array $args): array
+    public static function filterParamsForLog(array $args, string $method): array
     {
+        if ($method === 'client.loginByToken') {
+            return ['--omitted--'];
+        }
+
         if (isset($args[0]['session'])) {
             $args[0]['session'] = '--omitted--';
         }

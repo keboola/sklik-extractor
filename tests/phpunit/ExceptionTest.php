@@ -26,4 +26,36 @@ class ExceptionTest extends TestCase
         $this->assertArrayHasKey('b', $message['response']);
         $this->assertEquals(2, $message['response']['b']);
     }
+
+    /**
+     * @dataProvider filterParamsForLogProvider
+     * @param array<string|int, int|array<string, string>> $args
+     * @param array<string|int, int|array<string, string>> $expected
+     */
+    public function testFilterParamsForLog(array $args, string $method, array $expected): void
+    {
+        $this->assertEquals($expected, Exception::filterParamsForLog($args, $method));
+    }
+
+    /** @return array<string, array<int, array<int|string, array<string, string>|int|string>|string>> */
+    public function filterParamsForLogProvider(): array
+    {
+        return [
+            'login method' => [
+                ['a' => 1],
+                'client.loginByToken',
+                ['--omitted--'],
+            ],
+            'session argument' => [
+                [['session' => 'session']],
+                'method.test',
+                [['session' => '--omitted--']],
+            ],
+            'normal argument' => [
+                ['a' => 1],
+                'method.test',
+                ['a' => 1],
+            ],
+        ];
+    }
 }

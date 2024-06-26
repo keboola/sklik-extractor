@@ -1,5 +1,5 @@
 [%s] DEBUG: Component initialization completed [] []
-[%s] DEBUG: Sklik API request: client.loginByToken, json: ["0x2ff1bf323b7c8cffeff657e3ea25523cf5cbd18b660e206a4dbe568627c55b8481acd-sklik@keboola.com"] [] []
+[%s] DEBUG: Sklik API request: client.loginByToken, json: ["--omitted--"] [] []
 [%s] DEBUG: Sklik API request: api.limits, json: [{"session":"--omitted--"}] [] []
 [%s] DEBUG: Sklik API request: client.get, json: [{"session":"--omitted--"}] [] []
 [%s] DEBUG: Sklik API request: queries.createReport, json: [{"session":"--omitted--","userId":196379},{"dateFrom":"%s","dateTo":"%s"},{"statGranularity":"daily"}] [] []
