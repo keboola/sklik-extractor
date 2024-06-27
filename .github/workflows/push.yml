@@ -25,6 +25,8 @@ env:
   KBC_STORAGE_TOKEN: ${{ secrets.KBC_STORAGE_TOKEN }}
   KBC_TEST_PROJECT_URL: ""
   KBC_TEST_PROJECT_CONFIGS: "" # space separated list
+
+  KBC_COMPONENT_RUN_MODE: "run"
 jobs:
   build:
     runs-on: ubuntu-latest

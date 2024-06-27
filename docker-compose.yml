@@ -1,4 +1,3 @@
-version: '2'
 services:
   dev:
     image: keboola/sklik-extractor
@@ -9,6 +8,7 @@ services:
       - ./:/code
       - ./data:/data
     environment:
+      - KBC_COMPONENT_RUN_MODE
       - SKLIK_API_URL
       - SKLIK_API_TOKEN
       - SKLIK_API_USERNAME

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor\Tests;
 
+use Exception;
 use Keboola\SklikExtractor\UserStorage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,7 +23,7 @@ class UserStorageTest extends TestCase
         $this->assertFileExists(sys_get_temp_dir().'/table.csv');
         $fp = fopen(sys_get_temp_dir().'/table.csv', 'r');
         if ($fp === false) {
-            throw new \Exception(sys_get_temp_dir().'/table.csv not found');
+            throw new Exception(sys_get_temp_dir().'/table.csv not found');
         }
         $row = 0;
         while (($data = fgetcsv($fp, 1000, ',')) !== false) {
@@ -48,9 +49,11 @@ class UserStorageTest extends TestCase
         $this->assertFileExists(sys_get_temp_dir().'/table.csv.manifest');
         $manifestFile = file_get_contents(sys_get_temp_dir().'/table.csv.manifest');
         if ($manifestFile === false) {
-            throw new \Exception(sys_get_temp_dir().'/table.csv.manifest not found');
+            throw new Exception(sys_get_temp_dir().'/table.csv.manifest not found');
         }
+        /* @var $manifest string[]|null */
         $manifest = json_decode($manifestFile, true);
+        $this->assertIsArray($manifest);
         $this->assertArrayHasKey('destination', $manifest);
         $this->assertEquals('table', $manifest['destination']);
         $this->assertArrayHasKey('incremental', $manifest);
