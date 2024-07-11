@@ -81,10 +81,10 @@ class Extractor
                         $offset,
                         $limit,
                     );
-
-                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
                     $offset += $limit;
-                } while (count($data) > 0);
+                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
+                    usleep(5);
+                } while ($offset < $result['totalCount']);
             }
         }
     }

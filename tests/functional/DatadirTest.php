@@ -70,7 +70,7 @@ class DatadirTest extends AbstractDatadirTestCase
                     [
                         'name' => 'queries',
                         'resource' => 'queries',
-                        'restrictionFilter' => '{"dateFrom":"16.6.2024","dateTo":"25.6.2024"}',
+                        'restrictionFilter' => '{"dateFrom":"16.6.2024","dateTo":"17.6.2024"}',
                         'displayOptions' => '{"statGranularity":"daily"}',
                         'displayColumns' => 'query,campaign.name,impressions,clicks',
                     ],
