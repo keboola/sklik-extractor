@@ -6,7 +6,7 @@ namespace Keboola\SklikExtractor;
 
 use Exception;
 
-class ApiCallLimitException extends \Exception
+class ApiCallLimitException extends Exception
 {
     public function getWaitingTimeInSeconds(): int
     {
