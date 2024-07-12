@@ -189,6 +189,10 @@ class SklikApi
         ];
         $result = $this->requestAuthenticated("$resource.readReport", [$reportId, $args]);
         if (!isset($result['report'])) {
+            if (isset($result['status']) && $result['status'] === 429) {
+                throw new ApiCallLimitException($result['statusMessage'], $result['status']);
+            }
+
             throw Exception::apiError(
                 'Result is missing "report" field.',
                 "$resource.readReport",

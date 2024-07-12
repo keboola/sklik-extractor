@@ -73,18 +73,25 @@ class Extractor
                     );
                 }
                 do {
-                    $data = $this->api->readReport(
-                        $report['resource'],
-                        $result['reportId'],
-                        $report['allowEmptyStatistics'],
-                        $report['displayColumns'],
-                        $offset,
-                        $limit,
-                    );
+                    try {
+                        $data = $this->api->readReport(
+                            $report['resource'],
+                            $result['reportId'],
+                            $report['allowEmptyStatistics'],
+                            $report['displayColumns'],
+                            $offset,
+                            $limit,
+                        );
+                    } catch (ApiCallLimitException $e) {
+                        $waitingTime = $e->getWaitingTimeInSeconds();
+                        $this->logger->debug(sprintf('API call limit reached, waiting for %s seconds.', $waitingTime));
+                        sleep($waitingTime);
+                        continue;
+                    }
 
-                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
                     $offset += $limit;
-                } while (count($data) > 0);
+                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
+                } while ($offset < $result['totalCount']);
             }
         }
     }
