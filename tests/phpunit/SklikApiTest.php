@@ -154,33 +154,29 @@ class SklikApiTest extends TestCase
         ));
     }
 
-    public function testRetryOnInternalErrorWithSuccessHTTPCode(): void
+    public function testRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode(): void
     {
         $this->testHandler->clear();
 
         $this->api = new SklikApi(
             $this->logger,
             getenv('SKLIK_API_URL') ?: null,
-            HandlerStack::create(new MockHandler($this->getResponses())),
+            HandlerStack::create(new MockHandler($this->getResponseForTestRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode())),
         );
+
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
 
-        try {
-            $this->api->createReport(
-                'campaigns',
-                [
-                    'dateFrom' => getenv('SKLIK_DATE_FROM'),
-                    'dateTo' => getenv('SKLIK_DATE_TO'),
-                ],
-                ['statGranularity' => 'daily'],
-            );
-            $this->fail('create report must throw exception.');
-        } catch (SklikException $exception) {
-            self::assertStringContainsString(
-                '{"status":"error","message":"Server error","code":500}',
-                $exception->getMessage(),
-            );
-        }
+        $createReportResponse = $this->api->createReport(
+            'campaigns',
+            [
+                'dateFrom' => getenv('SKLIK_DATE_FROM'),
+                'dateTo' => getenv('SKLIK_DATE_TO'),
+            ],
+            ['statGranularity' => 'daily'],
+        );
+
+        self::assertArrayHasKey('reportId', $createReportResponse);
+        self::assertSame('1234567890', $createReportResponse['reportId']);
 
         self::assertTrue($this->testHandler->hasError(
             'API Error, will be retried. Retry count: 1x',
@@ -192,16 +188,19 @@ class SklikApiTest extends TestCase
     }
 
     /** @return Response[] */
-    private function getResponses(): array
+    private function getResponseForTestRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode(): array
     {
         $responses = [];
 
-        for ($x = 0; $x <= SklikApi::RETRY_MAX_ATTEMPTS; $x++) {
-            // @phpcs:ignore
-            $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"1YGLTg9vEdngwPjochR59L-K3TCqjzsur_90WYb2IdPJBaFT8sAcyO0LqRg7dYZWFeUgoQBr1nPBo"}'); //login response
-            // @phpcs:ignore
-            $responses[] = new Response(200, [], '{"status":"error","message":"Server error","code":500}'); //request response
+        $loginResponse = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue"}');
+
+        for ($x = 0; $x < SklikApi::RETRY_MAX_ATTEMPTS; $x++) {
+            $responses[] = $loginResponse;
+            $responses[] = new Response(200, [], '{"status":"error","message":"Server error","code":500}');
         }
+
+        $responses[] = $loginResponse;
+        $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue","reportId":"1234567890","totalCount":1}');
 
         return $responses;
     }
