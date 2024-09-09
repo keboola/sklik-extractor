@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\SklikExtractor\Tests;
 
-use ColinODell\PsrTestLogger\TestLogger;
 use Exception;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -12,13 +11,16 @@ use GuzzleHttp\Psr7\Response;
 use Keboola\Component\UserException;
 use Keboola\SklikExtractor\Exception as SklikException;
 use Keboola\SklikExtractor\SklikApi;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
 class SklikApiTest extends TestCase
 {
     protected SklikApi $api;
 
-    private TestLogger $logger;
+    private TestHandler $testHandler;
+    private Logger $logger;
 
     public function setUp(): void
     {
@@ -31,7 +33,10 @@ class SklikApiTest extends TestCase
             throw new Exception('Sklik API token not set in env.');
         }
 
-        $this->logger = new TestLogger();
+        $this->testHandler = new TestHandler();
+
+        $this->logger = new Logger('SklikApiTest');
+        $this->logger->pushHandler($this->testHandler);
 
         $this->api = new SklikApi($this->logger, getenv('SKLIK_API_URL'));
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
@@ -119,6 +124,8 @@ class SklikApiTest extends TestCase
 
     public function testRetry(): void
     {
+        $this->testHandler->clear();
+
         try {
             $this->api->createReport(
                 'unknownResource',
@@ -136,31 +143,20 @@ class SklikApiTest extends TestCase
             );
         }
 
-        self::assertTrue(
-            $this->logger->hasInfo(
-                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
-                . ' resulted in a `404 Not Found` response. Retrying... [1x]',
-            ),
-            implode(array_map(function ($v) {
-                return $v['message'];
-            }, $this->logger->records)),
-        );
-        self::assertTrue(
-            $this->logger->hasInfo(
-                'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
-                ' resulted in a `404 Not Found` response. Retrying... [4x]',
-            ),
-            implode(array_map(function ($v) {
-                return $v['message'];
-            }, $this->logger->records)),
-        );
+        self::assertTrue($this->testHandler->hasInfo(
+            'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
+            . ' resulted in a `404 Not Found` response. Retrying... [1x]',
+        ));
+
+        self::assertTrue($this->testHandler->hasInfo(
+            'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
+            ' resulted in a `404 Not Found` response. Retrying... [4x]',
+        ));
     }
 
     public function testRetryOnInternalErrorWithSuccessHTTPCode(): void
     {
-        if (getenv('SKLIK_API_TOKEN') === false) {
-            throw new Exception('Sklik API token not set in env.');
-        }
+        $this->testHandler->clear();
 
         $this->api = new SklikApi(
             $this->logger,
@@ -186,23 +182,13 @@ class SklikApiTest extends TestCase
             );
         }
 
-        $this->assertTrue(
-            $this->logger->hasError(
-                'API Error, will be retried. Retry count: 1x',
-            ),
-            implode(array_map(function ($v) {
-                return $v['message'];
-            }, $this->logger->records)),
-        );
+        self::assertTrue($this->testHandler->hasError(
+            'API Error, will be retried. Retry count: 1x',
+        ));
 
-        self::assertTrue(
-            $this->logger->hasError(
-                'API Error, will be retried. Retry count: 5x',
-            ),
-            implode(array_map(function ($v) {
-                return $v['message'];
-            }, $this->logger->records)),
-        );
+        self::assertTrue($this->testHandler->hasError(
+            'API Error, will be retried. Retry count: 5x',
+        ));
     }
 
     /** @return Response[] */
