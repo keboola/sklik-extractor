@@ -40,24 +40,24 @@ class SklikApiTest extends TestCase
     public function testApiLogin(): void
     {
         $result = $this->api->login();
-        $this->assertArrayHasKey('status', $result);
-        $this->assertEquals(200, $result['status']);
-        $this->assertArrayHasKey('session', $result);
-        $this->assertNotEmpty($result['session']);
+        self::assertArrayHasKey('status', $result);
+        self::assertEquals(200, $result['status']);
+        self::assertArrayHasKey('session', $result);
+        self::assertNotEmpty($result['session']);
     }
 
     public function testApiGetListLimit(): void
     {
         $result = $this->api->getListLimit();
-        $this->assertGreaterThan(0, $result);
+        self::assertGreaterThan(0, $result);
     }
 
     public function testApiGetAccounts(): void
     {
         $result = $this->api->getAccounts();
-        $this->assertGreaterThanOrEqual(1, count($result));
-        $this->assertArrayHasKey('userId', $result[0]);
-        $this->assertArrayHasKey('username', $result[0]);
+        self::assertGreaterThanOrEqual(1, count($result));
+        self::assertArrayHasKey('userId', $result[0]);
+        self::assertArrayHasKey('username', $result[0]);
     }
 
     public function testApiCreateReadReport(): void
@@ -70,8 +70,8 @@ class SklikApiTest extends TestCase
             ],
             ['statGranularity' => 'daily'],
         );
-        $this->assertArrayHasKey('reportId', $result);
-        $this->assertNotEmpty($result['reportId']);
+        self::assertArrayHasKey('reportId', $result);
+        self::assertNotEmpty($result['reportId']);
 
         $result = $this->api->readReport(
             'campaigns',
@@ -79,13 +79,13 @@ class SklikApiTest extends TestCase
             true,
             ['id', 'name', 'clicks', 'impressions'],
         );
-        $this->assertGreaterThanOrEqual(1, $result);
-        $this->assertArrayHasKey('id', $result[0]);
-        $this->assertArrayHasKey('name', $result[0]);
-        $this->assertArrayHasKey('stats', $result[0]);
-        $this->assertGreaterThanOrEqual(1, $result[0]['stats']);
-        $this->assertArrayHasKey('clicks', $result[0]['stats'][0]);
-        $this->assertArrayHasKey('impressions', $result[0]['stats'][0]);
+        self::assertGreaterThanOrEqual(1, $result);
+        self::assertArrayHasKey('id', $result[0]);
+        self::assertArrayHasKey('name', $result[0]);
+        self::assertArrayHasKey('stats', $result[0]);
+        self::assertGreaterThanOrEqual(1, $result[0]['stats']);
+        self::assertArrayHasKey('clicks', $result[0]['stats'][0]);
+        self::assertArrayHasKey('impressions', $result[0]['stats'][0]);
     }
 
     public function testApiCreateReadReportWithoutEmptyStatistics(): void
@@ -98,8 +98,8 @@ class SklikApiTest extends TestCase
             ],
             ['statGranularity' => 'daily'],
         );
-        $this->assertArrayHasKey('reportId', $result);
-        $this->assertNotEmpty($result['reportId']);
+        self::assertArrayHasKey('reportId', $result);
+        self::assertNotEmpty($result['reportId']);
 
         $result = $this->api->readReport(
             'campaigns',
@@ -107,7 +107,7 @@ class SklikApiTest extends TestCase
             false,
             ['id', 'name', 'clicks', 'impressions'],
         );
-        $this->assertEmpty($result);
+        self::assertEmpty($result);
     }
 
     public function testLoginFailed(): void
@@ -130,13 +130,13 @@ class SklikApiTest extends TestCase
             );
             $this->fail('create report must throw exception.');
         } catch (SklikException $exception) {
-            $this->assertStringContainsString(
+            self::assertStringContainsString(
                 '"error":"Not Found","method":"unknownResource.createReport"',
                 $exception->getMessage(),
             );
         }
 
-        $this->assertTrue(
+        self::assertTrue(
             $this->logger->hasInfo(
                 'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`'
                 . ' resulted in a `404 Not Found` response. Retrying... [1x]',
@@ -145,7 +145,7 @@ class SklikApiTest extends TestCase
                 return $v['message'];
             }, $this->logger->records)),
         );
-        $this->assertTrue(
+        self::assertTrue(
             $this->logger->hasInfo(
                 'Client error: `POST https://api.sklik.cz/jsonApi/drak/unknownResource.createReport`' .
                 ' resulted in a `404 Not Found` response. Retrying... [4x]',
@@ -180,7 +180,7 @@ class SklikApiTest extends TestCase
             );
             $this->fail('create report must throw exception.');
         } catch (SklikException $exception) {
-            $this->assertStringContainsString(
+            self::assertStringContainsString(
                 '{"status":"error","message":"Server error","code":500}',
                 $exception->getMessage(),
             );
@@ -195,7 +195,7 @@ class SklikApiTest extends TestCase
             }, $this->logger->records)),
         );
 
-        $this->assertTrue(
+        self::assertTrue(
             $this->logger->hasError(
                 'API Error, will be retried. Retry count: 5x',
             ),
