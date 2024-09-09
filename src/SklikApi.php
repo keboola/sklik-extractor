@@ -10,7 +10,6 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Request;
 use Keboola\Component\UserException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -244,7 +243,7 @@ class SklikApi
                 $this->session = $responseJson['session'];
             }
             if (isset($responseJson['status']) && $responseJson['status'] === 'error') {
-                $this->handleErrorResponse($responseJson, $method, $retries, $args);
+                return $this->handleErrorResponse($responseJson, $method, $retries, $args);
             }
 
             return $responseJson;
