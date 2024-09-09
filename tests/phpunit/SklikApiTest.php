@@ -165,7 +165,7 @@ class SklikApiTest extends TestCase
         $this->api = new SklikApi(
             $this->logger,
             getenv('SKLIK_API_URL') ?: null,
-            HandlerStack::create(new MockHandler($this->getResponses(6))),
+            HandlerStack::create(new MockHandler($this->getResponses())),
         );
         $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
 
@@ -206,11 +206,11 @@ class SklikApiTest extends TestCase
     }
 
     /** @return Response[] */
-    private function getResponses(int $count): array
+    private function getResponses(): array
     {
         $responses = [];
 
-        for ($x = 0; $x < $count; $x++) {
+        for ($x = 0; $x <= SklikApi::RETRY_MAX_ATTEMPTS; $x++) {
             // @phpcs:ignore
             $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"1YGLTg9vEdngwPjochR59L-K3TCqjzsur_90WYb2IdPJBaFT8sAcyO0LqRg7dYZWFeUgoQBr1nPBo"}'); //login response
             // @phpcs:ignore

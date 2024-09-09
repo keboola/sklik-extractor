@@ -26,8 +26,7 @@ use Throwable;
 
 class SklikApi
 {
-    protected const API_URL = 'https://api.sklik.cz/drak/json/';
-    protected const RETRIES_COUNT = 5;
+    private const API_URL = 'https://api.sklik.cz/drak/json/';
 
     private string $loginMethod;
     private array $loginParams;
@@ -35,7 +34,7 @@ class SklikApi
     private Client $client;
     private string $session;
 
-    private const RETRY_MAX_ATTEMPTS = 5;
+    public const RETRY_MAX_ATTEMPTS = 5;
 
     private const RETRY_INITIAL_INTERVAL = 1000;
 
@@ -214,7 +213,7 @@ class SklikApi
         return $this->request($method, $args);
     }
 
-    protected function request(string $method, ?array $args = [], ?int $retries = self::RETRIES_COUNT): array
+    protected function request(string $method, ?array $args = [], ?int $retries = self::RETRY_MAX_ATTEMPTS): array
     {
         $decoder = new JsonDecode([JsonDecode::ASSOCIATIVE => true ]);
         $retryPolicy = new SimpleRetryPolicy(
@@ -300,7 +299,7 @@ class SklikApi
 
         // Retry 500 errors
         $this->logger->error(
-            sprintf('API Error, will be retried. Retry count: %dx', self::RETRIES_COUNT - ($retries - 1)),
+            sprintf('API Error, will be retried. Retry count: %dx', self::RETRY_MAX_ATTEMPTS - ($retries - 1)),
             [
                 'response' => $responseJson,
                 'method' => $method,
@@ -330,7 +329,7 @@ class SklikApi
                 ?ResponseInterface $response = null,
                 ?string $error = null,
             ) {
-                if ($retries >= self::RETRIES_COUNT) {
+                if ($retries >= self::RETRY_MAX_ATTEMPTS) {
                     return false;
                 } elseif ($response && $response->getStatusCode() > 499) {
                     return true;
