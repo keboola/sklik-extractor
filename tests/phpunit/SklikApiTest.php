@@ -29,6 +29,7 @@ class SklikApiTest extends TestCase
         if (getenv('SKLIK_API_URL') === false) {
             throw new Exception('Sklik API url not set in env.');
         }
+
         if (getenv('SKLIK_API_TOKEN') === false) {
             throw new Exception('Sklik API token not set in env.');
         }
@@ -161,10 +162,12 @@ class SklikApiTest extends TestCase
         $this->api = new SklikApi(
             $this->logger,
             getenv('SKLIK_API_URL') ?: null,
-            HandlerStack::create(new MockHandler($this->getResponseForTestRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode())),
+            HandlerStack::create(new MockHandler(
+                $this->getResponseForTestRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode(),
+            )),
         );
 
-        $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
+        $this->api->loginByToken('dummyToken');
 
         self::assertFalse($this->testHandler->hasErrorRecords());
 
@@ -196,10 +199,12 @@ class SklikApiTest extends TestCase
         $this->api = new SklikApi(
             $this->logger,
             getenv('SKLIK_API_URL') ?: null,
-            HandlerStack::create(new MockHandler($this->getResponseForTestRetryOnReportReadWithInternalErrorHavingSuccessHTTPCode())),
+            HandlerStack::create(new MockHandler(
+                $this->getResponseForTestRetryOnReportReadWithInternalErrorHavingSuccessHTTPCode(),
+            )),
         );
 
-        $this->api->loginByToken(getenv('SKLIK_API_TOKEN'));
+        $this->api->loginByToken('dummyToken');
 
         $createReportResponse = $this->api->createReport(
             'campaigns',
@@ -228,7 +233,7 @@ class SklikApiTest extends TestCase
                     ],
                 ],
             ],
-            $readReportResponse
+            $readReportResponse,
         );
 
         self::assertTrue($this->testHandler->hasError(
@@ -240,20 +245,38 @@ class SklikApiTest extends TestCase
         ));
     }
 
+    private function getLoginResponse(): Response
+    {
+        return new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue"}');
+    }
+
+    private function getServerErrorResponse(): Response
+    {
+        return new Response(200, [], '{"status":"error","message":"Server error","code":500}');
+    }
+
+    private function getReportCreateResponse(): Response
+    {
+        return new Response(
+            200,
+            [],
+            '{"status":200,"statusMessage":"OK","session":"dummySessionValue","reportId":"1234567890","totalCount":1}',
+        );
+    }
+
     /** @return Response[] */
     private function getResponseForTestRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode(): array
     {
         $responses = [];
 
-        $loginResponse = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue"}');
+        $responses[] = $this->getLoginResponse();
 
         for ($x = 0; $x < SklikApi::RETRY_MAX_ATTEMPTS; $x++) {
-            $responses[] = $loginResponse;
-            $responses[] = new Response(200, [], '{"status":"error","message":"Server error","code":500}');
+            $responses[] = $this->getServerErrorResponse();
+            $responses[] = $this->getLoginResponse();
         }
 
-        $responses[] = $loginResponse;
-        $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue","reportId":"1234567890","totalCount":1}');
+        $responses[] = $this->getReportCreateResponse();
 
         return $responses;
     }
@@ -263,18 +286,19 @@ class SklikApiTest extends TestCase
     {
         $responses = [];
 
-        $loginResponse = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue"}');
-
-        $responses[] = $loginResponse;
-        $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue","reportId":"1234567890","totalCount":1}');
+        $responses[] = $this->getLoginResponse();
+        $responses[] = $this->getReportCreateResponse();
 
         for ($x = 0; $x < SklikApi::RETRY_MAX_ATTEMPTS; $x++) {
-            $responses[] = new Response(200, [], '{"status":"error","message":"Server error","code":500}');
-            $responses[] = $loginResponse;
-
+            $responses[] = $this->getServerErrorResponse();
+            $responses[] = $this->getLoginResponse();
         }
 
-        $responses[] = new Response(200, [], '{"status":200,"statusMessage":"OK","session":"dummySessionValue","report":{"stats":[{"day":"none"}]}}');
+        $responses[] = new Response(
+            200,
+            [],
+            '{"status":200,"statusMessage":"OK","session":"dummySessionValue","report":{"stats":[{"day":"none"}]}}',
+        );
 
         return $responses;
     }
