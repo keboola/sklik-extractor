@@ -39,7 +39,9 @@ class Extractor
             if (!isset($account['userId'])) {
                 throw new Exception('Account response is missing userId: ' . json_encode($account));
             }
-            if (count($accountsToGet) > 0 && !in_array($account['userId'], $accountsToGet)) {
+
+            $userId = $account['userId'];
+            if (count($accountsToGet) > 0 && !in_array($userId, $accountsToGet)) {
                 continue;
             }
 
@@ -60,7 +62,7 @@ class Extractor
                     $report['resource'],
                     $report['restrictionFilter'],
                     $report['displayOptions'],
-                    $account['userId'],
+                    $userId,
                 );
 
                 $offset = 0;
@@ -90,7 +92,7 @@ class Extractor
                     }
 
                     $offset += $limit;
-                    $this->userStorage->saveReport($report['name'], $data, $account['userId'], $primary);
+                    $this->userStorage->saveReport($report['name'], $data, $userId, $primary);
                 } while ($offset < $result['totalCount']);
             }
         }
