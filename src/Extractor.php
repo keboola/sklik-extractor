@@ -60,9 +60,9 @@ class Extractor
 
                 $result = $this->api->createReport(
                     $report['resource'],
+                    $userId,
                     $report['restrictionFilter'],
                     $report['displayOptions'],
-                    $userId,
                 );
 
                 $offset = 0;
@@ -74,6 +74,9 @@ class Extractor
                         $report['displayOptions']['statGranularity'] ?? null,
                     );
                 }
+
+                $this->logger->info(sprintf('Downloading report with id "%s"', $result['reportId']));
+
                 do {
                     try {
                         $data = $this->api->readReport(
