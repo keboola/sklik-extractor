@@ -1,13 +1,4 @@
-[%s] DEBUG: Component initialization completed [] []
-[%s] DEBUG: Sklik API request: client.loginByToken, json: ["--omitted--"] [] []
-[%s] DEBUG: Sklik API request: api.limits, json: [{"session":"--omitted--"}] [] []
-[%s] DEBUG: Sklik API request: client.get, json: [{"session":"--omitted--"}] [] []
-Creating "queries" report for account "196379", params: [{"dateFrom":"2024-09-07","dateTo":"2024-09-16"},{"statGranularity":"daily"}]
-[%s] DEBUG: Sklik API request: queries.createReport, json: [{"session":"--omitted--","userId":196379},{"dateFrom":"2024-09-07","dateTo":"2024-09-16"},{"statGranularity":"daily"}] [] []
+Creating "queries" report for account "196379", params: [{"dateFrom":"%s","dateTo":"%s"},{"statGranularity":"daily"}]
 Downloading report with id "%s"
-[%s] DEBUG: Sklik API request: queries.readReport, json: [{"session":"--omitted--"},"%s",{"offset":0,"limit":555,"allowEmptyStatistics":true,"displayColumns":["query","campaign.name","impressions","clicks","query"]}] [] []
-Creating "queries" report for account "845", params: [{"dateFrom":"2024-09-07","dateTo":"2024-09-16"},{"statGranularity":"daily"}]
-[%s] DEBUG: Sklik API request: queries.createReport, json: [{"session":"--omitted--","userId":845},{"dateFrom":"2024-09-07","dateTo":"2024-09-16"},{"statGranularity":"daily"}] [] []
+Creating "queries" report for account "845", params: [{"dateFrom":"%s","dateTo":"%s"},{"statGranularity":"daily"}]
 Downloading report with id "%s"
-[%s] DEBUG: Sklik API request: queries.readReport, json: [{"session":"--omitted--"},"%s",{"offset":0,"limit":555,"allowEmptyStatistics":true,"displayColumns":["query","campaign.name","impressions","clicks","query"]}] [] []
-%a
