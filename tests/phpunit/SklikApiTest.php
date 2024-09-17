@@ -70,6 +70,7 @@ class SklikApiTest extends TestCase
     {
         $result = $this->api->createReport(
             'campaigns',
+            $this->getUserId(),
             [
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
@@ -92,12 +93,15 @@ class SklikApiTest extends TestCase
         self::assertGreaterThanOrEqual(1, $result[0]['stats']);
         self::assertArrayHasKey('clicks', $result[0]['stats'][0]);
         self::assertArrayHasKey('impressions', $result[0]['stats'][0]);
+
+        $this->testHandler->hasInfo('Creating "campaigns" report for account');
     }
 
     public function testApiCreateReadReportWithoutEmptyStatistics(): void
     {
         $result = $this->api->createReport(
             'campaigns',
+            $this->getUserId(),
             [
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
@@ -130,6 +134,7 @@ class SklikApiTest extends TestCase
         try {
             $this->api->createReport(
                 'unknownResource',
+                $this->getUserId(),
                 [
                     'dateFrom' => getenv('SKLIK_DATE_FROM'),
                     'dateTo' => getenv('SKLIK_DATE_TO'),
@@ -157,6 +162,7 @@ class SklikApiTest extends TestCase
 
     public function testRetryOnReportCreateWithInternalErrorHavingSuccessHTTPCode(): void
     {
+        $userId = $this->getUserId();
         $this->testHandler->clear();
 
         $this->api = new SklikApi(
@@ -173,6 +179,7 @@ class SklikApiTest extends TestCase
 
         $createReportResponse = $this->api->createReport(
             'campaigns',
+            $userId,
             [
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
@@ -194,6 +201,7 @@ class SklikApiTest extends TestCase
 
     public function testRetryOnReportReadWithInternalErrorHavingSuccessHTTPCode(): void
     {
+        $userId = $this->getUserId();
         $this->testHandler->clear();
 
         $this->api = new SklikApi(
@@ -208,6 +216,7 @@ class SklikApiTest extends TestCase
 
         $createReportResponse = $this->api->createReport(
             'campaigns',
+            $userId,
             [
                 'dateFrom' => getenv('SKLIK_DATE_FROM'),
                 'dateTo' => getenv('SKLIK_DATE_TO'),
@@ -301,5 +310,13 @@ class SklikApiTest extends TestCase
         );
 
         return $responses;
+    }
+
+    private function getUserId(): int
+    {
+        $result = $this->api->getAccounts();
+        self::assertGreaterThanOrEqual(1, count($result));
+        self::assertArrayHasKey('userId', $result[0]);
+        return $result[0]['userId'];
     }
 }

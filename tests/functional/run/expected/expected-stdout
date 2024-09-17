@@ -1,0 +1,4 @@
+Creating "queries" report for account "196379", params: [{"dateFrom":"%s","dateTo":"%s"},{"statGranularity":"daily"}]
+Downloading report with id "%s"
+Creating "queries" report for account "845", params: [{"dateFrom":"%s","dateTo":"%s"},{"statGranularity":"daily"}]
+Downloading report with id "%s"

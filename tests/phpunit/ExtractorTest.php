@@ -12,12 +12,14 @@ use Keboola\SklikExtractor\Extractor;
 use Keboola\SklikExtractor\SklikApi;
 use Keboola\SklikExtractor\UserStorage;
 use Keboola\Temp\Temp;
+use Monolog\Handler\TestHandler;
 use PHPUnit\Framework\TestCase;
 
 class ExtractorTest extends TestCase
 {
-    protected Temp $temp;
-    protected Extractor $extractor;
+    private Temp $temp;
+    private Extractor $extractor;
+    private TestHandler $testHandler;
 
     public function setUp(): void
     {
@@ -32,6 +34,8 @@ class ExtractorTest extends TestCase
 
         $this->temp = new Temp('sklik-test');
         $logger = new Logger();
+        $this->testHandler = new TestHandler();
+        $logger->pushHandler($this->testHandler);
         $api = new SklikApi($logger, getenv('SKLIK_API_URL'));
         $api->loginByToken(getenv('SKLIK_API_TOKEN'));
         $userStorage = new UserStorage($this->temp->getTmpFolder());
@@ -84,6 +88,8 @@ class ExtractorTest extends TestCase
         $metaFile = file($this->temp->getTmpFolder() . '/queries.csv');
         $this->assertIsArray($metaFile);
         $this->assertEquals('"query","accountId","group_name","keyword_id"', trim($metaFile[0]));
+
+        $this->testHandler->hasInfo('Downloading report with id');
     }
 
     public function testIgnoreExtraKeys(): void

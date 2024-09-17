@@ -40,10 +40,15 @@ class DatadirTest extends AbstractDatadirTestCase
             ],
         ];
 
+        $expectedStdout = file_get_contents(__DIR__ . '/run/expected/expected-stdout');
+        if ($expectedStdout === false) {
+            throw new Exception('Cannot read expected stdout.');
+        }
+
         $specification = new DatadirTestSpecification(
             __DIR__ . '/run/source/data',
             0,
-            '',
+            $expectedStdout,
             '',
         );
         $tempDatadir = $this->getTempDatadir($specification);

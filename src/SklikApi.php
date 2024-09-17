@@ -144,9 +144,9 @@ class SklikApi
 
     public function createReport(
         string $resource,
+        int $userId,
         ?array $restrictionFilter = [],
         ?array $displayOptions = [],
-        ?int $userId = null,
     ): array {
         if (!$restrictionFilter) {
             $restrictionFilter = new stdClass();
@@ -154,6 +154,18 @@ class SklikApi
         if (!$displayOptions) {
             $displayOptions = new stdClass();
         }
+
+        $method = "$resource.createReport";
+
+        $this->logger->info(
+            sprintf(
+                'Creating "%s" report for account "%s", params: %s',
+                $resource,
+                $userId,
+                json_encode(Exception::filterParamsForLog([$restrictionFilter, $displayOptions], $method)),
+            ),
+        );
+
         $result = $this->requestAuthenticated(
             "$resource.createReport",
             [$restrictionFilter, $displayOptions],
