@@ -1,4 +1,7 @@
 # sklik-extractor
+
+test
+
 KBC Docker app for extracting data from Sklik API (http://api.sklik.cz)
 
 The extractor gets list of all accessible accounts if you don't restrict them explicitly. Then it downloads configured reports for all these specified accounts.
