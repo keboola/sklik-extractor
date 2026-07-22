@@ -21,6 +21,17 @@ class ApiCallLimitExceptionTest extends TestCase
         $this->assertEquals(18000, $exception->getWaitingTimeInSeconds());
     }
 
+    public function testNonPositiveWaitingTimeIsFlooredToZero(): void
+    {
+        // A negative wait time means the throttling window has already elapsed; it must be
+        // handled as "retry now" instead of crashing (regression for an unhandled parse error).
+        $exception = new ApiCallLimitException('Too many requests. Has to wait -2[s]. Limit exceeded.');
+        $this->assertEquals(0, $exception->getWaitingTimeInSeconds());
+
+        $exception = new ApiCallLimitException('Too many requests. Has to wait 0[s].');
+        $this->assertEquals(0, $exception->getWaitingTimeInSeconds());
+    }
+
     public function testInvalidMessage(): void
     {
         $this->expectExceptionMessage('Cannot parse waiting time from message: Invalid message');
