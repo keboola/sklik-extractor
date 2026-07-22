@@ -49,7 +49,10 @@ class DatadirTest extends AbstractDatadirTestCase
             __DIR__ . '/run/source/data',
             0,
             $expectedStdout,
-            '',
+            // %A wildcard: tolerate transient Sklik API retry log lines on stderr
+            // (e.g. "API Error, will be retried. Retry count: 1x") that the live API
+            // occasionally triggers; the retry succeeds and output is unaffected.
+            '%A',
         );
         $tempDatadir = $this->getTempDatadir($specification);
         file_put_contents($tempDatadir->getTmpFolder() . '/config.json', json_encode($config));
@@ -92,7 +95,10 @@ class DatadirTest extends AbstractDatadirTestCase
             __DIR__ . '/run-debug/source/data',
             0,
             $expectedStdout,
-            '',
+            // %A wildcard: tolerate transient Sklik API retry log lines on stderr
+            // (e.g. "API Error, will be retried. Retry count: 1x") that the live API
+            // occasionally triggers; the retry succeeds and output is unaffected.
+            '%A',
         );
         $tempDatadir = $this->getTempDatadir($specification);
         file_put_contents($tempDatadir->getTmpFolder() . '/config.json', json_encode($config));
